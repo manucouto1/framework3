@@ -1,8 +1,10 @@
 import boto3, pickle, io, sys
 from typing import Any, List
 from botocore.exceptions import ClientError
-from framework3.base.base_clases import BaseStorage
+from framework3.base.base_storage import BaseStorage
+from framework3.container.container import Container
 
+@Container.bind()
 class S3Storage(BaseStorage):
     def __init__(self, bucket: str, region_name: str, access_key_id: str, access_key: str, endpoint_url: str|None = None):
         super().__init__()
@@ -15,6 +17,9 @@ class S3Storage(BaseStorage):
                 use_ssl=True
         )
         self.bucket = bucket
+    
+    def get_root_path(self) -> str:
+        return self.bucket
 
     def upload_file(self, file:object, file_name:str, direct_stream:bool=False) -> str:# -> Any | None:
         if type(file) != io.BytesIO:

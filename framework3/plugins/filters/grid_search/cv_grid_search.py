@@ -15,11 +15,12 @@ class SkFilterWrapper(BaseEstimator):
         self.kwargs = kwargs
     
     def fit(self, x,y, *args, **kwargs):
-        self._model.fit(x, y)
+        
+        self._model.fit(XYData.mock(x), XYData.mock(y))
         return self
 
     def predict(self, x):
-        return self._model.predict(x)
+        return self._model.predict(XYData.mock(x))
     
     # def score(self, data):
     #     return self.model.score(data)
@@ -32,11 +33,12 @@ class SkFilterWrapper(BaseEstimator):
         return self
 
 @Container.bind()
-class GridSearchCVPlugin(BaseFilter, BasePlugin):
+class GridSearchCVPlugin(BaseFilter):
     def __init__(self, filterx:  Type[BaseFilter], param_grid: Dict[str, Any], scoring:str, cv:int=2): #TODO primero implemento con un solo filtro
         super().__init__(filterx=filterx, param_grid=param_grid, scoring=scoring, cv=cv)
-        SkFilterWrapper.z_clazz = filterx
+        # SkFilterWrapper.z_clazz = Container.ff[filterx]
 
+        SkFilterWrapper.z_clazz = filterx
         self._clf:GridSearchCV = GridSearchCV(
             estimator=SkFilterWrapper(), 
             param_grid=param_grid, 
@@ -47,7 +49,7 @@ class GridSearchCVPlugin(BaseFilter, BasePlugin):
         )
 
     def fit(self, x, y):
-        self._clf.fit(x, y) # type: ignore
+        self._clf.fit(x.value, y.value) # type: ignore
     
     def predict(self, x ):
-        return self._clf.predict(x) # type: ignore
+        return self._clf.predict(x.value) # type: ignore

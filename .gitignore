@@ -171,3 +171,6 @@ wandb
 
 main*.py
 !main.py
+
+/test/cache
+/cache

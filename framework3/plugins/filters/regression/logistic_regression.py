@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from framework3.base.base_types import XYData
+from framework3.base.base_types import XYData, VData
 from framework3.base.base_clases import BaseFilter, BasePlugin
 from framework3.container.container import Container
 from framework3.base.base_types import ArrayLike
@@ -11,11 +11,11 @@ class LogistiRegressionlugin(BaseFilter, BasePlugin):
     def __init__(self, max_ite: int, tol: float):
         self._logistic = LogisticRegression(max_iter=max_ite, tol=tol)
     
-    def fit(self, x:XYData, y:Any|None) -> None:
+    def fit(self, x:XYData, y:XYData|None) -> None:
         if y is not None and type(y) == ArrayLike:
-            self._logistic.fit(x, y)
+            self._logistic.fit(x._value, y._value)  # type: ignore
         else:
             raise ValueError("y must be provided for logistic regression")
 
-    def predict(self, x:XYData) -> XYData:
-        return self._logistic.predict(x)
+    def predict(self, x:XYData) -> VData:
+        return self._logistic.predict(x.value)

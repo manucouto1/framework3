@@ -20,14 +20,12 @@ def test_add_new_filter():
     class DummyFilter(BaseFilter):
         pass
     
-    factory['new_filter'] = BindGenericModel[BaseFilter](filter=DummyFilter)
+    factory['new_filter'] = DummyFilter
     print(factory['new_filter'])
     print(type(factory.new_filter))
-    assert 'new_filter' in factory._bindings
-    assert issubclass(factory.new_filter, BaseFilter)
-    assert factory._bindings['new_filter'].filter == DummyFilter
-    assert factory._bindings['new_filter'].manager is None
-    assert factory._bindings['new_filter'].wrapper is None
+    assert 'new_filter' in factory._foundry
+    assert factory.new_filter == DummyFilter
+    assert factory._foundry['new_filter'] == DummyFilter
 
 def test_getattr_existing_filter():
     factory = FilterFactory()
@@ -59,10 +57,10 @@ def test_filter_factory_iteration():
     assert ('filter_a', factory.get('filter_a')) in items
     assert ('filter_b', factory.get('filter_b')) in items
     
-    for name, bind_model in items:
+    for name, filter in items:
         assert isinstance(name, str)
-        assert isinstance(bind_model, BindGenericModel)
-        assert bind_model.filter in [FilterA, FilterB]
+        assert isinstance(filter, type)
+        assert filter in [FilterA, FilterB]
 
 def test_contains_existing_filter():
     factory = FilterFactory()
@@ -91,15 +89,15 @@ def test_get_non_existent_filter_with_default():
     class TestFilter(BaseFilter):
         pass
     factory = FilterFactory()
-    default_value = BindGenericModel[BaseFilter](filter=TestFilter)
+    default_value = TestFilter
     result = factory.get('non_existent_filter', default=default_value)
     assert result == default_value
 
 def test_filter_factory_initialization():
     factory = FilterFactory()
-    assert hasattr(factory, '_bindings')
-    assert isinstance(factory._bindings, dict)
-    assert len(factory._bindings) == 0
+    assert hasattr(factory, '_foundry')
+    assert isinstance(factory._foundry, dict)
+    assert len(factory._foundry) == 0
 
 def test_add_new_filter_with_none_manager_and_wrapper():
     factory = FilterFactory()
@@ -109,8 +107,6 @@ def test_add_new_filter_with_none_manager_and_wrapper():
     
     factory.custom_filter = CustomFilter
     
-    assert 'custom_filter' in factory._bindings
-    assert isinstance(factory._bindings['custom_filter'], BindGenericModel)
-    assert factory._bindings['custom_filter'].filter == CustomFilter
-    assert factory._bindings['custom_filter'].manager is None
-    assert factory._bindings['custom_filter'].wrapper is None
+    assert 'custom_filter' in factory._foundry
+    assert isinstance(factory._foundry['custom_filter'], type)
+    assert factory._foundry['custom_filter'] == CustomFilter

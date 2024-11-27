@@ -6,14 +6,14 @@ from regex import F
 import typeguard
 import numpy as np
 from framework3.base.base_clases import BasePlugin, BaseFilter, BasePipeline, BaseMetric
-from framework3.base.base_types import XYData
+from framework3.base.base_types import XYData, VData
 
 class ConcreteFilter(BaseFilter):
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         pass
 
-    def predict(self, x: XYData) -> XYData:
-        return x
+    def predict(self, x: XYData) -> VData:
+        return x.value
     
 
 def test_type_checking_init():
@@ -149,8 +149,8 @@ def test_base_plugin_item_dump():
     assert "param2" not in dump['params']
 
     # Test with mode='json'
-    dump = plugin.item_dump(mode='json')
-    assert "_param3" in dump['extra_params']
+    extra = plugin.get_extra()
+    assert "_param3" in extra
     
     assert isinstance(dump, dict)
     assert all(isinstance(key, str) for key in dump.keys())
@@ -161,8 +161,8 @@ def test_base_filter_subclass_initialization():
         def fit(self, x: XYData, y: Optional[XYData]) -> None:
             pass
 
-        def predict(self, x: XYData) -> XYData:
-            return x
+        def predict(self, x: XYData) -> VData:
+            return x.value
 
     concrete_filter = ConcreteFilter()
     
@@ -172,15 +172,16 @@ def test_base_filter_subclass_initialization():
     assert callable(concrete_filter.predict)
 
     # Test fit method
-    x_data = np.array([[1, 2], [3, 4]])
-    y_data = np.array([0, 1])
+    x_data = XYData.mock(np.array([[1, 2], [3, 4]]))
+    y_data = XYData.mock(np.array([0, 1]))
+
     concrete_filter.fit(x_data, y_data)
 
     # Test predict method
-    x_test = np.array([[5, 6]])
+    x_test = XYData.mock(np.array([[5, 6]]))
     result = concrete_filter.predict(x_test)
     assert isinstance(result, np.ndarray)
-    assert result.shape == x_test.shape
+    assert result.shape == x_test.value.shape
 
 
 def test_basepipeline_abstract_methods():
@@ -188,8 +189,8 @@ def test_basepipeline_abstract_methods():
         def fit(self, x: XYData, y: Optional[XYData]) -> None:
             pass
 
-        def predict(self, x: XYData) -> XYData:
-            return x
+        def predict(self, x: XYData) -> VData:
+            return x.value
 
     with pytest.raises(TypeError) as excinfo:
         IncompleteBasePipeline() # type: ignore
@@ -206,13 +207,13 @@ def test_basepipeline_abstract_methods():
         def fit(self, x: XYData, y: Optional[XYData]) -> None:
             pass
 
-        def predict(self, x: XYData) -> XYData:
-            return x
+        def predict(self, x: XYData) -> VData:
+            return x.value
 
         def init(self) -> None:
             pass
 
-        def start(self, x: XYData, y: Optional[XYData], X_: Optional[XYData]) -> Optional[XYData]:
+        def start(self, x: XYData, y: Optional[XYData], X_: Optional[XYData]) -> Optional[VData]:
             return None
 
         def log_metrics(self) -> None:
@@ -237,7 +238,7 @@ def test_base_metric_evaluate_implementation():
 
     # Valid implementation
     concrete_metric = ConcreteMetric()
-    result = concrete_metric.evaluate(np.array([1, 2, 3]), np.array([1, 2, 3]), np.array([1, 2, 3]))
+    result = concrete_metric.evaluate(XYData.mock(np.array([1, 2, 3])), XYData.mock(np.array([1, 2, 3])), XYData.mock(np.array([1, 2, 3])))
     assert isinstance(result, (float, np.ndarray))
 
     # Invalid implementation (missing evaluate method)

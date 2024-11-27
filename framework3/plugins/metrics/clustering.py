@@ -20,12 +20,12 @@ class ARI(BaseMetric):
 @Container.bind()
 class Silhouette(BaseMetric):
     def evaluate(self,x_data:XYData, y_true: Any, y_pred: Any, **kwargs) -> Float|np.ndarray:
-        return silhouette_score(x_data, y_pred, **kwargs)
+        return silhouette_score(x_data.value, y_pred, **kwargs)
 
 @Container.bind()
 class CalinskiHarabasz(BaseMetric):
     def evaluate(self,x_data:XYData, y_true: Any, y_pred: Any, **kwargs) -> Float|np.ndarray:
-        return calinski_harabasz_score(x_data, y_pred, **kwargs)
+        return calinski_harabasz_score(x_data.value, y_pred, **kwargs)
     
 @Container.bind()
 class Homogeneity(BaseMetric):

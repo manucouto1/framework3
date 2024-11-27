@@ -30,3 +30,4 @@ gensim
 beir
 
 pytest-mock
+petname

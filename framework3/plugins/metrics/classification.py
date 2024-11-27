@@ -13,7 +13,7 @@ class F1(BaseMetric):
         self.average = average
         
     def evaluate(self, x_data:XYData, y_true: XYData, y_pred: XYData, **kwargs) -> Float|np.ndarray:
-        return f1_score(y_true, y_pred, zero_division=0, average=self.average) # type: ignore
+        return f1_score(y_true._value, y_pred._value, zero_division=0, average=self.average) # type: ignore
 
 @Container.bind()
 class Precission(BaseMetric):
@@ -21,7 +21,7 @@ class Precission(BaseMetric):
         super().__init__(average=average)
         self.average = average
     def evaluate(self, x_data:XYData, y_true: XYData, y_pred: XYData, **kwargs) -> Float|np.ndarray:
-        return precision_score(y_true, y_pred, zero_division=0, average=self.average, **kwargs) # type: ignore
+        return precision_score(y_true._value, y_pred._value, zero_division=0, average=self.average, **kwargs) # type: ignore
     
 @Container.bind()
 class Recall(BaseMetric):
@@ -30,5 +30,5 @@ class Recall(BaseMetric):
         self.average = average
         
     def evaluate(self, x_data:XYData, y_true: XYData, y_pred: XYData, **kwargs) -> Float|np.ndarray:
-        return recall_score(y_true, y_pred, zero_division=0, average=self.average, **kwargs) # type: ignore
+        return recall_score(y_true._value, y_pred._value, zero_division=0, average=self.average, **kwargs) # type: ignore
     

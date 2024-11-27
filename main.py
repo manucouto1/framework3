@@ -1,87 +1,87 @@
-from typing import Any, Dict, List, Optional, Type
-import pytest
-import numpy as np
-from sklearn.base import BaseEstimator
+from turtle import st
+from typing import cast
+from framework3.base.base_clases import BaseFilter, BasePipeline, BasePlugin
+from framework3.container.container import Container
+from framework3.plugins.filters.clasification.svm import ClassifierSVMPlugin
+from framework3.plugins.filters.grid_search.cv_grid_search import GridSearchCVPlugin
+from framework3.base.base_types import XYData
+from framework3.plugins.filters.transformation.pca import PCAPlugin
+from framework3.plugins.metrics.classification import F1, Precission, Recall
+from framework3.plugins.pipelines.pipeline import F3Pipeline
+from framework3.storage.local_storage import LocalStorage
+from framework3.cache.cached_filter import Cached
+
+from rich import print
+
+from sklearn import datasets
 
 from framework3.container.container import Container
-from framework3.base.base_clases import BasePlugin, BaseFilter
-from framework3.base.base_types import XYData
-from framework3.container.model.bind_model import BindGenericModel
-from framework3.plugins.filters.grid_search.cv_grid_search import GridSearchCVPlugin
+
+pipeline = F3Pipeline(
+    plugins=[
+        Cached(
+            filter=PCAPlugin(n_components=1),
+            cache_data=False, 
+            cache_filter=False,
+            # overwrite=True
+            # storage=LocalStorage()
+        ),
+        Cached(
+            filter=GridSearchCVPlugin(scoring='f1_weighted', cv=2, **ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf'])),
+            cache_data=False, 
+            cache_filter=False,
+            # overwrite=True
+            # storage=LocalStorage()
+        )
+    ], 
+    metrics=[
+        F1(), 
+        Precission(), 
+        Recall()
+    ]
+)
+
+print(pipeline)
+
+dumped_pipeline = pipeline.item_dump()
+
+print(dumped_pipeline)
+
+reconstructed_pipeline:BasePipeline = cast(BasePipeline, BasePlugin.build_from_dump(dumped_pipeline, Container.pif))
 
 
-class DummyFilter(BaseFilter):
-    def __init__(self, param1: int|List[int], param2: float|List[float]):
-        ...
-    
-    def fit(self, x: XYData, y: Optional[XYData]) -> None:
-        pass
+print(reconstructed_pipeline)
 
-    def predict(self, x: XYData) -> XYData:
-        return x
-    
-# try:
 
-class SkFilterWrapper(BasePlugin):
-    def __init__(self, clazz: Type[BaseFilter], **kwargs):
-        self.model = clazz(**kwargs)
-        self.z_clazz = clazz
-        self.kwargs = kwargs
-    
-    def fit(self, data):
-        print(data)
-        self.model.fit(data[0], data[1])
-        return self
+# pipeline2 = F3Pipeline(
+#     plugins=[
+#         pipeline,
+#     ],
+#     metrics=[]
+# )
 
-    def predict(self, data):
-        return self.model.predict(data)
-    
-    # def score(self, data):
-    #     return self.model.score(data)
+# # Test data
+print(pipeline)
 
-    def get_params(self, deep=True):
-        return {**self.kwargs}
+iris = datasets.load_iris()
 
-    def set_params(self, **parameters):
-        self.model = self.z_clazz(**parameters)
-        return self
+X = XYData(
+    _hash='Iris X partial data',
+    _path=Container.storage.get_root_path(),
+    _value=iris.data[:,:2] # type: ignore
+)
+y = XYData(
+    _hash='Iris y data',
+    _path=Container.storage.get_root_path(),
+    _value=iris.target # type: ignore
+)
+print(type(X))
+print(type(y))
 
-    
+reconstructed_pipeline.fit(X, y)
+prediction = reconstructed_pipeline.predict(x=X)
 
-# @Container.bind()
-# class GridSearchCVPlugin(BasePlugin, BaseFilter):
-#     def __init__(self, filterx:  Dict[str, Any]): #TODO primero implemento con un solo filtro
-#         # super().__init__(filterx)
-#         clazz:Type[BaseFilter] = Container.ff.get(filterx['clazz'])
-        
+y_pred = XYData.mock(prediction)
+evaluate = reconstructed_pipeline.evaluate(X,y, y_pred=y_pred)
 
-#         if clazz is not None:
-#             obj = clazz(**filterx)
-#             print(obj)
-           
-
-#     def fit(self, x, y):
-#         self.model.fit(x, y) # type: ignore
-    
-#     def predict(self, x ):
-#         return self.model.predict(x) # type: ignore
-    
-
-dummy_filter:BaseFilter = Container.ff.SkFilterWrapper(param1=[1, 2, 3], param2=[0.1, 0.2, 0.3], scoring='f1_weighted') # type: ignore
-dummy_grid_search_cv:BaseFilter = GridSearchCVPlugin(filterx=dummy_filter)  # type: ignore # type: ignore)
-
-# print(" Grid Search","*"*100)
-# print(grid_search.model_dump())
-# print("*"*100)
-
-try:
-
-    DummyFilter(param1="hello", param2=[0.1, 0.2, 0.3]) # type: ignore
-
-except Exception as e:
-    print("TODO Ok")
-    
-
-# except Exception as e:
-#     print("\n"*5)
-#     print("Exception occurred:", e)
+print(reconstructed_pipeline)

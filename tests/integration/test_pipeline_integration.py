@@ -1,5 +1,7 @@
 import numpy as np
 from sklearn import datasets
+from framework3.base.base_types import XYData
+from framework3.container.container import Container
 from framework3.plugins.filters.clasification.svm import ClassifierSVMPlugin
 from framework3.plugins.filters.grid_search.cv_grid_search import GridSearchCVPlugin
 from framework3.plugins.filters.transformation.pca import PCAPlugin
@@ -10,8 +12,6 @@ from framework3.plugins.pipelines.pipeline import F3Pipeline
 
 def test_pipeline_iris_dataset():
     iris = datasets.load_iris()
-    X = iris.data # type: ignore
-    y = iris.target # type: ignore
 
     pipeline = F3Pipeline(
         plugins=[
@@ -25,9 +25,22 @@ def test_pipeline_iris_dataset():
         ]
     )
 
+    X = XYData(
+        _hash='Iris X data',
+        _path=Container.storage.get_root_path(),
+        _value=iris.data # type: ignore
+    )
+    y = XYData(
+        _hash='Iris y data',
+        _path=Container.storage.get_root_path(),
+        _value=iris.target # type: ignore
+    )
+
     pipeline.fit(X, y)
     prediction = pipeline.predict(x=X)
-    evaluate = pipeline.evaluate(X, y, y_pred=prediction)
+
+    y_pred = XYData.mock(prediction)
+    evaluate = pipeline.evaluate(X, y, y_pred=y_pred)
 
     assert isinstance(prediction, np.ndarray)
     assert prediction.shape == (150,)
@@ -41,9 +54,23 @@ def test_pipeline_iris_dataset():
 def test_pipeline_different_feature_counts():
     # Create datasets with different numbers of features
     iris = datasets.load_iris()
-    X_full = iris.data # type: ignore
-    X_reduced = X_full[:, :2]  # Use only the first two features
-    y = iris.target # type: ignore
+
+    X_full = XYData(
+        _hash='Iris X data',
+        _path=Container.storage.get_root_path(),
+        _value=iris.data # type: ignore
+    )
+    X_reduced = XYData(
+        _hash='Iris X reduced data',
+        _path=Container.storage.get_root_path(),
+        _value=iris.data[:, :3] # type: ignore
+    )
+
+    y = XYData(
+        _hash='Iris y data',
+        _path=Container.storage.get_root_path(),
+        _value=iris.target # type: ignore
+    )
 
     pipeline = F3Pipeline(
         plugins=[
@@ -57,15 +84,18 @@ def test_pipeline_different_feature_counts():
         ]
     )
 
+    
     # Test with full dataset
-    pipeline.fit(X_full, y)
+    pipeline.fit(X_full, y=y)
     prediction_full = pipeline.predict(x=X_full)
-    evaluate_full = pipeline.evaluate(X_full, y, y_pred=prediction_full)
+
+    evaluate_full = pipeline.evaluate(X_full, y, y_pred=XYData.mock(prediction_full))
 
     # Test with reduced dataset
+    
     pipeline.fit(X_reduced, y)
     prediction_reduced = pipeline.predict(x=X_reduced)
-    evaluate_reduced = pipeline.evaluate(X_reduced, y, y_pred=prediction_reduced)
+    evaluate_reduced = pipeline.evaluate(X_reduced, y, y_pred=XYData.mock(prediction_reduced))
 
     assert isinstance(prediction_full, np.ndarray)
     assert isinstance(prediction_reduced, np.ndarray)
@@ -78,8 +108,16 @@ def test_pipeline_different_feature_counts():
 
 def test_grid_search_with_specified_parameters():
     iris = datasets.load_iris()
-    X = iris.data # type: ignore
-    y = iris.target # type: ignore
+    X = XYData(
+        _hash='Iris X data',
+        _path=Container.storage.get_root_path(),
+        _value=iris.data # type: ignore
+    )
+    y = XYData(
+        _hash='Iris y data',
+        _path=Container.storage.get_root_path(),
+        _value=iris.target # type: ignore
+    )
 
     pipeline = F3Pipeline(
         plugins=[
