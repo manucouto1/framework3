@@ -94,6 +94,8 @@ def test_get_non_existent_file(local_storage):
     non_existent_file = "non_existent_file.txt"
     with pytest.raises(FileNotFoundError) as excinfo:
         local_storage.get_file_by_hashcode(non_existent_file, local_storage.get_root_path())
+        print(str(excinfo.value))
+        print( f"Couldn't find file {non_existent_file} in path {local_storage.get_root_path()}")
     assert str(excinfo.value) == f"Couldn't find file {non_existent_file} in path {local_storage.get_root_path()}"
 
 def test_check_if_exists_true(local_storage):

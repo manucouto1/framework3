@@ -15,4 +15,4 @@ class PCAPlugin(BaseFilter):
         self._pca.fit(x.value)
 
     def predict(self, x:XYData):
-        return self._pca.transform(x.value)
+        return XYData.mock(self._pca.transform(x.value))

@@ -12,8 +12,8 @@ class ConcreteFilter(BaseFilter):
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         pass
 
-    def predict(self, x: XYData) -> VData:
-        return x.value
+    def predict(self, x: XYData) -> XYData:
+        return x
     
 
 def test_type_checking_init():
@@ -161,8 +161,8 @@ def test_base_filter_subclass_initialization():
         def fit(self, x: XYData, y: Optional[XYData]) -> None:
             pass
 
-        def predict(self, x: XYData) -> VData:
-            return x.value
+        def predict(self, x: XYData) -> XYData:
+            return XYData.mock(x.value)
 
     concrete_filter = ConcreteFilter()
     
@@ -180,8 +180,8 @@ def test_base_filter_subclass_initialization():
     # Test predict method
     x_test = XYData.mock(np.array([[5, 6]]))
     result = concrete_filter.predict(x_test)
-    assert isinstance(result, np.ndarray)
-    assert result.shape == x_test.value.shape
+    assert isinstance(result.value, np.ndarray)
+    assert result.value.shape == x_test.value.shape
 
 
 def test_basepipeline_abstract_methods():
@@ -189,8 +189,8 @@ def test_basepipeline_abstract_methods():
         def fit(self, x: XYData, y: Optional[XYData]) -> None:
             pass
 
-        def predict(self, x: XYData) -> VData:
-            return x.value
+        def predict(self, x: XYData) -> XYData:
+            return x
 
     with pytest.raises(TypeError) as excinfo:
         IncompleteBasePipeline() # type: ignore
@@ -207,13 +207,13 @@ def test_basepipeline_abstract_methods():
         def fit(self, x: XYData, y: Optional[XYData]) -> None:
             pass
 
-        def predict(self, x: XYData) -> VData:
-            return x.value
+        def predict(self, x: XYData) -> XYData:
+            return x
 
         def init(self) -> None:
             pass
 
-        def start(self, x: XYData, y: Optional[XYData], X_: Optional[XYData]) -> Optional[VData]:
+        def start(self, x: XYData, y: Optional[XYData], X_: Optional[XYData]) -> Optional[XYData]:
             return None
 
         def log_metrics(self) -> None:

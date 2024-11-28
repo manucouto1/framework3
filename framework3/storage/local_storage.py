@@ -32,7 +32,7 @@ class LocalStorage(BaseStorage):
         if hashcode in os.listdir(context):
             return open(f'{context}/{hashcode}', 'rb')
         else:
-            raise FileNotFoundError(f"Couldn't find file {hashcode} in path {self.storage_path}")
+            raise FileNotFoundError(f"Couldn't find file {hashcode} in path {context}")
                 
     def check_if_exists(self, hashcode:str, context:str):
         try:

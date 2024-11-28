@@ -17,7 +17,7 @@ class ClassifierSVMPlugin(BaseFilter, BasePlugin):
             self._model.fit(x.value, y.value)  # type: ignore
     
     def predict(self, x:XYData):
-        return self._model.predict(x.value)
+        return XYData.mock(self._model.predict(x.value))
     
     @staticmethod
     def item_grid(C: List[float], kernel: List[L], gamma: List[float]|List[Literal['scale', 'auto']]=['scale']) -> Dict[str, Any]:

@@ -17,5 +17,5 @@ class LogistiRegressionlugin(BaseFilter, BasePlugin):
         else:
             raise ValueError("y must be provided for logistic regression")
 
-    def predict(self, x:XYData) -> VData:
-        return self._logistic.predict(x.value)
+    def predict(self, x:XYData):
+        return XYData.mock(self._logistic.predict(x.value))

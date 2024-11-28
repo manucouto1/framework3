@@ -38,12 +38,11 @@ def test_pipeline_iris_dataset():
 
     pipeline.fit(X, y)
     prediction = pipeline.predict(x=X)
+    print(prediction.value)
+    evaluate = pipeline.evaluate(X, y, prediction)
 
-    y_pred = XYData.mock(prediction)
-    evaluate = pipeline.evaluate(X, y, y_pred=y_pred)
-
-    assert isinstance(prediction, np.ndarray)
-    assert prediction.shape == (150,)
+    assert isinstance(prediction.value, np.ndarray)
+    assert prediction.value.shape == (150,)
     assert isinstance(evaluate, dict)
     assert 'F1' in evaluate
     assert 'Precission' in evaluate
@@ -89,17 +88,17 @@ def test_pipeline_different_feature_counts():
     pipeline.fit(X_full, y=y)
     prediction_full = pipeline.predict(x=X_full)
 
-    evaluate_full = pipeline.evaluate(X_full, y, y_pred=XYData.mock(prediction_full))
+    evaluate_full = pipeline.evaluate(X_full, y, y_pred= prediction_full)
 
     # Test with reduced dataset
     
     pipeline.fit(X_reduced, y)
     prediction_reduced = pipeline.predict(x=X_reduced)
-    evaluate_reduced = pipeline.evaluate(X_reduced, y, y_pred=XYData.mock(prediction_reduced))
+    evaluate_reduced = pipeline.evaluate(X_reduced, y, y_pred=prediction_reduced)
 
-    assert isinstance(prediction_full, np.ndarray)
-    assert isinstance(prediction_reduced, np.ndarray)
-    assert prediction_full.shape == prediction_reduced.shape == (150,)
+    assert isinstance(prediction_full.value, np.ndarray)
+    assert isinstance(prediction_reduced.value, np.ndarray)
+    assert prediction_full.value.shape == prediction_reduced.value.shape == (150,)
     assert isinstance(evaluate_full, dict)
     assert isinstance(evaluate_reduced, dict)
     assert set(evaluate_full.keys()) == set(evaluate_reduced.keys()) == {'F1', 'Precission', 'Recall'}
@@ -134,7 +133,7 @@ def test_grid_search_with_specified_parameters():
     pipeline.fit(X, y)
 
     # Check if the GridSearchCVPlugin is present in the pipeline
-    grid_search_plugin = next((plugin for plugin in pipeline._filters.values() if isinstance(plugin, GridSearchCVPlugin)), None)
+    grid_search_plugin = next((plugin for plugin in pipeline._filters if isinstance(plugin, GridSearchCVPlugin)), None)
     assert grid_search_plugin is not None, "GridSearchCVPlugin not found in the pipeline"
 
     print(grid_search_plugin._clf)  # type: ignore

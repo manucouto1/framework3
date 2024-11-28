@@ -20,7 +20,7 @@ class SkFilterWrapper(BaseEstimator):
         return self
 
     def predict(self, x):
-        return self._model.predict(XYData.mock(x))
+        return self._model.predict(XYData.mock(x)).value
     
     # def score(self, data):
     #     return self.model.score(data)
@@ -52,4 +52,4 @@ class GridSearchCVPlugin(BaseFilter):
         self._clf.fit(x.value, y.value) # type: ignore
     
     def predict(self, x ):
-        return self._clf.predict(x.value) # type: ignore
+        return XYData.mock(self._clf.predict(x.value)) # type: ignore

@@ -12,5 +12,5 @@ class StandardScalerPlugin(BaseFilter, BasePlugin):
     def fit(self, x:XYData, y:Optional[XYData]) -> None:
         self.scaler.fit(x.value)
     
-    def predict(self, x:XYData) -> VData:
-        return self.scaler.transform(x.value)
+    def predict(self, x:XYData):
+        return XYData.mock(self.scaler.transform(x.value))

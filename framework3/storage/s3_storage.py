@@ -21,7 +21,7 @@ class S3Storage(BaseStorage):
     def get_root_path(self) -> str:
         return self.bucket
 
-    def upload_file(self, file:object, file_name:str, direct_stream:bool=False) -> str:# -> Any | None:
+    def upload_file(self, file:object, file_name:str, context:str, direct_stream:bool=False) -> str:# -> Any | None:
         if type(file) != io.BytesIO:
             binary = pickle.dumps(file)
             stream = io.BytesIO(binary)
@@ -34,21 +34,21 @@ class S3Storage(BaseStorage):
         self._client.put_object(
             Body=stream,
             Bucket=self.bucket,
-            Key=file_name
+            Key=f'{context}/{file_name}'
         )
         print('Upload Complete!')
         return file_name
 
-    def list_stored_files(self) -> List[Any]:# -> Any | None:# -> Any | None:
+    def list_stored_files(self, context) -> List[Any]:# -> Any | None:# -> Any | None:
         return self._client.list_objects_v2(Bucket=self.bucket)['Contents']
    
-    def get_file_by_hashcode(self, hashcode:str):
+    def get_file_by_hashcode(self, hashcode:str, context:str):
         obj = self._client.get_object(Bucket=self.bucket, Key=hashcode)
         return obj['Body'].read()
 
-    def check_if_exists(self, hashcode:str) -> bool:
+    def check_if_exists(self, hashcode:str, context:str) -> bool:
         try:
-            self._client.head_object(Bucket=self.bucket, Key=hashcode)
+            self._client.head_object(Bucket=self.bucket, Key=f'{context}/{hashcode}'  )
         except ClientError as e:
             if e.response['Error']['Code'] == '404':
                 return False
@@ -57,14 +57,14 @@ class S3Storage(BaseStorage):
                 return False
         return True
 
-    def download_file(self, hashcode:str) -> Any:
-        obj = self._client.get_object(Bucket=self.bucket, Key=hashcode)
+    def download_file(self, hashcode:str, context:str) -> Any:
+        obj = self._client.get_object(Bucket=self.bucket, Key=f'{context}/{hashcode}'  )
         return pickle.loads(obj['Body'].read())
 
-    def delete_file(self, hashcode:str):
-        if self.check_if_exists(hashcode):
-            self._client.delete_object(Bucket=self.bucket, Key=hashcode)
-            if self.check_if_exists(hashcode):
+    def delete_file(self, hashcode:str, context:str) -> None:
+        if self.check_if_exists(hashcode, context):
+            self._client.delete_object(Bucket=self.bucket, Key=f'{context}/{hashcode}'  )
+            if self.check_if_exists(hashcode, context):
                 raise Exception("Couldn't delete file")
             else:
                 print("Deleted!")

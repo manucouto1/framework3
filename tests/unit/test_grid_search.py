@@ -15,8 +15,8 @@ class DummyFilter(BaseFilter, BasePlugin):
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         pass
 
-    def predict(self, x: XYData) -> VData:
-        return x.value
+    def predict(self, x: XYData) -> XYData:
+        return x 
     @staticmethod
     def item_grid(param1: List[int], param2: List[float]) -> dict:
         return {"filterx": DummyFilter, "param_grid": {"param1": param1, "param2": param2}}
@@ -44,7 +44,7 @@ def test_grid_search_fit_and_predict():
     # Predict
     predictions = grid_search.predict(X)
     
-    assert predictions.shape == (10000,)
+    assert predictions.value.shape == (10000,)
 
 def test_grid_search_best_params():
     grid_search = GridSearchCVPlugin(scoring='f1_weighted', **DummyFilter.item_grid(param1=[1, 2], param2=[0.1, 0.2]))
@@ -73,4 +73,4 @@ def test_grid_search_mixed_params(param1, param2):
     grid_search.fit(X, y)
     predictions = grid_search.predict(X)
     
-    assert predictions.shape == (10000,)
+    assert predictions.value.shape == (10000,)
