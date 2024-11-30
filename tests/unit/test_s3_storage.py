@@ -6,7 +6,7 @@ import io
 from moto import mock_aws
 
 
-from framework3.storage.s3_storage import S3Storage
+from framework3.plugins.storage import S3Storage
 
 @pytest.fixture
 def s3_client():

@@ -1,12 +1,12 @@
 import numpy as np
 from sklearn import datasets
 from framework3.base.base_types import XYData
-from framework3.container.container import Container
-from framework3.plugins.filters.clasification.svm import ClassifierSVMPlugin
+from framework3.container import Container
+from framework3.plugins.filters.classification.svm import ClassifierSVMPlugin
 from framework3.plugins.filters.grid_search.cv_grid_search import GridSearchCVPlugin
 from framework3.plugins.filters.transformation.pca import PCAPlugin
 from framework3.plugins.metrics.classification import F1, Precission, Recall
-from framework3.plugins.pipelines.pipeline import F3Pipeline
+from framework3.plugins.pipelines.f3_pipeline import F3Pipeline
 
 
 
@@ -16,7 +16,7 @@ def test_pipeline_iris_dataset():
     pipeline = F3Pipeline(
         plugins=[
             PCAPlugin(n_components=1),
-            GridSearchCVPlugin(scoring='f1_weighted', cv=2, **ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf'])),
+            GridSearchCVPlugin(ClassifierSVMPlugin, ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf']), scoring='f1_weighted', cv=2),
         ],
         metrics=[
             F1(),
@@ -74,7 +74,7 @@ def test_pipeline_different_feature_counts():
     pipeline = F3Pipeline(
         plugins=[
             PCAPlugin(n_components=1),
-            GridSearchCVPlugin(scoring='f1_weighted', cv=2, **ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf'])),
+            GridSearchCVPlugin(ClassifierSVMPlugin, ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf']), scoring='f1_weighted', cv=2),
         ],
         metrics=[
             F1(),
@@ -121,7 +121,7 @@ def test_grid_search_with_specified_parameters():
     pipeline = F3Pipeline(
         plugins=[
             PCAPlugin(n_components=1),
-            GridSearchCVPlugin(scoring='f1_weighted', cv=2, **ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf'])),
+            GridSearchCVPlugin(filterx=ClassifierSVMPlugin, param_grid=ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf']), scoring='f1_weighted', cv=2),
         ],
         metrics=[
             F1(),
@@ -140,10 +140,10 @@ def test_grid_search_with_specified_parameters():
 
     # Check if the grid search parameters are correctly set
     param_grid = grid_search_plugin._clf.param_grid # type: ignore
-    assert 'C' in param_grid, "C parameter not found in param_grid"
-    assert param_grid['C'] == [1.0, 10], "C parameter values are incorrect"
-    assert 'kernel' in param_grid, "kernel parameter not found in param_grid"
-    assert param_grid['kernel'] == ['rbf'], "kernel parameter values are incorrect"
+    assert 'ClassifierSVMPlugin__C' in param_grid, "C parameter not found in param_grid"
+    assert param_grid['ClassifierSVMPlugin__C'] == [1.0, 10], "C parameter values are incorrect"
+    assert 'ClassifierSVMPlugin__kernel' in param_grid, "kernel parameter not found in param_grid"
+    assert param_grid['ClassifierSVMPlugin__kernel'] == ['rbf'], "kernel parameter values are incorrect"
 
     # Check if the scoring and cv parameters are correctly set
     assert grid_search_plugin._clf.scoring == 'f1_weighted', "Incorrect scoring parameter" # type: ignore
@@ -152,7 +152,7 @@ def test_grid_search_with_specified_parameters():
     # Verify that the best parameters have been found
     assert hasattr(grid_search_plugin._clf, 'best_params_'), "Best parameters not found after fitting"
     assert isinstance(grid_search_plugin._clf.best_params_, dict), "Best parameters should be a dictionary"
-    assert 'C' in grid_search_plugin._clf.best_params_, "C parameter not found in best_params_"
-    assert 'kernel' in grid_search_plugin._clf.best_params_, "kernel parameter not found in best_params_"
+    assert 'ClassifierSVMPlugin__C' in grid_search_plugin._clf.best_params_, "C parameter not found in best_params_"
+    assert 'ClassifierSVMPlugin__kernel' in grid_search_plugin._clf.best_params_, "kernel parameter not found in best_params_"
 
 

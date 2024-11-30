@@ -222,7 +222,7 @@ def test_basepipeline_abstract_methods():
         def finish(self) -> None:
             pass
 
-        def evaluate(self, x_data: XYData, y_true: XYData, y_pred: XYData) -> Dict[str, float]:
+        def evaluate(self, x_data: XYData, y_true: XYData|None, y_pred: XYData) -> Dict[str, float]:
             return {}
 
     # Should not raise any exception
@@ -230,7 +230,7 @@ def test_basepipeline_abstract_methods():
 
 def test_base_metric_evaluate_implementation():
     class ConcreteMetric(BaseMetric):
-        def evaluate(self, x_data: XYData, y_true: XYData, y_pred: XYData) -> float:
+        def evaluate(self, x_data: XYData, y_true: XYData|None, y_pred: XYData) -> float:
             return 0.5
 
     class InvalidMetric(BaseMetric):

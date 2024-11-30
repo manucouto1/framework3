@@ -4,7 +4,7 @@ import pytest
 import os
 import pickle
 import io
-from framework3.storage.local_storage import LocalStorage
+from framework3.plugins.storage import LocalStorage
 
 @pytest.fixture
 def local_storage():

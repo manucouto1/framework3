@@ -31,3 +31,8 @@ beir
 
 pytest-mock
 petname
+
+mkdocs 
+mkdocs-material
+mkdocstrings[python]
+
