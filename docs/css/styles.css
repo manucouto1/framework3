@@ -1,0 +1,12 @@
+.md-header__button.md-logo {
+    filter: invert(1); /* Convierte colores oscuros a claros */
+}
+
+/* Opcional: ajuste según el esquema de color */
+[data-md-color-scheme="default"] .md-header__button.md-logo {
+    filter: none; /* Deja el icono negro en el tema claro */
+}
+
+[data-md-color-scheme="slate"] .md-header__button.md-logo {
+    filter: invert(1); /* Invierte el color a blanco en el tema oscuro */
+}

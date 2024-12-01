@@ -1,0 +1,95 @@
+site_name: Framework3
+theme:
+  name: material
+  palette:
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: black
+      accent: pink
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+  logo: icons/f3_icon.png
+  code:
+    highlight_theme: monokai
+  features:
+    - navigation.expand
+  # toggle:
+  #     icon: material/weather-sunny  # Icono para el toggle
+  #     name: Toggle theme            # Texto del toggle
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quick Start: quick_start.md
+  
+  - Tutorials: 
+      - index: examples/index.md
+  #     - First Filter:
+  #     - First Pipeline:
+  #     - Caching Data:
+  #     - Grid Search:
+  #     - Anidating Pipelines:
+  #     - Feature Extraction:
+  - Api: 
+      - base:
+          - base_types: api/base/base_types.md
+          - base_clases: api/base/base_clases.md
+          - base_factory: api/base/base_factory.md
+          - base_storage: api/base/base_storage.md
+      - container: 
+          - container: api/container/container.md
+          - overload: api/container/overload.md
+      - plugins:
+          - pipelines: 
+              - F3pipeline: api/plugins/pipelines/f3_pipeline.md
+              - Gridpipeline: api/plugins/pipelines/g3_pipeline.md
+              - Feature Extraction:
+                  - Sequential: api/plugins/pipelines/sequential.md
+                  - MapReduce: api/plugins/pipelines/map_reduce_pipeline.md
+          - filters:
+              - classification: api/plugins/filters/classification.md
+              - clustering: api/plugins/filters/clustering.md
+              - regression: api/plugins/filters/regression.md
+              - cache: 
+                  - cached_filter: api/plugins/filters/cache.md
+              - transformation: api/plugins/filters/transformation.md
+              - grid_search: api/plugins/filters/grid_search.md
+              
+          - metrics:
+              - classification: api/plugins/metrics/classification.md
+              - clustering: api/plugins/metrics/clustering.md
+              - coherence: api/plugins/metrics/coherence.md
+          - storage:
+              - local: api/plugins/storage/local.md
+              - s3: api/plugins/storage/s3.md
+      - Full API Reference: api/index.md
+          
+
+  - Best Practices: best_practices.md
+      
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      use_pygments: true
+      pygments_lang_class: true
+      auto_title: true
+      linenums: true
+      linenums_style: pymdownx-inline
+      anchor_linenums: true
+      line_spans: __span
+
+  - pymdownx.superfences
+
+plugins:
+  - search
+  - mkdocstrings
+
+extra_css:
+  - css/styles.css
+

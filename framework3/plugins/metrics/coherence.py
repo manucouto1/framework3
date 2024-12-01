@@ -40,13 +40,13 @@ class NPMI(BaseMetric):
             x_data (XYData): The input data, expected to be a pandas DataFrame.
             y_true (XYData): Not used for this metric, but required by the interface.
             y_pred (XYData): The predicted topics, typically a list of lists of words.
-            **kwargs: Additional keyword arguments:
+            **kwargs (Any): Additional keyword arguments:
                 - f_vocab (list): The vocabulary of the corpus.
                 - topk (int): The number of top words to consider for each topic (default: 10).
                 - processes (int): The number of processes to use for parallel computation (default: 1).
 
         Returns:
-            Float|np.ndarray: The NPMI coherence score.
+            (Float|np.ndarray): The NPMI coherence score.
 
         Raises:
             Exception: If x_data is not a pandas DataFrame.
@@ -90,13 +90,13 @@ class UMASS(BaseMetric):
             x_data (XYData): The input data, expected to be a pandas DataFrame.
             y_true (XYData): Not used for this metric, but required by the interface.
             y_pred (XYData): The predicted topics, typically a list of lists of words.
-            **kwargs: Additional keyword arguments:
+            **kwargs (Any): Additional keyword arguments:
                 - f_vocab (list): The vocabulary of the corpus.
                 - topk (int): The number of top words to consider for each topic (default: 10).
                 - processes (int): The number of processes to use for parallel computation (default: 1).
 
         Returns:
-            Float|np.ndarray: The UMass coherence score.
+            (Float|np.ndarray): The UMass coherence score.
 
         Raises:
             Exception: If x_data is not a pandas DataFrame.
@@ -140,13 +140,13 @@ class V(BaseMetric):
             x_data (XYData): The input data, expected to be a pandas DataFrame.
             y_true (XYData): Not used for this metric, but required by the interface.
             y_pred (XYData): The predicted topics, typically a list of lists of words.
-            **kwargs: Additional keyword arguments:
+            **kwargs (Any): Additional keyword arguments:
                 - f_vocab (list): The vocabulary of the corpus.
                 - topk (int): The number of top words to consider for each topic (default: 10).
                 - processes (int): The number of processes to use for parallel computation (default: 1).
 
         Returns:
-            Float|np.ndarray: The V-measure coherence score.
+            (Float|np.ndarray): The V-measure coherence score.
 
         Raises:
             Exception: If x_data is not a pandas DataFrame.
@@ -190,13 +190,13 @@ class UCI(BaseMetric):
             x_data (XYData): The input data, expected to be a pandas DataFrame.
             y_true (XYData): Not used for this metric, but required by the interface.
             y_pred (XYData): The predicted topics, typically a list of lists of words.
-            **kwargs: Additional keyword arguments:
+            **kwargs (Any): Additional keyword arguments:
                 - f_vocab (list): The vocabulary of the corpus.
                 - topk (int): The number of top words to consider for each topic (default: 10).
                 - processes (int): The number of processes to use for parallel computation (default: 1).
 
         Returns:
-            Float|np.ndarray: The UCI coherence score.
+            (Float|np.ndarray): The UCI coherence score.
 
         Raises:
             Exception: If x_data is not a pandas DataFrame.

@@ -51,10 +51,10 @@ class F1(BaseMetric):
             x_data (XYData): The input data (not used in this metric, but required by the interface).
             y_true (XYData): The ground truth (correct) target values.
             y_pred (XYData): The estimated targets as returned by a classifier.
-            **kwargs: Additional keyword arguments passed to sklearn's f1_score.
+            **kwargs (Any): Additional keyword arguments passed to sklearn's f1_score.
 
         Returns:
-            Float|np.ndarray: The F1 score or array of F1 scores if average is None.
+            (Float|np.ndarray): The F1 score or array of F1 scores if average is None.
         """
         return f1_score(y_true.value, y_pred.value, zero_division=0, average=self.average) # type: ignore
 
@@ -101,10 +101,10 @@ class Precission(BaseMetric):
             x_data (XYData): The input data (not used in this metric, but required by the interface).
             y_true (XYData): The ground truth (correct) target values.
             y_pred (XYData): The estimated targets as returned by a classifier.
-            **kwargs: Additional keyword arguments passed to sklearn's precision_score.
+            **kwargs (Any): Additional keyword arguments passed to sklearn's precision_score.
 
         Returns:
-            Float|np.ndarray: The precision score or array of precision scores if average is None.
+            (Float|np.ndarray): The precision score or array of precision scores if average is None.
         """
         return precision_score(y_true.value, y_pred.value, zero_division=0, average=self.average, **kwargs) # type: ignore
     
@@ -151,9 +151,9 @@ class Recall(BaseMetric):
             x_data (XYData): The input data (not used in this metric, but required by the interface).
             y_true (XYData): The ground truth (correct) target values.
             y_pred (XYData): The estimated targets as returned by a classifier.
-            **kwargs: Additional keyword arguments passed to sklearn's recall_score.
+            **kwargs (Any): Additional keyword arguments passed to sklearn's recall_score.
 
         Returns:
-            Float|np.ndarray: The recall score or array of recall scores if average is None.
+            (Float|np.ndarray): The recall score or array of recall scores if average is None.
         """
         return recall_score(y_true.value, y_pred.value, zero_division=0, average=self.average, **kwargs) # type: ignore

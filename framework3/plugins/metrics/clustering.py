@@ -38,10 +38,10 @@ class NMI(BaseMetric):
             x_data (XYData): The input data (not used in this metric, but required by the interface).
             y_true (Any): The ground truth labels.
             y_pred (Any): The predicted cluster labels.
-            **kwargs: Additional keyword arguments passed to sklearn's normalized_mutual_info_score.
+            **kwargs (Any): Additional keyword arguments passed to sklearn's normalized_mutual_info_score.
 
         Returns:
-            Float|np.ndarray: The NMI score.
+            (Float|np.ndarray): The NMI score.
         """
         return normalized_mutual_info_score(y_true, y_pred, **kwargs)
 
@@ -74,10 +74,10 @@ class ARI(BaseMetric):
             x_data (XYData): The input data (not used in this metric, but required by the interface).
             y_true (Any): The ground truth labels.
             y_pred (Any): The predicted cluster labels.
-            **kwargs: Additional keyword arguments passed to sklearn's adjusted_rand_score.
+            **kwargs (Any): Additional keyword arguments passed to sklearn's adjusted_rand_score.
 
         Returns:
-            Float|np.ndarray: The ARI score.
+            (Float|np.ndarray): The ARI score.
         """
         return adjusted_rand_score(y_true, y_pred, **kwargs)
 
@@ -109,10 +109,10 @@ class Silhouette(BaseMetric):
             x_data (XYData): The input data.
             y_true (Any): Not used for this metric, but required by the interface.
             y_pred (Any): The predicted cluster labels.
-            **kwargs: Additional keyword arguments passed to sklearn's silhouette_score.
+            **kwargs (Any): Additional keyword arguments passed to sklearn's silhouette_score.
 
         Returns:
-            Float|np.ndarray: The Silhouette Coefficient.
+            (Float|np.ndarray): The Silhouette Coefficient.
         """
         return silhouette_score(x_data.value, y_pred, **kwargs)
 
@@ -144,10 +144,10 @@ class CalinskiHarabasz(BaseMetric):
             x_data (XYData): The input data.
             y_true (Any): Not used for this metric, but required by the interface.
             y_pred (Any): The predicted cluster labels.
-            **kwargs: Additional keyword arguments passed to sklearn's calinski_harabasz_score.
+            **kwargs (Any): Additional keyword arguments passed to sklearn's calinski_harabasz_score.
 
         Returns:
-            Float|np.ndarray: The Calinski-Harabasz Index.
+            (Float|np.ndarray): The Calinski-Harabasz Index.
         """
         return calinski_harabasz_score(x_data.value, y_pred, **kwargs)
     
@@ -180,10 +180,10 @@ class Homogeneity(BaseMetric):
             x_data (XYData): The input data (not used in this metric, but required by the interface).
             y_true (Any): The ground truth labels.
             y_pred (Any): The predicted cluster labels.
-            **kwargs: Additional keyword arguments passed to sklearn's homogeneity_score.
+            **kwargs (Any): Additional keyword arguments passed to sklearn's homogeneity_score.
 
         Returns:
-            Float|np.ndarray: The Homogeneity score.
+            (Float|np.ndarray): The Homogeneity score.
         """
         return homogeneity_score(y_true, y_pred, **kwargs)
     
@@ -216,9 +216,9 @@ class Completeness(BaseMetric):
             x_data (XYData): The input data (not used in this metric, but required by the interface).
             y_true (Any): The ground truth labels.
             y_pred (Any): The predicted cluster labels.
-            **kwargs: Additional keyword arguments passed to sklearn's completeness_score.
+            **kwargs (Any): Additional keyword arguments passed to sklearn's completeness_score.
 
         Returns:
-            Float|np.ndarray: The Completeness score.
+            (Float|np.ndarray): The Completeness score.
         """
         return completeness_score(y_true, y_pred, **kwargs)

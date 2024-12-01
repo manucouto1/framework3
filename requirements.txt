@@ -36,3 +36,9 @@ mkdocs
 mkdocs-material
 mkdocstrings[python]
 
+multimethod
+
+mlflow
+kafka
+prometheus-client
+pyspark

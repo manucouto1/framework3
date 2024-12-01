@@ -129,8 +129,9 @@ class BasePlugin(ABC):
                 self._public_attributes,
                 custom_encoder={
                     BasePlugin: lambda v: v.item_dump(), 
-                    type: lambda v: {'clazz': v.__name__}
-
+                    type: lambda v: {'clazz': v.__name__},
+                    np.integer: lambda x: int(x),
+                    np.floating: lambda x: float(x),
                 },
                 **kwargs
             )
@@ -237,19 +238,33 @@ class BaseFilter(BasePlugin):
             (BaseFilter): A new instance of the BaseFilter class.
 
         """
-        instance = super().__new__(cls)
+        # instance = super().__new__(cls)
 
-        # Store original methods
-        setattr(instance, "_original_fit", instance.fit if hasattr(instance, 'fit') else None)
-        setattr(instance, "_original_predict", instance.predict if hasattr(instance, 'predict') else None)
+        # # Store original methods
+        # setattr(instance, "_original_fit", instance.fit if hasattr(instance, 'fit') else None)
+        # setattr(instance, "_original_predict", instance.predict if hasattr(instance, 'predict') else None)
         
-        # Wrap fit and predict methods
+        # # Wrap fit and predict methods
+        # if hasattr(instance, 'fit'):
+        #     instance.fit = instance._pre_fit_wrapp(instance.fit)
+        # if hasattr(instance, 'predict'):
+        #     instance.predict = instance._pre_predict_wrapp(instance.predict)
+        
+        # return instance
+        instance = super().__new__(cls)
+        
+        # Store original methods
+        instance._original_fit = instance.fit if hasattr(instance, 'fit') else None
+        instance._original_predict = instance.predict if hasattr(instance, 'predict') else None
+        
+        # Replace fit and predict methods
         if hasattr(instance, 'fit'):
-            instance.fit = instance._pre_fit_wrapp(instance.fit)
+            instance.fit = instance._pre_fit_wrapp
         if hasattr(instance, 'predict'):
-            instance.predict = instance._pre_predict_wrapp(instance.predict)
+            instance.predict = instance._pre_predict_wrapp
         
         return instance
+
 
     def __init__(self, *args, **kwargs):
         """
@@ -262,88 +277,128 @@ class BaseFilter(BasePlugin):
         self._m_str: str
         self._m_path: str
 
-    def _pre_fit_wrapp(self, method):
-        """
-        Wrapper for the fit method.
+    def _pre_fit(self, x: XYData, y: Optional[XYData]):
+        m_hash, m_str = self._get_model_key(data_hash=f'{x._hash}, {y._hash if y is not None else ""}')
+        m_path = f'{self._get_model_name()}/{m_hash}'
+        print("*"*100)
+        print("SE LLAMA PREFIT También")
+        print("*"*100)
+        self._m_hash = m_hash
+        self._m_path = m_path
+        self._m_str = m_str
+        
 
-        This method wraps the fit method to add pre-processing steps,
-        including generating and storing model keys and paths.
+    def _pre_predict(self, x: XYData):
+        pass  # Add any pre-predict processing here if needed
 
-        Args:
-            method (callable): The original fit method to be wrapped.
+    def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData], *args, **kwargs):
+        self._pre_fit(x, y)
+        return self._original_fit(x, y, *args, **kwargs)
 
-        Returns:
-            callable: The wrapped fit method.
-        """
-        @functools.wraps(method)
-        def wrapper(x: XYData, y: Optional[XYData], *args, **kwargs):
-            m_hash, m_str = self._get_model_key(data_hash=f'{x._hash}, {y._hash if y is not None else ""}')
-            m_path = f'{self._get_model_name()}/{m_hash}'
+    def _pre_predict_wrapp(self, x: XYData, *args, **kwargs) -> XYData:
+        self._pre_predict(x)
+        value = self._original_predict(x, *args, **kwargs)
+        return XYData(
+            _hash=x._hash,
+            _value=value._value,
+            _path=x._path
+        )
+
+    # def _pre_fit_wrapp(self, method):
+    #     """
+    #     Wrapper for the fit method.
+
+    #     This method wraps the fit method to add pre-processing steps,
+    #     including generating and storing model keys and paths.
+
+    #     Args:
+    #         method (callable): The original fit method to be wrapped.
+
+    #     Returns:
+    #         callable: The wrapped fit method.
+    #     """
+    #     @functools.wraps(method)
+    #     def wrapper(x: XYData, y: Optional[XYData], *args, **kwargs):
+    #         m_hash, m_str = self._get_model_key(data_hash=f'{x._hash}, {y._hash if y is not None else ""}')
+    #         m_path = f'{self._get_model_name()}/{m_hash}'
             
-            setattr(self, '_m_hash', m_hash)
-            setattr(self, '_m_path', m_path)
-            setattr(self, '_m_str', m_str)
+    #         setattr(self, '_m_hash', m_hash)
+    #         setattr(self, '_m_path', m_path)
+    #         setattr(self, '_m_str', m_str)
             
-            return method(x, y, *args, **kwargs)
-        return wrapper
+    #         return method(x, y, *args, **kwargs)
+    #     return wrapper
     
-    def _pre_predict_wrapp(self, method):
-        """
-        Wrapper for the predict method.
+    # def _pre_predict_wrapp(self, method):
+    #     """
+    #     Wrapper for the predict method.
 
-        This method wraps the predict method to add post-processing steps,
-        including creating a new XYData instance with the prediction results.
+    #     This method wraps the predict method to add post-processing steps,
+    #     including creating a new XYData instance with the prediction results.
 
-        Args:
-            method (callable): The original predict method to be wrapped.
+    #     Args:
+    #         method (callable): The original predict method to be wrapped.
 
-        Returns:
-            callable: The wrapped predict method.
-        """
-        @functools.wraps(method)
-        def wrapper(x: XYData, *args, **kwargs) -> XYData:
-            value = method(x, *args, **kwargs)
+    #     Returns:
+    #         callable: The wrapped predict method.
+    #     """
+    #     @functools.wraps(method)
+    #     def wrapper(x: XYData, *args, **kwargs) -> XYData:
+    #         value = method(x, *args, **kwargs)
 
-            return XYData(
-                _hash=x._hash,
-                _value=value._value,
-                _path=x._path
-            )
+    #         return XYData(
+    #             _hash=x._hash,
+    #             _value=value._value,
+    #             _path=x._path
+    #         )
 
-        return wrapper
-    
+    #     return wrapper
+
     def __getstate__(self):
-        """
-        Prepare the object for serialization.
-
-        This method ensures that the original unwrapped methods are used for serialization.
-
-        Returns:
-            (Dict[str,Any]): The object's state dictionary.
-        """
         state = super().__getstate__()
-        if self._original_fit:
-            state['fit'] = self._original_fit
-        if self._original_predict:
-            state['predict'] = self._original_predict
+        # Ensure we're storing the original methods for serialization
+        state['fit'] = self._original_fit
+        state['predict'] = self._original_predict
         return state
 
     def __setstate__(self, state):
-        """
-        Restore the object's state after deserialization.
-
-        This method rewraps the fit and predict methods after deserialization.
-
-        Args:
-            state (dict): The object's state dictionary.
-        """
         super().__setstate__(state)
-        if hasattr(self, 'fit'):
-            self._original_fit = self.fit
-            self.fit = self._pre_fit_wrapp(self._original_fit)
-        if hasattr(self, 'predict'):
-            self._original_predict = self.predict
-            self.predict = self._pre_predict_wrapp(self._original_predict)
+        # Restore the wrapper methods after deserialization
+        self.fit = self._pre_fit_wrapp
+        self.predict = self._pre_predict_wrapp
+    
+    # def __getstate__(self):
+    #     """
+    #     Prepare the object for serialization.
+
+    #     This method ensures that the original unwrapped methods are used for serialization.
+
+    #     Returns:
+    #         (Dict[str,Any]): The object's state dictionary.
+    #     """
+    #     state = super().__getstate__()
+    #     if self._original_fit:
+    #         state['fit'] = self._original_fit
+    #     if self._original_predict:
+    #         state['predict'] = self._original_predict
+    #     return state
+
+    # def __setstate__(self, state):
+    #     """
+    #     Restore the object's state after deserialization.
+
+    #     This method rewraps the fit and predict methods after deserialization.
+
+    #     Args:
+    #         state (dict): The object's state dictionary.
+    #     """
+    #     super().__setstate__(state)
+    #     if hasattr(self, 'fit'):
+    #         self._original_fit = self.fit
+    #         self.fit = self._pre_fit_wrapp(self._original_fit)
+    #     if hasattr(self, 'predict'):
+    #         self._original_predict = self.predict
+    #         self.predict = self._pre_predict_wrapp(self._original_predict)
 
     @abstractmethod
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
@@ -432,19 +487,25 @@ class BasePipeline(BaseFilter):
 
         ```
     """
-    def _pre_fit_wrapp(self, method):
-        """Wrapper for fit method."""
-        @functools.wraps(method)
-        def wrapper(x: XYData, y: Optional[XYData], *args, **kwargs):
-            return method(x, y, *args, **kwargs)
-        return wrapper
+    def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData], *args, **kwargs):
+        return self._original_fit(x, y, *args, **kwargs)
+
+    def _pre_predict_wrapp(self, x: XYData, *args, **kwargs) -> XYData:
+        return self._original_predict(x, *args, **kwargs)
+        
+    # def _pre_fit_wrapp(self, method):
+    #     """Wrapper for fit method."""
+    #     @functools.wraps(method)
+    #     def wrapper(x: XYData, y: Optional[XYData], *args, **kwargs):
+    #         return method(x, y, *args, **kwargs)
+    #     return wrapper
     
-    def _pre_predict_wrapp(self, method):
-        """Wrapper for predict method."""
-        @functools.wraps(method)
-        def wrapper(x: XYData, *args, **kwargs) -> XYData:
-            return method(x, *args, **kwargs)
-        return wrapper
+    # def _pre_predict_wrapp(self, method):
+    #     """Wrapper for predict method."""
+    #     @functools.wraps(method)
+    #     def wrapper(x: XYData, *args, **kwargs) -> XYData:
+    #         return method(x, *args, **kwargs)
+    #     return wrapper
 
     @abstractmethod
     def init(self) -> None:

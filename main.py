@@ -9,7 +9,7 @@ from framework3.plugins.filters.transformation.pca import PCAPlugin
 from framework3.plugins.metrics import F1, Precission, Recall
 from framework3.plugins.pipelines import F3Pipeline
 
-from framework3.plugins.filters.cached_filter import Cached
+from framework3.plugins.filters.cache.cached_filter import Cached
 
 from rich import print
 
@@ -18,30 +18,36 @@ from sklearn import datasets
 from framework3.plugins.pipelines.gs_cv_pipeline import GridSearchCVPipeline
 
 
-gs_pipeline = GridSearchCVPipeline(
-        filterx=[
-            ClassifierSVMPlugin
-        ],
-        param_grid=ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf']),
-        scoring='f1_weighted',
-        cv=2,
-        metrics=[]
-)
-cached_pipeline = Cached(
-    filter=gs_pipeline,
-    cache_data=True, 
-    cache_filter=True,
-    overwrite=True,
-)
+# gs_pipeline = GridSearchCVPipeline(
+#         filterx=[
+#             ClassifierSVMPlugin,
+#             KnnFilter
+#         ],
+#         param_grid=ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf']),
+#         scoring='f1_weighted',
+#         cv=2,
+#         metrics=[]
+# )
+# cached_pipeline = Cached(
+#     filter=gs_pipeline,
+#     cache_data=True, 
+#     cache_filter=True,
+#     overwrite=True,
+# )
 pipeline = F3Pipeline(
     plugins=[
         Cached(
             filter=PCAPlugin(n_components=1),
-            cache_data=True, 
+            cache_data=False, 
             cache_filter=True,
-            overwrite=True,
+            overwrite=False,
         ),
-        cached_pipeline
+        Cached(
+            filter=KnnFilter(),
+            cache_data=False, 
+            cache_filter=True,
+            overwrite=False,
+        ),
     ], 
     metrics=[
         F1(), 
@@ -89,6 +95,12 @@ print(y)
 
 
 reconstructed_pipeline.fit(X, y)
+
+X = XYData(
+    _hash='Iris X data changed',
+    _path=f'/datasets',
+    _value=iris.data # type: ignore
+)
 prediction = reconstructed_pipeline.predict(x=X)
 
 y_pred = XYData.mock(prediction.value)

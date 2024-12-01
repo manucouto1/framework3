@@ -1,11 +1,11 @@
 from typing import Optional
 from sklearn.preprocessing import StandardScaler
 from framework3.base.base_types import XYData, VData
-from framework3.base.base_clases import BaseFilter, BasePlugin
+from framework3.base.base_clases import BaseFilter
 from framework3.container.container import Container
 
 @Container.bind()
-class StandardScalerPlugin(BaseFilter, BasePlugin):
+class StandardScalerPlugin(BaseFilter):
     """
     A plugin for standardizing features by removing the mean and scaling to unit variance.
 
@@ -42,7 +42,8 @@ class StandardScalerPlugin(BaseFilter, BasePlugin):
         """
         Initialize the StandardScalerPlugin.
         """
-        self.scaler = StandardScaler()
+        super().__init__()  # Call the BaseFilter constructor to initialize the plugin's parameters
+        self._scaler = StandardScaler()
     
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         """
@@ -57,7 +58,7 @@ class StandardScalerPlugin(BaseFilter, BasePlugin):
         Returns:
             None
         """
-        self.scaler.fit(x.value)
+        self._scaler.fit(x.value)
     
     def predict(self, x: XYData) -> XYData:
         """
@@ -69,4 +70,5 @@ class StandardScalerPlugin(BaseFilter, BasePlugin):
         Returns:
             XYData: The standardized version of the input data.
         """
-        return XYData.mock(self.scaler.transform(x.value))
+        return XYData.mock(self._scaler.transform(x.value))
+    
