@@ -18,12 +18,14 @@ class S3Storage(BaseStorage):
         bucket (str): The name of the S3 bucket.
 
     Example:
+    ```python
         >>> storage = S3Storage(bucket='my-bucket', region_name='us-west-2', 
         ...                     access_key_id='YOUR_ACCESS_KEY', access_key='YOUR_SECRET_KEY')
         >>> storage.upload_file("Hello, World!", "greeting.txt", "my-folder")
         >>> content = storage.download_file("greeting.txt", "my-folder")
         >>> print(content)
         'Hello, World!'
+    ```
     """
 
     def __init__(self, bucket: str, region_name: str, access_key_id: str, access_key: str, endpoint_url: str|None = None):
@@ -112,10 +114,12 @@ class S3Storage(BaseStorage):
             (List[Any]): A list of dictionaries containing information about the objects in the bucket.
 
         Example:
+        ```python
             >>> storage = S3Storage(bucket='my-bucket', ...)
             >>> files = storage.list_stored_files("")
             >>> for file in files:
             ...     print(file['Key'])
+        ```
         """
         return self._client.list_objects_v2(Bucket=self.bucket)['Contents']
    
@@ -131,10 +135,12 @@ class S3Storage(BaseStorage):
             (bytes): The content of the file.
 
         Example:
+        ```python
             >>> storage = S3Storage(bucket='my-bucket', ...)
             >>> content = storage.get_file_by_hashcode("my-folder/greeting.txt", "")
             >>> print(content.decode())
             'Hello, World!'
+        ```
         """
         obj = self._client.get_object(Bucket=self.bucket, Key=hashcode)
         return obj['Body'].read()
@@ -151,10 +157,12 @@ class S3Storage(BaseStorage):
             bool: True if the file exists, False otherwise.
 
         Example:
+        ```python
             >>> storage = S3Storage(bucket='my-bucket', ...)
             >>> exists = storage.check_if_exists("greeting.txt", "my-folder")
             >>> print(exists)
             True
+        ```
         """
         try:
             self._client.head_object(Bucket=self.bucket, Key=f'{context}/{hashcode}'  )
@@ -178,10 +186,12 @@ class S3Storage(BaseStorage):
             Any: The deserialized content of the file.
 
         Example:
+        ```python	
             >>> storage = S3Storage(bucket='my-bucket', ...)
             >>> content = storage.download_file("greeting.txt", "my-folder")
             >>> print(content)
             'Hello, World!'
+        ```
         """
         obj = self._client.get_object(Bucket=self.bucket, Key=f'{context}/{hashcode}'  )
         return pickle.loads(obj['Body'].read())
@@ -199,9 +209,11 @@ class S3Storage(BaseStorage):
             FileExistsError: If the file doesn't exist in the bucket.
 
         Example:
+        ```python
             >>> storage = S3Storage(bucket='my-bucket', ...)
             >>> storage.delete_file("greeting.txt", "my-folder")
             Deleted!
+        ```
         """
         if self.check_if_exists(hashcode, context):
             self._client.delete_object(Bucket=self.bucket, Key=f'{context}/{hashcode}'  )

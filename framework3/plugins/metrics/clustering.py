@@ -55,6 +55,7 @@ class ARI(BaseMetric):
     The Adjusted Rand Index is the corrected-for-chance version of the Rand Index. It measures similarity between two clusterings, adjusted for chance.
 
     Example:
+    ```python	
         >>> from framework3.plugins.metrics.clustering import ARI
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
@@ -66,6 +67,7 @@ class ARI(BaseMetric):
         >>> ari_metric = ARI()
         >>> score = ari_metric.evaluate(x_data, y_true, y_pred)
         >>> print(f"ARI Score: {score}")
+    ```
     """
 
     def evaluate(self, x_data: XYData, y_true: Any, y_pred: Any, **kwargs) -> Float|np.ndarray:
@@ -91,6 +93,7 @@ class Silhouette(BaseMetric):
     The Silhouette Coefficient is calculated using the mean intra-cluster distance and the mean nearest-cluster distance for each sample.
 
     Example:
+    ```python	
         >>> from framework3.plugins.metrics.clustering import Silhouette
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
@@ -101,6 +104,7 @@ class Silhouette(BaseMetric):
         >>> silhouette_metric = Silhouette()
         >>> score = silhouette_metric.evaluate(x_data, None, y_pred)
         >>> print(f"Silhouette Score: {score}")
+    ```
     """
 
     def evaluate(self, x_data: XYData, y_true: Any, y_pred: Any, **kwargs) -> Float|np.ndarray:
@@ -126,6 +130,7 @@ class CalinskiHarabasz(BaseMetric):
     The Calinski-Harabasz Index is the ratio of the sum of between-clusters dispersion and of inter-cluster dispersion for all clusters.
 
     Example:
+    ```python
         >>> from framework3.plugins.metrics.clustering import CalinskiHarabasz
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
@@ -136,6 +141,7 @@ class CalinskiHarabasz(BaseMetric):
         >>> ch_metric = CalinskiHarabasz()
         >>> score = ch_metric.evaluate(x_data, None, y_pred)
         >>> print(f"Calinski-Harabasz Score: {score}")
+    ```
     """
 
     def evaluate(self, x_data: XYData, y_true: Any, y_pred: Any, **kwargs) -> Float|np.ndarray:
@@ -161,6 +167,7 @@ class Homogeneity(BaseMetric):
     Homogeneity measures whether all of its clusters contain only data points which are members of a single class.
 
     Example:
+    ```python
         >>> from framework3.plugins.metrics.clustering import Homogeneity
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
@@ -172,6 +179,7 @@ class Homogeneity(BaseMetric):
         >>> homogeneity_metric = Homogeneity()
         >>> score = homogeneity_metric.evaluate(x_data, y_true, y_pred)
         >>> print(f"Homogeneity Score: {score}")
+    ```
     """
 
     def evaluate(self, x_data: XYData, y_true: Any, y_pred: Any, **kwargs) -> Float|np.ndarray:
@@ -197,6 +205,7 @@ class Completeness(BaseMetric):
     Completeness measures whether all members of a given class are assigned to the same cluster.
 
     Example:
+    ```python
         >>> from framework3.plugins.metrics.clustering import Completeness
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
@@ -208,6 +217,7 @@ class Completeness(BaseMetric):
         >>> completeness_metric = Completeness()
         >>> score = completeness_metric.evaluate(x_data, y_true, y_pred)
         >>> print(f"Completeness Score: {score}")
+    ```
     """
 
     def evaluate(self, x_data: XYData, y_true: Any, y_pred: Any, **kwargs) -> Float|np.ndarray:

@@ -122,6 +122,7 @@ class Recall(BaseMetric):
         average (str): The type of averaging performed on the data. Default is 'weighted'.
 
     Example:
+    ```python
         >>> from framework3.plugins.metrics.classification import Recall
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
@@ -133,6 +134,7 @@ class Recall(BaseMetric):
         >>> recall_metric = Recall(average='macro')
         >>> score = recall_metric.evaluate(x_data, y_true, y_pred)
         >>> print(f"Recall Score: {score}")
+    ```
     """
 
     def __init__(self, average:str='weighted'):
