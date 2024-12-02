@@ -2,9 +2,12 @@
 icon: material/home
 ---
 
-# Framework3: Una Plataforma de Desarrollo de Modelos de Machine Learning
+# Framework3: A Machine Learning Model Development Platform
 
-> **⚠️ Advertencia**: Este proyecto está actualmente en desarrollo y aún no ha sido probado exhaustivamente. Úselo con precaución en entornos de producción.
+> **⚠️ Warning**: This project is currently under development and has not been thoroughly tested yet. Use with caution in production environments.
+
+
+
 
 <div style="background: black; color: white; font-family: monospace; font-size: 15px;  ">
     <pre style="font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><code style="font-family:inherit"><span style="color: #800080; text-decoration-color: #800080; font-weight: bold; ">F3Pipeline</span><span style="font-weight: bold">(</span>
@@ -48,37 +51,36 @@ icon: material/home
 <span style="font-weight: bold">)</span>
 </div>
 
+## Purpose
 
-## Propósito
+Framework3 is an innovative platform designed to simplify and accelerate the development of machine learning models. Our main goal is to provide data scientists and machine learning engineers with a flexible and powerful tool that allows them to create, experiment with, and deploy models efficiently and in a structured manner.
 
-Framework3 es una plataforma innovadora diseñada para simplificar y acelerar el desarrollo de modelos de machine learning. Nuestro objetivo principal es proporcionar a los científicos de datos y a los ingenieros de machine learning una herramienta flexible y potente que les permita crear, experimentar y desplegar modelos de manera eficiente y estructurada.
+## Philosophy
 
-## Filosofía
+Our philosophy is based on three fundamental principles:
 
-Nuestra filosofía se basa en tres principios fundamentales:
+1. **Flexibility**: We believe that each machine learning project is unique. That's why Framework3 is designed to be highly adaptable, allowing users to customize every aspect of the model development process.
 
-1. **Flexibilidad**: Creemos que cada proyecto de machine learning es único. Por eso, Framework3 está diseñado para ser altamente adaptable, permitiendo a los usuarios personalizar cada aspecto del proceso de desarrollo de modelos.
+2. **Modularity**: We have adopted a modular approach that allows users to combine different components easily. This facilitates experimentation and code reuse.
 
-2. **Modularidad**: Hemos adoptado un enfoque modular que permite a los usuarios combinar diferentes componentes de manera sencilla. Esto facilita la experimentación y la reutilización de código.
+3. **Transparency**: We value clarity and understanding at every step of the machine learning process. Framework3 is designed to provide visibility at all stages, from data preparation to model evaluation.
 
-3. **Transparencia**: Valoramos la claridad y la comprensión en cada paso del proceso de machine learning. Framework3 está diseñado para proporcionar visibilidad en todas las etapas, desde la preparación de datos hasta la evaluación del modelo.
+## Architecture
 
-## Arquitectura
+Framework3 is built on a robust and scalable architecture:
 
-Framework3 está construido sobre una arquitectura robusta y escalable:
+### Main Components
 
-### Componentes Principales
+1. **Base**: Includes the base classes and types that serve as the foundation for the entire framework.
 
-1. **Base**: Incluye las clases y tipos base que sirven como fundamento para todo el framework.
+2. **Container**: Provides structures to organize and manage the different components of the project.
 
-2. **Cantainer**: Proporciona estructuras para organizar y gestionar los diferentes componentes del proyecto.
+3. **Plugins**: An extensible system that allows adding new functionalities:
+   - Pipelines: For creating complex workflows.
+   - Filters: For data transformation and processing.
+   - Metrics: For model evaluation.
+   - Storage: For efficient management of data and models.
 
-3. **Plugins**: Un sistema extensible que permite añadir nuevas funcionalidades:
-   - Pipelines: Para la creación de flujos de trabajo complejos.
-   - Filtros: Para la transformación y procesamiento de datos.
-   - Métricas: Para la evaluación de modelos.
-   - Almacenamiento: Para la gestión eficiente de datos y modelos.
+4. **MapReduce**: Facilitates distributed processing to handle large volumes of data.
 
-4. **MapReduce**: Facilita el procesamiento distribuido para manejar grandes volúmenes de datos.
-
-5. **Utilidades**: Un conjunto de herramientas auxiliares para tareas comunes en el desarrollo de modelos.
+5. **Utilities**: A set of auxiliary tools for common tasks in model development.

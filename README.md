@@ -1,80 +1,80 @@
 # Framework3
 
-Framework3 es una plataforma innovadora diseñada para simplificar y acelerar el desarrollo de modelos de machine learning. Proporciona a los científicos de datos y a los ingenieros de machine learning una herramienta flexible y potente para crear, experimentar y desplegar modelos de manera eficiente y estructurada.
+Framework3 is an innovative platform designed to simplify and accelerate the development of machine learning models. It provides data scientists and machine learning engineers with a flexible and powerful tool to create, experiment with, and deploy models efficiently and in a structured manner. [https://manucouto1.github.io/framework3](https://manucouto1.github.io/framework3)
 
-## Características principales
+## Key Features
 
-- Arquitectura modular y flexible
-- Pipelines personalizables para flujos de trabajo de ML
-- Sistema de plugins extensible para filtros, métricas y almacenamiento
-- Soporte para procesamiento distribuido con MapReduce
-- Herramientas de evaluación y optimización de modelos integradas
+- Modular and flexible architecture
+- Customizable pipelines for ML workflows
+- Extensible plugin system for filters, metrics, and storage
+- Support for distributed processing with MapReduce
+- Integrated model evaluation and optimization tools
 
-## Instalación
+## Installation
 
-Para instalar Framework3, sigue estos pasos:
+To install Framework3, follow these steps:
 
-1. Asegúrate de tener Python 3.7 o superior instalado en tu sistema.
+1. Make sure you have Python 3.7 or higher installed on your system.
 
-2. Clona el repositorio:
+2. Clone the repository:
    ```
    git clone https://github.com/manucouto1/framework3.git
    ```
 
-3. Navega al directorio del proyecto:
+3. Navigate to the project directory:
    ```
    cd framework3
    ```
 
-4. Instala las dependencias utilizando pip:
+4. Install the dependencies using pip:
    ```
    pip install -r requirements.txt
    ```
 
-## Uso básico
+## Basic Usage
 
-Aquí tienes un ejemplo básico de cómo usar Framework3:
+Here's a basic example of how to use Framework3:
 
 ```python
 from framework3.plugins.pipelines import F3Pipeline
 from framework3.plugins.filters.classification import KnnFilter
 from framework3.plugins.metrics import F1, Precision, Recall
 
-# Crear un pipeline
+# Create a pipeline
 pipeline = F3Pipeline(
     plugins=[KnnFilter()],
     metrics=[F1(), Precision(), Recall()]
 )
 
-# Ajustar el modelo
+# Fit the model
 pipeline.fit(X_train, y_train)
 
-# Hacer predicciones
+# Make predictions
 predictions = pipeline.predict(X_test)
 
-# Evaluar el modelo
+# Evaluate the model
 evaluation = pipeline.evaluate(X_test, y_test, y_pred=predictions)
 print(evaluation)
 ```
 
-## Documentación
+## Documentation
 
-Para obtener información más detallada sobre cómo usar Framework3, consulta nuestra documentación completa en:
+For more detailed information on how to use Framework3, check out our complete documentation at:
 
 [https://manucouto1.github.io/framework3](https://manucouto1.github.io/framework3)
 
-## Contribuir
+## Contributing
 
-Las contribuciones son bienvenidas. Por favor, lee nuestras guías de contribución antes de enviar pull requests.
+Contributions are welcome. Please read our contribution guidelines before submitting pull requests.
 
-## Licencia
+## License
 
-Este proyecto está licenciado bajo la licencia MIT. Consulta el archivo `LICENSE` para más detalles.
+This project is licensed under the AGPL-3.0 license. See the `LICENSE` file for more details.
 
-## Contacto
+## Contact
 
-Si tienes alguna pregunta o sugerencia, no dudes en abrir un issue en este repositorio o contactar con el equipo de desarrollo.
+If you have any questions or suggestions, don't hesitate to open an issue in this repository or contact the development team.
 
 ---
 
-¡Gracias por tu interés en Framework3! Esperamos que esta herramienta te sea útil en tus proyectos de machine learning.
+Thank you for your interest in Framework3! We hope this tool will be useful in your machine learning projects.
