@@ -17,6 +17,7 @@ class NMI(BaseMetric):
     NMI is a normalization of the Mutual Information (MI) score to scale the results between 0 (no mutual information) and 1 (perfect correlation).
 
     Example:
+    ```python
         >>> from framework3.plugins.metrics.clustering import NMI
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
@@ -28,6 +29,7 @@ class NMI(BaseMetric):
         >>> nmi_metric = NMI()
         >>> score = nmi_metric.evaluate(x_data, y_true, y_pred)
         >>> print(f"NMI Score: {score}")
+    ```
     """
 
     def evaluate(self, x_data: XYData, y_true: Any, y_pred: Any, **kwargs) -> Float|np.ndarray:

@@ -26,6 +26,7 @@ class ClassifierSVMPlugin(BaseFilter, BasePlugin):
                     Can be 'linear', 'poly', 'rbf', or 'sigmoid'. Default is 'linear'.
 
     Example:
+        ```python
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
         >>> 
@@ -45,6 +46,7 @@ class ClassifierSVMPlugin(BaseFilter, BasePlugin):
         >>> # Use item_grid for hyperparameter tuning
         >>> grid_params = ClassifierSVMPlugin.item_grid(C=[0.1, 1, 10], kernel=['linear', 'rbf'], gamma=['scale', 'auto'])
         >>> print(grid_params)
+        ```
     """
 
     def __init__(self, C: float = 1.0, gamma: float | Literal['scale', 'auto'] = 'scale', kernel: L = 'linear') -> None:

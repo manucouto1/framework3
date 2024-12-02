@@ -20,6 +20,7 @@ class F1(BaseMetric):
         average (str): The type of averaging performed on the data. Default is 'weighted'.
 
     Example:
+        ```python
         >>> from framework3.plugins.metrics.classification import F1
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
@@ -31,6 +32,7 @@ class F1(BaseMetric):
         >>> f1_metric = F1(average='macro')
         >>> score = f1_metric.evaluate(x_data, y_true, y_pred)
         >>> print(f"F1 Score: {score}")
+        ```
     """
 
     def __init__(self, average:str='weighted'):

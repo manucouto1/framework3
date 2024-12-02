@@ -18,6 +18,7 @@ class NPMI(BaseMetric):
     NPMI measures the coherence of topics based on the normalized pointwise mutual information of word pairs.
 
     Example:
+    ```python
         >>> from framework3.plugins.metrics.coherence import NPMI
         >>> from framework3.base.base_types import XYData
         >>> import pandas as pd
@@ -30,6 +31,7 @@ class NPMI(BaseMetric):
         >>> npmi_metric = NPMI()
         >>> score = npmi_metric.evaluate(x_data, None, y_pred, f_vocab=df.columns)
         >>> print(f"NPMI Score: {score}")
+    ```
     """
 
     def evaluate(self, x_data: XYData, y_true: XYData|None, y_pred: XYData, **kwargs) -> Float|np.ndarray:

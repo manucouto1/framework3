@@ -1,8 +1,3 @@
-Certainly! I'll create a comprehensive documentation for the base classes in framework3. Here's an updated version of the Markdown file that covers the base classes:
-
-**File: /home/manuel.couto.pintos/Documents/code/framework3/docs/api/base/base_clases.md**
-
-```markdown
 # Base Classes from framework3
 
 This page documents the base classes provided by the `framework3.base.base_clases` module. These classes form the foundation of the framework and are designed to be extended by specific implementations.
@@ -131,6 +126,3 @@ class MeanSquaredError(BaseMetric):
 ## Conclusion
 
 The base classes in framework3 provide a solid foundation for building complex data processing pipelines. By understanding and properly extending these classes, you can create custom filters, metrics, and storage solutions that seamlessly integrate with the framework's ecosystem.
-```
-
-This documentation provides a comprehensive overview of the base classes in framework3, including their purpose, key methods, usage examples, and best practices. It should give users a clear understanding of how to effectively use and extend these base classes in their Framework3 applications.

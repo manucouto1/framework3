@@ -16,6 +16,7 @@ The Support Vector Machine (SVM) classifier is implemented in the `ClassifierSVM
 #### Usage
 
 ```python
+
 from framework3.plugins.filters.classification.svm import ClassifierSVMPlugin
 
 svm_classifier = ClassifierSVMPlugin(C=1.0, kernel='rbf', gamma='scale')
