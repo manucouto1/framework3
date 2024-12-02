@@ -14,7 +14,6 @@ The Classification Filters module in framework3 provides a collection of powerfu
 The Support Vector Machine (SVM) classifier is implemented in the `ClassifierSVMPlugin`. This versatile classifier is effective for both linear and non-linear classification tasks.
 
 #### Usage
-
 ```python
 
 from framework3.plugins.filters.classification.svm import ClassifierSVMPlugin
