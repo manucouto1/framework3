@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple, Type, TypeVar, get_type_hints, Dict, Optional, Any
+from typing import List, Tuple, Type, TypeVar, get_type_hints, Dict, Optional, Any
 from typeguard import typechecked
 from abc import ABC, abstractmethod
 from fastapi.encoders import jsonable_encoder
@@ -9,9 +9,8 @@ from framework3.base.base_factory import BaseFactory
 import inspect
 import numpy as np
 import hashlib
-import functools
 
-__all__ = ["BasePlugin", "BaseFilter", "BasePipeline", "BaseMetric"]
+__all__ = ["BasePlugin", "BaseFilter", "BaseMetric"]
 
 T = TypeVar('T')
 
@@ -280,79 +279,40 @@ class BaseFilter(BasePlugin):
     def _pre_fit(self, x: XYData, y: Optional[XYData]):
         m_hash, m_str = self._get_model_key(data_hash=f'{x._hash}, {y._hash if y is not None else ""}')
         m_path = f'{self._get_model_name()}/{m_hash}'
-        print("*"*100)
-        print("SE LLAMA PREFIT También")
-        print("*"*100)
+       
         self._m_hash = m_hash
         self._m_path = m_path
         self._m_str = m_str
+        return m_hash, m_path, m_str
         
 
     def _pre_predict(self, x: XYData):
-        pass  # Add any pre-predict processing here if needed
+        if not self._m_hash or not self._m_path or not self._m_str:
+            raise ValueError("Cached filter model not trained or loaded")
+        
+        d_hash, _ = self._get_data_key(self._m_str, x._hash)
+        
+        new_x = XYData(
+            _hash=d_hash,
+            _value=x._value,
+            _path=f'{self._get_model_name()}/{self._m_hash}',
+        )
+
+        return new_x
 
     def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData], *args, **kwargs):
         self._pre_fit(x, y)
         return self._original_fit(x, y, *args, **kwargs)
 
     def _pre_predict_wrapp(self, x: XYData, *args, **kwargs) -> XYData:
-        self._pre_predict(x)
-        value = self._original_predict(x, *args, **kwargs)
+        new_x = self._pre_predict(x)
         return XYData(
-            _hash=x._hash,
-            _value=value._value,
-            _path=x._path
+            _hash=new_x._hash,
+            _path=new_x._path,
+            _value=self._original_predict(new_x, *args, **kwargs)._value
         )
 
-    # def _pre_fit_wrapp(self, method):
-    #     """
-    #     Wrapper for the fit method.
 
-    #     This method wraps the fit method to add pre-processing steps,
-    #     including generating and storing model keys and paths.
-
-    #     Args:
-    #         method (callable): The original fit method to be wrapped.
-
-    #     Returns:
-    #         callable: The wrapped fit method.
-    #     """
-    #     @functools.wraps(method)
-    #     def wrapper(x: XYData, y: Optional[XYData], *args, **kwargs):
-    #         m_hash, m_str = self._get_model_key(data_hash=f'{x._hash}, {y._hash if y is not None else ""}')
-    #         m_path = f'{self._get_model_name()}/{m_hash}'
-            
-    #         setattr(self, '_m_hash', m_hash)
-    #         setattr(self, '_m_path', m_path)
-    #         setattr(self, '_m_str', m_str)
-            
-    #         return method(x, y, *args, **kwargs)
-    #     return wrapper
-    
-    # def _pre_predict_wrapp(self, method):
-    #     """
-    #     Wrapper for the predict method.
-
-    #     This method wraps the predict method to add post-processing steps,
-    #     including creating a new XYData instance with the prediction results.
-
-    #     Args:
-    #         method (callable): The original predict method to be wrapped.
-
-    #     Returns:
-    #         callable: The wrapped predict method.
-    #     """
-    #     @functools.wraps(method)
-    #     def wrapper(x: XYData, *args, **kwargs) -> XYData:
-    #         value = method(x, *args, **kwargs)
-
-    #         return XYData(
-    #             _hash=x._hash,
-    #             _value=value._value,
-    #             _path=x._path
-    #         )
-
-    #     return wrapper
 
     def __getstate__(self):
         state = super().__getstate__()
@@ -367,39 +327,6 @@ class BaseFilter(BasePlugin):
         self.fit = self._pre_fit_wrapp
         self.predict = self._pre_predict_wrapp
     
-    # def __getstate__(self):
-    #     """
-    #     Prepare the object for serialization.
-
-    #     This method ensures that the original unwrapped methods are used for serialization.
-
-    #     Returns:
-    #         (Dict[str,Any]): The object's state dictionary.
-    #     """
-    #     state = super().__getstate__()
-    #     if self._original_fit:
-    #         state['fit'] = self._original_fit
-    #     if self._original_predict:
-    #         state['predict'] = self._original_predict
-    #     return state
-
-    # def __setstate__(self, state):
-    #     """
-    #     Restore the object's state after deserialization.
-
-    #     This method rewraps the fit and predict methods after deserialization.
-
-    #     Args:
-    #         state (dict): The object's state dictionary.
-    #     """
-    #     super().__setstate__(state)
-    #     if hasattr(self, 'fit'):
-    #         self._original_fit = self.fit
-    #         self.fit = self._pre_fit_wrapp(self._original_fit)
-    #     if hasattr(self, 'predict'):
-    #         self._original_predict = self.predict
-    #         self.predict = self._pre_predict_wrapp(self._original_predict)
-
     @abstractmethod
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         """
@@ -461,145 +388,7 @@ class BaseFilter(BasePlugin):
         data_str = f"{model_str}.predict({data_hash})"
         data_hashcode = hashlib.sha1(data_str.encode('utf-8')).hexdigest()
         return data_hashcode, data_str
-    
-class BasePipeline(BaseFilter):
-    """
-    Base class for implementing pipeline structures in the framework.
-
-    This abstract class extends BaseFilter and defines the interface for pipeline operations.
-    Subclasses should implement the abstract methods to provide specific pipeline functionality.
-
-    Example:
-        ```python
-        from framework3.base.base_clases import BasePipeline
-        from framework3.base.base_types import XYData
-
-        class MyCustomPipeline(BasePipeline):
-            def fit(self, x: XYData, y: Optional[XYData]) -> None:
-                # Implement fitting logic here
-                pass
-
-            def predict(self, x: XYData) -> XYData:
-                # Implement prediction logic here
-                pass
-
-            # Implement other required methods...
-
-        ```
-    """
-    def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData], *args, **kwargs):
-        return self._original_fit(x, y, *args, **kwargs)
-
-    def _pre_predict_wrapp(self, x: XYData, *args, **kwargs) -> XYData:
-        return self._original_predict(x, *args, **kwargs)
-        
-    # def _pre_fit_wrapp(self, method):
-    #     """Wrapper for fit method."""
-    #     @functools.wraps(method)
-    #     def wrapper(x: XYData, y: Optional[XYData], *args, **kwargs):
-    #         return method(x, y, *args, **kwargs)
-    #     return wrapper
-    
-    # def _pre_predict_wrapp(self, method):
-    #     """Wrapper for predict method."""
-    #     @functools.wraps(method)
-    #     def wrapper(x: XYData, *args, **kwargs) -> XYData:
-    #         return method(x, *args, **kwargs)
-    #     return wrapper
-
-    @abstractmethod
-    def init(self) -> None:
-        """
-        Initialize the pipeline.
-
-        This method should be implemented to perform any necessary setup or initialization
-        before the pipeline starts processing data.
-        """
-        ...
-
-    @abstractmethod
-    def start(self, x: XYData, y: Optional[XYData], X_: Optional[XYData]) -> Optional[XYData]:
-        """
-        Start the pipeline processing.
-
-        Parameters:
-        -----------
-        x : XYData
-            The input data to be processed.
-        y : Optional[XYData]
-            Optional target data.
-        X_ : Optional[XYData]
-            Optional additional input data.
-
-        Returns:
-        --------
-        Optional[XYData]
-            The processed data, if any.
-        """
-        ...
-
-    @abstractmethod
-    def log_metrics(self) -> None:
-        """
-        Log the metrics of the pipeline.
-
-        This method should be implemented to record and possibly display
-        the performance metrics of the pipeline.
-        """
-        ...
-
-    @abstractmethod
-    def finish(self) -> None:
-        """
-        Finish the pipeline processing.
-
-        This method should be implemented to perform any necessary cleanup
-        or finalization steps after the pipeline has completed its processing.
-        """
-        ...
-    @abstractmethod
-    def evaluate(self, x_data: XYData, y_true: XYData|None, y_pred: XYData) -> Dict[str, float]:
-        """
-        Evaluate the performance of the pipeline.
-
-        This method should be implemented to assess the pipeline's performance
-        by comparing predicted values against true values (if available) and
-        potentially considering the input data.
-
-        Parameters:
-        -----------
-        x_data : XYData
-            The input data used for generating predictions.
-        y_true : XYData | None
-            The true target values, if available. May be None for unsupervised tasks.
-        y_pred : XYData
-            The predicted values generated by the pipeline.
-
-        Returns:
-        --------
-        (Dict[str, float])
-            A dictionary containing various evaluation metrics and their corresponding values.
-            The keys should be strings representing the metric names, and the values should be
-            the computed metric scores as floats.
-
-        Example:
-        --------
-        ```python
-        {
-            'mse': 0.25,
-            'mae': 0.4,
-            'r2_score': 0.85
-        }
-        ```
-
-        Note:
-        -----
-        The specific metrics included in the returned dictionary may vary depending on
-        the nature of the task (e.g., regression, classification) and the requirements
-        of the particular pipeline implementation.
-        """
-        ...
-
+  
 class BaseMetric(BasePlugin):
     """
     Base class for implementing metric calculations.

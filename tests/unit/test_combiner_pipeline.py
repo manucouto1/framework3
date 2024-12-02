@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from framework3.base import XYData, BaseFilter
-from framework3.plugins.pipelines.sequential_feature_extractor_pipeline import SequentialFeatureExtractorPipeline
+from framework3.plugins.pipelines.parallel.parallel_mono_pipeline import MonoPipeline
 from framework3.base.base_clases import BaseMetric
 
 class DummyFilter(BaseFilter):
@@ -26,7 +26,7 @@ def sample_data():
 @pytest.fixture
 def combiner_pipeline():
     filters = [DummyFilter(), DummyFilter()]
-    pipeline = SequentialFeatureExtractorPipeline(filters=filters)
+    pipeline = MonoPipeline(filters=filters)
     pipeline.metrics = [DummyMetric()]
     return pipeline
 
@@ -41,6 +41,7 @@ def test_fit(combiner_pipeline, sample_data):
 
 def test_predict(combiner_pipeline, sample_data):
     x, _ = sample_data
+    combiner_pipeline.fit(x, None)
     result = combiner_pipeline.predict(x)
     assert isinstance(result, XYData)
     assert result.value.shape == (6,)  # 2 filtros con un ejemplo de 3 features por ejemplo
@@ -60,7 +61,7 @@ def test_combine_features():
         XYData(_hash="1", _path="/tmp", _value=np.array([[1, 2], [3, 4]])),
         XYData(_hash="2", _path="/tmp", _value=np.array([[5, 6], [7, 8]]))
     ]
-    result = SequentialFeatureExtractorPipeline.combine_features(outputs)
+    result = MonoPipeline.combine_features(outputs)
     assert isinstance(result, XYData)
     assert result.value.shape == (2, 4)
     np.testing.assert_array_equal(result.value, np.array([[1, 2, 5, 6], [3, 4, 7, 8]])) # type: ignore
@@ -74,10 +75,10 @@ def test_different_input_shapes():
         DummyFilter(),
         DummyFilter()
     ]
-    pipeline = SequentialFeatureExtractorPipeline(filters=filters)
+    pipeline = MonoPipeline(filters=filters)
     x1 = XYData(_hash="input1", _path="/tmp", _value=np.array([[1, 2], [3, 4]])) # Esto representa dos filtros devolviendo un ejemplo con 2 características
     x2 = XYData(_hash="input2", _path="/tmp", _value=np.array([[[1, 2, 3], [4, 5, 6]], [[1, 2, 3], [4, 5, 6]]])) # Esto representa dos filtros devolviendo dos ejemplos con 3 características cada uno
-    
+    pipeline.fit(x1, None)
     result1 = pipeline.predict(x1)
     result2 = pipeline.predict(x2)
     assert x1.value.shape == (2, 2) 

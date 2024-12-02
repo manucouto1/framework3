@@ -15,7 +15,6 @@ from rich import print
 
 from sklearn import datasets
 
-from framework3.plugins.pipelines.gs_cv_pipeline import GridSearchCVPipeline
 
 
 # gs_pipeline = GridSearchCVPipeline(
@@ -34,8 +33,9 @@ from framework3.plugins.pipelines.gs_cv_pipeline import GridSearchCVPipeline
 #     cache_filter=True,
 #     overwrite=True,
 # )
+
 pipeline = F3Pipeline(
-    plugins=[
+    filters=[
         Cached(
             filter=PCAPlugin(n_components=1),
             cache_data=False, 
@@ -69,7 +69,7 @@ print(reconstructed_pipeline)
 
 
 pipeline2 = F3Pipeline(
-    plugins=[
+    filters=[
         pipeline,
     ],
     metrics=[]

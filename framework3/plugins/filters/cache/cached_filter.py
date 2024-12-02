@@ -1,5 +1,4 @@
 from typing import Callable, Dict, Optional, Tuple, cast
-from framework3.base.base_clases import BasePipeline
 from framework3.container.container import Container
 from framework3.base import BaseFilter
 from framework3.base import BaseStorage
@@ -64,78 +63,11 @@ class Cached(BaseFilter):
         self._lambda_filter: Callable[...,BaseFilter]|None = None
 
     def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData]):
-        m_hash, m_str = self._get_model_key(data_hash=f'{x._hash}, {y._hash if y is not None else ""}')
-        m_path = f'{self._get_model_name()}/{m_hash}'
-
-        print("*"*100)
-        print("SE LLAMA PREFIT")
-        print("*"*100)
-        
-        setattr(self.filter, '_m_hash', m_hash)
-        setattr(self.filter, '_m_path', m_path)
-        setattr(self.filter, '_m_str', m_str)
         return self._original_fit(x, y)
-
+        
     def _pre_predict_wrapp(self, x: XYData, *args, **kwargs) -> XYData:
-        if not self.filter._m_hash or not self.filter._m_path or not self.filter._m_str:
-            raise ValueError("Cached filter model not trained or loaded")
-        
-        d_hash, d_str = self._get_data_key(self.filter._m_str, x._hash)
-        
-        new_x = XYData(
-            _hash=d_hash,
-            _value=x._value,
-            _path=f'{self._get_model_name()}/{self.filter._m_hash}',
-        )
-        return self._original_predict(new_x, *args, **kwargs)
-        
-    # def _pre_fit_wrapp(self, method):
-    #     """
-    #     Decorador para el método fit que prepara el hash y la ruta del modelo antes de ajustar.
-
-    #     Args:
-    #         method (Callable): El método fit a envolver.
-
-    #     Returns:
-    #         Callable: El método fit envuelto.
-    #     """
-    #     @functools.wraps(method)
-    #     def wrapper(x:XYData, y:Optional[XYData], *args, **kwargs):
-    #         m_hash, m_str = self._get_model_key(data_hash=f'{x._hash}, {y._hash if y is not None else ""}')
-    #         m_path = f'{self._get_model_name()}/{m_hash}'
-
-    #         setattr(self.filter, '_m_hash', m_hash)
-    #         setattr(self.filter, '_m_path', m_path)
-    #         setattr(self.filter, '_m_str', m_str)
-    #         return method(x, y, *args, **kwargs)
-    #     return wrapper
+        return self._original_predict(x, *args, **kwargs)
     
-    # def _pre_predict_wrapp(self, method):
-    #     """
-    #     Decorador para el método predict que prepara los datos antes de la predicción.
-
-    #     Args:
-    #         method (Callable): El método predict a envolver.
-
-    #     Returns:
-    #         Callable: El método predict envuelto.
-    #     """
-    #     @functools.wraps(method)
-    #     def wrapper(x:XYData, *args, **kwargs) -> XYData:
-    #         if not self.filter._m_hash or not self.filter._m_path or not self.filter._m_str:
-    #             raise ValueError("Cached filter model not trained or loaded")
-            
-    #         d_hash, d_str = self._get_data_key(self.filter._m_str, x._hash)
-            
-    #         new_x = XYData(
-    #             _hash=d_hash,
-    #             _value=x._value,
-    #             _path=f'{self._get_model_name()}/{self.filter._m_hash}',
-    #         )
-
-    #         return method(new_x, *args, **kwargs)
-    #     return wrapper
-
     def _get_model_name(self) -> str:
         """
         Obtiene el nombre del modelo del filtro subyacente.
@@ -178,12 +110,24 @@ class Cached(BaseFilter):
             x (XYData): Los datos de entrada.
             y (Optional[XYData]): Los datos objetivo, si existen.
         """
-        if not self._storage.check_if_exists('model', f'{self._storage.get_root_path()}/{self.filter._m_path}') or self.overwrite:
+        
+        self.filter._pre_fit(x,y)
+
+        if not self._storage.check_if_exists(
+            hashcode='model', 
+            context=f'{self._storage.get_root_path()}/{self.filter._m_path}'
+        ) or self.overwrite:
             rprint(f"\t - El filtro {self.filter} con hash {self.filter._m_hash} No existe, se va a entrenar.")
-            self.filter.fit(x, y)
+            self.filter._original_fit(x, y)
+
             if self.cache_filter:
                 rprint(f"\t - El filtro {self.filter} Se cachea.")
-                self._storage.upload_file(pickle.dumps(self.filter), 'model', context=f'{self._storage.get_root_path()}/{self.filter._m_path}')
+
+                self._storage.upload_file(
+                    file=pickle.dumps(self.filter), 
+                    file_name='model', 
+                    context=f'{self._storage.get_root_path()}/{self.filter._m_path}'
+                )
         else:
             rprint(f"\t - El filtro {self.filter} Existe, se crea lambda.")
             self._lambda_filter = lambda: cast(BaseFilter, self._storage.download_file('model', f'{self._storage.get_root_path()}/{self.filter._m_path}'))
@@ -200,18 +144,22 @@ class Cached(BaseFilter):
         Returns:
             XYData: Los resultados de la predicción.
         """
+        x = self.filter._pre_predict(x)
+
         if not self._storage.check_if_exists(x._hash, context=f'{self._storage.get_root_path()}/{x._path}') or self.overwrite:
             rprint(f"\t - El dato {x} No existe, se va a crear.")
             if self._lambda_filter is not None:
                 rprint(f"\t - Existe un Lambda por lo que se recupera el filtro del storage.")
                 self.filter = self._lambda_filter()
-                print(self.filter)
 
-            value = self.filter.predict(x)
-
+            value =XYData(
+                _hash=x._hash,
+                _path=x._path,
+                _value=self.filter._original_predict(x)._value
+            )
             if self.cache_data:
                 rprint(f"\t - El dato {x} Se cachea.")
-                self._storage.upload_file(pickle.dumps(value.value), x._hash, context=f'{self._storage.get_root_path()}/{x._path}')
+                self._storage.upload_file(file=pickle.dumps(value.value), file_name=x._hash, context=f'{self._storage.get_root_path()}/{x._path}')
         else:
             rprint(f"\t - El dato {x} Existe, se crea lambda.")
             value = XYData(

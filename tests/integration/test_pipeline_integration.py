@@ -6,7 +6,7 @@ from framework3.plugins.filters.classification.svm import ClassifierSVMPlugin
 from framework3.plugins.filters.grid_search.cv_grid_search import GridSearchCVPlugin
 from framework3.plugins.filters.transformation.pca import PCAPlugin
 from framework3.plugins.metrics.classification import F1, Precission, Recall
-from framework3.plugins.pipelines.f3_pipeline import F3Pipeline
+from framework3.plugins.pipelines.sequential.f3_pipeline import F3Pipeline
 
 
 
@@ -14,7 +14,7 @@ def test_pipeline_iris_dataset():
     iris = datasets.load_iris()
 
     pipeline = F3Pipeline(
-        plugins=[
+        filters=[
             PCAPlugin(n_components=1),
             GridSearchCVPlugin(ClassifierSVMPlugin, ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf']), scoring='f1_weighted', cv=2),
         ],
@@ -72,7 +72,7 @@ def test_pipeline_different_feature_counts():
     )
 
     pipeline = F3Pipeline(
-        plugins=[
+        filters=[
             PCAPlugin(n_components=1),
             GridSearchCVPlugin(ClassifierSVMPlugin, ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf']), scoring='f1_weighted', cv=2),
         ],
@@ -119,7 +119,7 @@ def test_grid_search_with_specified_parameters():
     )
 
     pipeline = F3Pipeline(
-        plugins=[
+        filters=[
             PCAPlugin(n_components=1),
             GridSearchCVPlugin(filterx=ClassifierSVMPlugin, param_grid=ClassifierSVMPlugin.item_grid(C=[1.0, 10], kernel=['rbf']), scoring='f1_weighted', cv=2),
         ],

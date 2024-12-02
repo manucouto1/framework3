@@ -44,8 +44,9 @@ def test_cache_filter_model_when_not_exists(mock_storage, simple_filter):
     cached_filter.fit(x, y)
     
     mock_storage.upload_file.assert_called_once()
-    assert mock_storage.upload_file.call_args[0][1] == 'model'
-    assert mock_storage.upload_file.call_args[1]['context'] == f'/root/{cached_filter._get_model_name()}/{cached_filter.filter._m_hash}'
+    calls = mock_storage.upload_file.mock_calls
+    assert calls[0].kwargs['file_name'] == 'model'
+    assert calls[0].kwargs['context'] == f'/root/{cached_filter._get_model_name()}/{cached_filter.filter._m_hash}'
 
 def test_use_cached_filter_model_when_exists(mock_storage, simple_filter):
     mock_storage.check_if_exists.return_value = True
@@ -82,11 +83,12 @@ def test_cache_processed_data_when_cache_data_is_true(mock_storage, simple_filte
     cached_filter = Cached(filter=simple_filter, cache_data=True, cache_filter=False, storage=mock_storage)
     
     result = cached_filter.predict(x)
-    
     mock_storage.upload_file.assert_called_once()
-    assert mock_storage.upload_file.call_args[0][1] == result._hash
-    assert mock_storage.upload_file.call_args[1]['context'] == f'/root/{cached_filter._get_model_name()}/{cached_filter.filter._m_hash}'
-    assert np.array_equal(pickle.loads(mock_storage.upload_file.call_args[0][0]), np.array([7, 8, 9]))
+
+    calls = mock_storage.upload_file.mock_calls
+    assert calls[0].kwargs['file_name'] == result._hash
+    assert calls[0].kwargs['context'] == f'/root/{cached_filter._get_model_name()}/{cached_filter.filter._m_hash}'
+    assert np.array_equal(pickle.loads(calls[0].kwargs['file']), np.array([7, 8, 9]))
     assert result._hash == result._hash
     assert result._path == f'{cached_filter._get_model_name()}/{cached_filter.filter._m_hash}'
     assert np.array_equal(cast(ArrayLike, result.value), np.array([7, 8, 9]))
@@ -173,7 +175,7 @@ def test_create_lambda_filter_when_exists(mock_storage, simple_filter):
     
     assert cached_filter._lambda_filter is not None
     assert callable(cached_filter._lambda_filter)
-    mock_storage.check_if_exists.assert_called_once_with('model', f'/root/{cached_filter._get_model_name()}/{cached_filter.filter._m_hash}')
+    mock_storage.check_if_exists.assert_called_once_with(hashcode='model', context=f'/root/{cached_filter._get_model_name()}/{cached_filter.filter._m_hash}')
     mock_storage.upload_file.assert_not_called()
 
 def test_fit_with_x_and_y(mock_storage, simple_filter):
@@ -191,7 +193,8 @@ def test_fit_with_x_and_y(mock_storage, simple_filter):
     assert hasattr(simple_filter, '_m_path')
     assert hasattr(simple_filter, '_m_str')
     mock_storage.upload_file.assert_called_once()
-    assert mock_storage.upload_file.call_args[0][1] == 'model'
+    calls = mock_storage.upload_file.mock_calls
+    assert calls[0].kwargs['file_name'] == 'model'
     assert 'input_hash, target_hash' in simple_filter._m_str
 
 def test_fit_with_only_x(mock_storage, simple_filter):
@@ -207,8 +210,9 @@ def test_fit_with_only_x(mock_storage, simple_filter):
     cached_filter.fit(x, None)
     
     mock_storage.upload_file.assert_called_once()
-    assert mock_storage.upload_file.call_args[0][1] == 'model'
-    assert mock_storage.upload_file.call_args[1]['context'] == f'/root/{cached_filter._get_model_name()}/{cached_filter.filter._m_hash}'
+    calls = mock_storage.upload_file.mock_calls
+    assert calls[0].kwargs['file_name'] == 'model'
+    assert calls[0].kwargs['context'] == f'/root/{cached_filter._get_model_name()}/{cached_filter.filter._m_hash}'
     assert cached_filter._lambda_filter is None
 
 def test_manage_storage_paths_for_different_models_and_data(mock_storage, simple_filter):
@@ -231,10 +235,10 @@ def test_manage_storage_paths_for_different_models_and_data(mock_storage, simple
     setattr(simple_filter, '_m_str', 'model_str1')
     
     cached_filter1.fit(x1, y1)
-    mock_storage1.upload_file.assert_called_with(ANY, 'model', context=f'/root1/{cached_filter1._get_model_name()}/{cached_filter1.filter._m_hash}')
+    mock_storage1.upload_file.assert_called_with(file=ANY, file_name='model', context=f'/root1/{cached_filter1._get_model_name()}/{cached_filter1.filter._m_hash}')
     
     ret1: XYData = cached_filter1.predict(x1)
-    mock_storage1.upload_file.assert_called_with(ANY, ret1._hash, context=f'/root1/{cached_filter1._get_model_name()}/{cached_filter1.filter._m_hash}')
+    mock_storage1.upload_file.assert_called_with(file=ANY, file_name=ret1._hash, context=f'/root1/{cached_filter1._get_model_name()}/{cached_filter1.filter._m_hash}')
     
     # Second model
     mock_storage1.check_if_exists.return_value = False
@@ -243,10 +247,10 @@ def test_manage_storage_paths_for_different_models_and_data(mock_storage, simple
     setattr(simple_filter, '_m_str', 'model_str2')
     
     cached_filter1.fit(x2, y2)
-    mock_storage1.upload_file.assert_called_with(ANY, 'model', context=f'/root1/{cached_filter1._get_model_name()}/{cached_filter1.filter._m_hash}')
+    mock_storage1.upload_file.assert_called_with(file=ANY, file_name='model', context=f'/root1/{cached_filter1._get_model_name()}/{cached_filter1.filter._m_hash}')
     
     val = cached_filter1.predict(x2)
-    mock_storage1.upload_file.assert_called_with(ANY, val._hash, context=f'/root1/{cached_filter1._get_model_name()}/{cached_filter1.filter._m_hash}')
+    mock_storage1.upload_file.assert_called_with(file=ANY, file_name=val._hash, context=f'/root1/{cached_filter1._get_model_name()}/{cached_filter1.filter._m_hash}')
     
     assert mock_storage1.upload_file.call_count == 4
 
@@ -258,10 +262,10 @@ def test_manage_storage_paths_for_different_models_and_data(mock_storage, simple
     cached_filter2 = Cached(filter=simple_filter, cache_data=True, cache_filter=True, storage=mock_storage1)
     mock_storage2.get_root_path.return_value = "/root2"
     cached_filter2.fit(x1, y1)
-    mock_storage2.upload_file.assert_called_with(ANY, 'model', context=f'/root2/{cached_filter2._get_model_name()}/{cached_filter2.filter._m_hash}')
+    mock_storage2.upload_file.assert_called_with(file=ANY, file_name='model', context=f'/root2/{cached_filter2._get_model_name()}/{cached_filter2.filter._m_hash}')
     
     ret2 = cached_filter2.predict(x1)
-    mock_storage2.upload_file.assert_called_with(ANY, ret2._hash, context=f'/root2/{cached_filter2._get_model_name()}/{cached_filter2.filter._m_hash}')
+    mock_storage2.upload_file.assert_called_with(file=ANY, file_name=ret2._hash, context=f'/root2/{cached_filter2._get_model_name()}/{cached_filter2.filter._m_hash}')
     
     # Second model
     mock_storage2.check_if_exists.return_value = False
@@ -272,9 +276,9 @@ def test_manage_storage_paths_for_different_models_and_data(mock_storage, simple
     
     
     cached_filter2.fit(x2, y2)
-    mock_storage2.upload_file.assert_called_with(ANY, 'model', context=f'/root2/{cached_filter2._get_model_name()}/{cached_filter2.filter._m_hash}')
+    mock_storage2.upload_file.assert_called_with(file=ANY, file_name='model', context=f'/root2/{cached_filter2._get_model_name()}/{cached_filter2.filter._m_hash}')
     
     ret2 = cached_filter2.predict(x2)
-    mock_storage2.upload_file.assert_called_with(ANY, ret2._hash, context=f'/root2/{cached_filter2._get_model_name()}/{cached_filter2.filter._m_hash}')
+    mock_storage2.upload_file.assert_called_with(file=ANY, file_name=ret2._hash, context=f'/root2/{cached_filter2._get_model_name()}/{cached_filter2.filter._m_hash}')
     
     assert mock_storage2.upload_file.call_count == 8

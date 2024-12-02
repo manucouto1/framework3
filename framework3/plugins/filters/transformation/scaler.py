@@ -4,6 +4,9 @@ from framework3.base.base_types import XYData, VData
 from framework3.base.base_clases import BaseFilter
 from framework3.container.container import Container
 
+
+__all__=['StandardScalerPlugin']
+
 @Container.bind()
 class StandardScalerPlugin(BaseFilter):
     """

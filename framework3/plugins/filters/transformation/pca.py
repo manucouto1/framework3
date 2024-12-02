@@ -4,6 +4,7 @@ from framework3.base.base_clases import BaseFilter
 from framework3.container.container import Container
 from sklearn.decomposition import PCA
 
+__all__ = ['PCAPlugin']
 @Container.bind()
 class PCAPlugin(BaseFilter):
     """

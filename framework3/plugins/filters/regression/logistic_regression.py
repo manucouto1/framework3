@@ -2,6 +2,7 @@ from framework3.base import BaseFilter, BasePlugin, XYData
 from framework3.container.container import Container
 from sklearn.linear_model import LogisticRegression
 
+__all__ = ['LogistiRegressionlugin']
 
 Container.bind()
 class LogistiRegressionlugin(BaseFilter, BasePlugin):

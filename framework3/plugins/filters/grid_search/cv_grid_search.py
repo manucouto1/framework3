@@ -9,7 +9,7 @@ from sklearn.model_selection import GridSearchCV
 
 from framework3.utils.skestimator import SkWrapper
 
-
+__all__ = ['GridSearchCVPlugin']
 class SkFilterWrapper(BaseEstimator):
     """
     A wrapper class for BaseFilter that implements scikit-learn's BaseEstimator interface.

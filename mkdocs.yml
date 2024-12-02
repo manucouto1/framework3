@@ -43,9 +43,8 @@ theme:
   #     name: Toggle theme            # Texto del toggle
 nav:
   - Home: index.md
-  - Installation: installation/index.md
   - Quick Start: quick_start/index.md
-  
+  - Installation: installation/index.md
   - Tutorials: 
       - index: examples/index.md
   #     - First Filter:
@@ -132,4 +131,6 @@ plugins:
 
 extra_css:
   - css/styles.css
+
+copyright: Manuel Cout Pintos
 

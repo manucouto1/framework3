@@ -5,6 +5,8 @@ from sklearn.cluster import KMeans
 from typing import Literal, Optional, Dict, Any
 import numpy as np
 
+__all__ = ['KMeansFilter']
+
 @Container.bind()
 class KMeansFilter(BaseFilter):
     """

@@ -5,13 +5,12 @@ import numpy as np
 from sklearn.metrics import homogeneity_score, make_scorer
 from sklearn.model_selection import GridSearchCV
 from framework3.container.container import Container
-from framework3.plugins.filters.classification.knn import KnnFilter
 from framework3.plugins.filters.clustering.kmeans import KMeansFilter
 from framework3.plugins.filters.transformation.pca import PCAPlugin
 from framework3.plugins.filters.classification.svm import ClassifierSVMPlugin
 from framework3.base.base_types import XYData
 from framework3.base.base_clases import BaseFilter, BasePlugin
-from framework3.plugins.pipelines.gs_cv_pipeline import GridSearchCVPipeline
+from framework3.plugins.pipelines import GridSearchPipeline
 from framework3.utils.skestimator import SkWrapper
 
 class DummyFilter(BaseFilter):
@@ -71,7 +70,7 @@ def test_grid_search_cv_pipeline_with_multiple_filters():
     filters = [PCAPlugin, ClassifierSVMPlugin]
 
     # Create GridSearchCVPipeline
-    grid_search = GridSearchCVPipeline(
+    grid_search = GridSearchPipeline(
         filterx=filters,
         param_grid=param_grid,
         scoring='accuracy',
@@ -117,7 +116,7 @@ def test_grid_search_cv_pipeline_best_score_and_params():
     
 
     # Create GridSearchCVPipeline
-    grid_search = GridSearchCVPipeline(
+    grid_search = GridSearchPipeline(
         filterx=filters,
         param_grid=param_grid,
         scoring='accuracy',
@@ -160,7 +159,7 @@ def test_grid_search_cv_pipeline_predictions():
     param_grid = PCAPlugin.item_grid(n_components=[2]) | ClassifierSVMPlugin.item_grid(C=[0.1, 1], kernel=['linear', 'rbf'])
 
     # Create GridSearchCVPipeline
-    grid_search = GridSearchCVPipeline(
+    grid_search = GridSearchPipeline(
         filterx=filters,
         param_grid=param_grid,
         scoring='accuracy',
@@ -211,7 +210,7 @@ def test_grid_search_cv_pipeline_with_none_input():
             return silhouette_score(X, estimator.predict(X), metric=self.metric)
 
     # Create GridSearchCVPipeline
-    grid_search = GridSearchCVPipeline(
+    grid_search = GridSearchPipeline(
         filterx=[
             PCAPlugin,
             KMeansFilter
