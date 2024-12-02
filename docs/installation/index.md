@@ -1,3 +1,8 @@
+---
+icon: material/download
+---
+
+
 # Installation Guide for Framework3
 
 This guide will walk you through the process of installing Framework3 and its dependencies.
@@ -119,4 +124,4 @@ This will fetch the latest changes and reinstall the package.
 
 ## Next Steps
 
-Now that you have Framework3 installed, you can start using it in your projects. Check out the [Quick Start Guide](quick_start.md) for an introduction to using Framework3, or explore the [API Documentation](api/index.md) for more detailed information on available modules and functions.
+Now that you have Framework3 installed, you can start using it in your projects. Check out the [Quick Start Guide](../quick_start/index.md) for an introduction to using Framework3, or explore the [API Documentation](../api/index.md) for more detailed information on available modules and functions.

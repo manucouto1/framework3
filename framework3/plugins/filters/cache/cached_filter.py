@@ -54,7 +54,7 @@ class Cached(BaseFilter):
         cached_filter.clear_cache()
         ```
     """
-    def __init__(self, filter: BaseFilter, cache_data: bool = False, cache_filter: bool = False, overwrite: bool=False, storage:BaseStorage|None=None):
+    def __init__(self, filter: BaseFilter, cache_data: bool = True, cache_filter: bool = True, overwrite: bool=False, storage:BaseStorage|None=None):
         super().__init__(filter=filter, cache_data=cache_data, cache_filter=cache_filter, overwrite=overwrite, storage=storage)
         self.filter: BaseFilter = filter
         self.cache_data = cache_data

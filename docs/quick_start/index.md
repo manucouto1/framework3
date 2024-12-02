@@ -1,10 +1,14 @@
+---
+icon: material/glasses
+---
+
 # Quick Start Guide for Framework3
 
 This guide will help you get started with Framework3, demonstrating its basic usage and core concepts.
 
 ## 1. Installation
 
-If you haven't installed Framework3 yet, please refer to the [Installation Guide](installation.md) first.
+If you haven't installed Framework3 yet, please refer to the [Installation Guide](../installation/index.md) first.
 
 ## 2. Basic Concepts
 
@@ -354,23 +358,8 @@ new_predictions = loaded_pipeline.predict(x_data)
 
 This quick start guide covers the basics of using Framework3. For more advanced usage and detailed API documentation, please refer to the following resources:
 
-- [API Documentation](api/index.md)
-- [Examples](examples/index.md)
-- [Best Practices](best_practices.md)
+- [API Documentation](../api/index.md)
+- [Examples](../examples/index.md)
+- [Best Practices](../best_practices.md)
 
 Happy coding with Framework3!
-
-This quick start guide provides a comprehensive introduction to Framework3, covering basic concepts, creating pipelines, using different filters, working with metrics, and saving/loading models. It gives users a solid foundation to start working with the framework.
-
-To include this quick start guide in your MkDocs configuration, make sure you have the following entry in the `nav` section of your `mkdocs.yml` file:
-
-**File: /home/manuel.couto.pintos/Documents/code/framework3/mkdocs.yml**
-```yaml
-nav:
-  - Home: index.md
-  - Installation: installation.md
-  - Quick Start: quick_start.md
-  - Api:
-      # ... (rest of your API structure)
-```
-

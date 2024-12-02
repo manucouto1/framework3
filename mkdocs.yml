@@ -1,32 +1,50 @@
 site_name: Framework3
+repo_url: https://github.com/manucouto1/framework3
+repo_name: manucouto1/framework3
+edit_uri: edit/main/docs/
+
 theme:
   name: material
+  features:
+    - content.code.annotate
+    - content.code.select
+    - content.code.copy
+    - toc.follow
+    - navigation.path
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.tracking
+    - navigation.indexes
   palette:
     # Palette toggle for dark mode
     - scheme: slate
       primary: black
       accent: pink
       toggle:
-        icon: material/brightness-4
+        icon: material/weather-night
         name: Switch to light mode
 
     # Palette toggle for light mode
     - scheme: default
       toggle:
-        icon: material/brightness-7 
+        icon: material/weather-sunny 
         name: Switch to dark mode
-  logo: icons/f3_icon.png
+  logo: icons/f3_white.png
+  favicon: icons/f3_white.png
   code:
     highlight_theme: monokai
-  features:
-    - navigation.expand
+  # features:
+  #   - navigation.expand
+  icon:
+    edit: material/pencil 
+    view: material/eye
   # toggle:
   #     icon: material/weather-sunny  # Icono para el toggle
   #     name: Toggle theme            # Texto del toggle
 nav:
   - Home: index.md
-  - Installation: installation.md
-  - Quick Start: quick_start.md
+  - Installation: installation/index.md
+  - Quick Start: quick_start/index.md
   
   - Tutorials: 
       - index: examples/index.md
@@ -37,43 +55,60 @@ nav:
   #     - Anidating Pipelines:
   #     - Feature Extraction:
   - Api: 
-      - base:
-          - base_types: api/base/base_types.md
-          - base_clases: api/base/base_clases.md
-          - base_factory: api/base/base_factory.md
-          - base_storage: api/base/base_storage.md
-      - container: 
-          - container: api/container/container.md
-          - overload: api/container/overload.md
-      - plugins:
-          - pipelines: 
+      - api/index.md
+      - Base:
+          - Types: api/base/base_types.md
+          - Clases: api/base/base_clases.md
+          - Factory: api/base/base_factory.md
+          - Storage: api/base/base_storage.md
+      - Container: 
+          - Container: api/container/container.md
+          - Overload: api/container/overload.md
+      - Plugins:
+          - Pipelines: 
               - F3pipeline: api/plugins/pipelines/f3_pipeline.md
               - Gridpipeline: api/plugins/pipelines/g3_pipeline.md
               - Feature Extraction:
                   - Sequential: api/plugins/pipelines/sequential.md
                   - MapReduce: api/plugins/pipelines/map_reduce_pipeline.md
-          - filters:
-              - classification: api/plugins/filters/classification.md
-              - clustering: api/plugins/filters/clustering.md
-              - regression: api/plugins/filters/regression.md
-              - cache: 
-                  - cached_filter: api/plugins/filters/cache.md
-              - transformation: api/plugins/filters/transformation.md
-              - grid_search: api/plugins/filters/grid_search.md
+          - Filters:
+              - Classification: api/plugins/filters/classification.md
+              - Clustering: api/plugins/filters/clustering.md
+              - Regression: api/plugins/filters/regression.md
+              - Cache: 
+                  - Cached: api/plugins/filters/cache.md
+              - Transformation: api/plugins/filters/transformation.md
+              - Grid Search: api/plugins/filters/grid_search.md
               
-          - metrics:
-              - classification: api/plugins/metrics/classification.md
-              - clustering: api/plugins/metrics/clustering.md
-              - coherence: api/plugins/metrics/coherence.md
-          - storage:
-              - local: api/plugins/storage/local.md
-              - s3: api/plugins/storage/s3.md
+          - Metrics:
+              - Classification: api/plugins/metrics/classification.md
+              - Clustering: api/plugins/metrics/clustering.md
+              - Coherence: api/plugins/metrics/coherence.md
+          - Storage:
+              - Local: api/plugins/storage/local.md
+              - S3: api/plugins/storage/s3.md
       - Full API Reference: api/index.md
           
-
   - Best Practices: best_practices.md
-      
+
+extra:
+  social:
+    - icon: material/github
+      link: https://github.com/manuelcouto1
+
+    - icon: material/linkedin
+      link: https://linkedin.com/in/manuel-couto-pintos-96a20a130
+
 markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
       use_pygments: true
@@ -83,8 +118,13 @@ markdown_extensions:
       linenums_style: pymdownx-inline
       anchor_linenums: true
       line_spans: __span
-
-  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: tabs
+          class: tabbed-set
+          format: !!python/name:pymdownx.superfences.fence_div_format
 
 plugins:
   - search

@@ -1,3 +1,7 @@
+---
+icon: material/bookshelf
+---
+
 # Framework3 API Documentation
 
 Welcome to the API documentation for Framework3. This guide provides detailed information about the modules, classes, and functions that make up the Framework3 library.
