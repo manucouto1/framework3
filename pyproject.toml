@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "framework3"
-version = "0.1.0"
+version = "0.0.0"  # Esto será reemplazado dinámicamente
 description = "A flexible framework for machine learning pipelines"
 authors = ["Manuel Couto Pintos <manuel.couto.pintos@usc.es>"]
 license = "GNU Affero General Public License v3"
