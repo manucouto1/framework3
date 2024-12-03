@@ -150,7 +150,7 @@ cached_pipeline = Cached(
             StandardScalerPlugin(),
             PCAPlugin(n_components=2),
             ClassifierSVMPlugin()
-        ],  
+        ],
         metrics=[F1(), Precission(), Recall()]
     ),
     cache_data=True,
@@ -165,8 +165,8 @@ predictions = cached_pipeline.predict(x_data)
 # Subsequent runs will use cached data if available
 ```
 ```console
-         - El filtro F3Pipeline({'plugins': [StandardScalerPlugin({}), PCAPlugin({'n_components': 2}), ClassifierSVMPlugin({'C': 1.0, 'kernel': 'linear', 'gamma': 'scale'})], 'metrics': 
-[F1({'average': 'weighted'}), Precission({'average': 'weighted'}), Recall({'average': 'weighted'})], 'overwrite': False, 'store': False, 'log': False}) con hash 
+         - El filtro F3Pipeline({'plugins': [StandardScalerPlugin({}), PCAPlugin({'n_components': 2}), ClassifierSVMPlugin({'C': 1.0, 'kernel': 'linear', 'gamma': 'scale'})], 'metrics':
+[F1({'average': 'weighted'}), Precission({'average': 'weighted'}), Recall({'average': 'weighted'})], 'overwrite': False, 'store': False, 'log': False}) con hash
 632894579e201291ada48a918108b799628cad00 No existe, se va a entrenar.
 ____________________________________________________________________________________________________
 Fitting pipeline...
@@ -177,7 +177,7 @@ Fitting pipeline...
 * PCAPlugin({'n_components': 2}):
 
 * ClassifierSVMPlugin({'C': 1.0, 'kernel': 'linear', 'gamma': 'scale'}):
-         - El filtro F3Pipeline({'plugins': [StandardScalerPlugin({}), PCAPlugin({'n_components': 2}), ClassifierSVMPlugin({'C': 1.0, 'kernel': 'linear', 'gamma': 'scale'})], 'metrics': 
+         - El filtro F3Pipeline({'plugins': [StandardScalerPlugin({}), PCAPlugin({'n_components': 2}), ClassifierSVMPlugin({'C': 1.0, 'kernel': 'linear', 'gamma': 'scale'})], 'metrics':
 [F1({'average': 'weighted'}), Precission({'average': 'weighted'}), Recall({'average': 'weighted'})], 'overwrite': False, 'store': False, 'log': False}) Se cachea.
          * Saving in local path: /home/manuel.couto.pintos/Documents/code/framework3/cache/F3Pipeline/632894579e201291ada48a918108b799628cad00/model
          * Saved !
@@ -209,13 +209,13 @@ map_reduce_pipeline = MapReduceFeatureExtractorPipeline(
     app_name='quick_start',
     filters=[
         F3Pipeline(plugins=[
-            StandardScalerPlugin(), 
-            PCAPlugin(n_components=2), 
+            StandardScalerPlugin(),
+            PCAPlugin(n_components=2),
             KnnFilter()
         ]),
         F3Pipeline(plugins=[
-            StandardScalerPlugin(), 
-            PCAPlugin(n_components=3), 
+            StandardScalerPlugin(),
+            PCAPlugin(n_components=3),
             ClassifierSVMPlugin()
         ])
     ])
@@ -232,17 +232,17 @@ Predicting pipeline...
 ********************************************************************************
 ********************
 
-* StandardScalerPlugin({'fit': <function StandardScalerPlugin.fit at 
-0x71cb785cd300>, 'predict': <function StandardScalerPlugin.predict at 
+* StandardScalerPlugin({'fit': <function StandardScalerPlugin.fit at
+0x71cb785cd300>, 'predict': <function StandardScalerPlugin.predict at
 0x71cb785ccfe0>})
 
-* PCAPlugin({'n_components': 3, 'fit': <function PCAPlugin.fit at 
+* PCAPlugin({'n_components': 3, 'fit': <function PCAPlugin.fit at
 0x71cb785cda80>, 'predict': <function PCAPlugin.predict at 0x71cb785cd6c0>})
 
-* ClassifierSVMPlugin({'C': 1.0, 'kernel': 'linear', 'gamma': 'scale', 'fit': 
-<function ClassifierSVMPlugin.fit at 0x71caa99deb60>, 'predict': <function 
+* ClassifierSVMPlugin({'C': 1.0, 'kernel': 'linear', 'gamma': 'scale', 'fit':
+<function ClassifierSVMPlugin.fit at 0x71caa99deb60>, 'predict': <function
 ClassifierSVMPlugin.predict at 0x71caa99de980>})
-(150, 2)  
+(150, 2)
 ```
 
 ## 7. Stacking functionalities
@@ -266,20 +266,20 @@ pipeline = F3Pipeline(
                             StandardScalerPlugin(),
                             PCAPlugin(n_components=2),
                             ClassifierSVMPlugin()
-                        ],  
+                        ],
                     ),
                     cache_data=True,
                     cache_filter=True,
                     overwrite=False
                 ),
                 F3Pipeline(plugins=[
-                    StandardScalerPlugin(), 
-                    PCAPlugin(n_components=3), 
+                    StandardScalerPlugin(),
+                    PCAPlugin(n_components=3),
                     ClassifierSVMPlugin(kernel='rbf'),
                 ]),
                 F3Pipeline(plugins=[
-                    StandardScalerPlugin(), 
-                    PCAPlugin(n_components=1), 
+                    StandardScalerPlugin(),
+                    PCAPlugin(n_components=1),
                     ClassifierSVMPlugin(kernel='linear')
                 ])
             ]),

@@ -4,7 +4,8 @@ from framework3.base import BaseFilter
 from framework3.base import ParallelPipeline
 from framework3.container.container import Container
 
-__all__=["MonoPipeline"]
+__all__ = ["MonoPipeline"]
+
 
 @Container.bind()
 class MonoPipeline(ParallelPipeline):
@@ -22,7 +23,7 @@ class MonoPipeline(ParallelPipeline):
         >>> from framework3.plugins.filters.transformation import PCAPlugin
         >>> from framework3.plugins.filters.classification import KnnFilter
         >>> from framework3.plugins.metrics import F1Score
-        >>> 
+        >>>
         >>> pipeline = MonoPipeline(
         ...     filters=[
         ...         PCAPlugin(n_components=2),
@@ -30,7 +31,7 @@ class MonoPipeline(ParallelPipeline):
         ...     ],
         ...     metrics=[F1Score()]
         ... )
-        >>> 
+        >>>
         >>> # Assuming x_train, y_train, x_test, y_test are your data
         >>> pipeline.fit(x_train, y_train)
         >>> predictions = pipeline.predict(x_test)
@@ -48,7 +49,7 @@ class MonoPipeline(ParallelPipeline):
         super().__init__(filters=filters)
         self.filters = filters
 
-    def fit(self, x: XYData, y: XYData|None = None):
+    def fit(self, x: XYData, y: XYData | None = None):
         """
         Fit all filters in parallel.
 
@@ -83,8 +84,10 @@ class MonoPipeline(ParallelPipeline):
         """
         outputs: List[XYData] = [filter.predict(x) for filter in self.filters]
         return self.combine_features(outputs)
-    
-    def evaluate(self, x_data: XYData, y_true: XYData|None, y_pred: XYData) -> Dict[str, Any]:
+
+    def evaluate(
+        self, x_data: XYData, y_true: XYData | None, y_pred: XYData
+    ) -> Dict[str, Any]:
         """
         Evaluate the pipeline using the provided metrics.
 
@@ -127,12 +130,12 @@ class MonoPipeline(ParallelPipeline):
             Make sure that your filters produce compatible outputs.
         """
         return XYData.concat([output.value for output in pipeline_outputs], axis=-1)
-    
+
     def init(self):
         """Initialize the pipeline (e.g., set up logging)."""
         # TODO: Initialize logger, possibly wandb
 
-    def start(self, x: XYData, y: XYData|None, X_: XYData|None) -> XYData|None:
+    def start(self, x: XYData, y: XYData | None, X_: XYData | None) -> XYData | None:
         """
         Start the pipeline execution.
 
@@ -154,9 +157,9 @@ class MonoPipeline(ParallelPipeline):
             else:
                 return self.predict(x)
         except Exception as e:
-            print(f'Error during pipeline execution: {e}')
+            print(f"Error during pipeline execution: {e}")
             raise e
-        
+
     def log_metrics(self):
         """Log metrics (to be implemented)."""
         # TODO: Implement metric logging
@@ -164,4 +167,3 @@ class MonoPipeline(ParallelPipeline):
     def finish(self):
         """Finish pipeline execution (e.g., close logger)."""
         # TODO: Finalize logger, possibly wandb
-        

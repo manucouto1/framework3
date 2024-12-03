@@ -1,10 +1,14 @@
-import boto3, pickle, io, sys
+import boto3
+import pickle
+import io
+import sys
 from typing import Any, List
 from botocore.exceptions import ClientError
 from framework3.base import BaseStorage
 from framework3.container import Container
 
-__all__ = ['S3Storage']
+__all__ = ["S3Storage"]
+
 
 @Container.bind()
 class S3Storage(BaseStorage):
@@ -19,7 +23,7 @@ class S3Storage(BaseStorage):
 
     Example:
     ```python
-        >>> storage = S3Storage(bucket='my-bucket', region_name='us-west-2', 
+        >>> storage = S3Storage(bucket='my-bucket', region_name='us-west-2',
         ...                     access_key_id='YOUR_ACCESS_KEY', access_key='YOUR_SECRET_KEY')
         >>> storage.upload_file("Hello, World!", "greeting.txt", "my-folder")
         >>> content = storage.download_file("greeting.txt", "my-folder")
@@ -28,7 +32,14 @@ class S3Storage(BaseStorage):
     ```
     """
 
-    def __init__(self, bucket: str, region_name: str, access_key_id: str, access_key: str, endpoint_url: str|None = None):
+    def __init__(
+        self,
+        bucket: str,
+        region_name: str,
+        access_key_id: str,
+        access_key: str,
+        endpoint_url: str | None = None,
+    ):
         """
         Initialize the S3Storage.
 
@@ -40,20 +51,20 @@ class S3Storage(BaseStorage):
             endpoint_url (str|None, optional): The endpoint URL for the S3 service. Defaults to None.
 
         Example:
-            >>> storage = S3Storage(bucket='my-bucket', region_name='us-west-2', 
+            >>> storage = S3Storage(bucket='my-bucket', region_name='us-west-2',
             ...                     access_key_id='YOUR_ACCESS_KEY', access_key='YOUR_SECRET_KEY')
         """
         super().__init__()
         self._client = boto3.client(
-                service_name='s3',
-                region_name=region_name,
-                aws_access_key_id=access_key_id,
-                aws_secret_access_key=access_key,
-                endpoint_url=endpoint_url,
-                use_ssl=True
+            service_name="s3",
+            region_name=region_name,
+            aws_access_key_id=access_key_id,
+            aws_secret_access_key=access_key,
+            endpoint_url=endpoint_url,
+            use_ssl=True,
         )
         self.bucket = bucket
-    
+
     def get_root_path(self) -> str:
         """
         Get the root path (bucket name) of the storage.
@@ -68,7 +79,9 @@ class S3Storage(BaseStorage):
         """
         return self.bucket
 
-    def upload_file(self, file:object, file_name:str, context:str, direct_stream:bool=False) -> str:
+    def upload_file(
+        self, file: object, file_name: str, context: str, direct_stream: bool = False
+    ) -> str:
         """
         Upload a file to the specified context in S3.
 
@@ -86,21 +99,19 @@ class S3Storage(BaseStorage):
             >>> storage.upload_file("Hello, World!", "greeting.txt", "my-folder")
             'greeting.txt'
         """
-        if type(file) != io.BytesIO:
+        if type(file) is not io.BytesIO:
             binary = pickle.dumps(file)
             stream = io.BytesIO(binary)
         else:
             stream = file
         print("- Binary prepared!")
-        
+
         print("- Stream ready!")
         print(f" \t * Object size {sys.getsizeof(stream) * 1e-9} GBs ")
         self._client.put_object(
-            Body=stream,
-            Bucket=self.bucket,
-            Key=f'{context}/{file_name}'
+            Body=stream, Bucket=self.bucket, Key=f"{context}/{file_name}"
         )
-        print('Upload Complete!')
+        print("Upload Complete!")
         return file_name
 
     def list_stored_files(self, context) -> List[Any]:
@@ -121,9 +132,9 @@ class S3Storage(BaseStorage):
             ...     print(file['Key'])
         ```
         """
-        return self._client.list_objects_v2(Bucket=self.bucket)['Contents']
-   
-    def get_file_by_hashcode(self, hashcode:str, context:str):
+        return self._client.list_objects_v2(Bucket=self.bucket)["Contents"]
+
+    def get_file_by_hashcode(self, hashcode: str, context: str):
         """
         Get a file by its hashcode (key in S3).
 
@@ -143,9 +154,9 @@ class S3Storage(BaseStorage):
         ```
         """
         obj = self._client.get_object(Bucket=self.bucket, Key=hashcode)
-        return obj['Body'].read()
+        return obj["Body"].read()
 
-    def check_if_exists(self, hashcode:str, context:str) -> bool:
+    def check_if_exists(self, hashcode: str, context: str) -> bool:
         """
         Check if a file exists in S3.
 
@@ -165,16 +176,16 @@ class S3Storage(BaseStorage):
         ```
         """
         try:
-            self._client.head_object(Bucket=self.bucket, Key=f'{context}/{hashcode}'  )
+            self._client.head_object(Bucket=self.bucket, Key=f"{context}/{hashcode}")
         except ClientError as e:
-            if e.response['Error']['Code'] == '404':
+            if e.response["Error"]["Code"] == "404":
                 return False
             else:
-                print(f'An error ocurred > {e}')
+                print(f"An error ocurred > {e}")
                 return False
         return True
 
-    def download_file(self, hashcode:str, context:str) -> Any:
+    def download_file(self, hashcode: str, context: str) -> Any:
         """
         Download a file from S3.
 
@@ -186,17 +197,17 @@ class S3Storage(BaseStorage):
             Any: The deserialized content of the file.
 
         Example:
-        ```python	
+        ```python
             >>> storage = S3Storage(bucket='my-bucket', ...)
             >>> content = storage.download_file("greeting.txt", "my-folder")
             >>> print(content)
             'Hello, World!'
         ```
         """
-        obj = self._client.get_object(Bucket=self.bucket, Key=f'{context}/{hashcode}'  )
-        return pickle.loads(obj['Body'].read())
+        obj = self._client.get_object(Bucket=self.bucket, Key=f"{context}/{hashcode}")
+        return pickle.loads(obj["Body"].read())
 
-    def delete_file(self, hashcode:str, context:str) -> None:
+    def delete_file(self, hashcode: str, context: str) -> None:
         """
         Delete a file from S3.
 
@@ -216,7 +227,7 @@ class S3Storage(BaseStorage):
         ```
         """
         if self.check_if_exists(hashcode, context):
-            self._client.delete_object(Bucket=self.bucket, Key=f'{context}/{hashcode}'  )
+            self._client.delete_object(Bucket=self.bucket, Key=f"{context}/{hashcode}")
             if self.check_if_exists(hashcode, context):
                 raise Exception("Couldn't delete file")
             else:

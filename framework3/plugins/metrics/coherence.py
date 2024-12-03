@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 
-__all__ = ['NPMI', 'UMASS', 'V', 'UCI']
+__all__ = ["NPMI", "UMASS", "V", "UCI"]
 
 
 @Container.bind()
@@ -23,18 +23,20 @@ class NPMI(BaseMetric):
         >>> from framework3.base.base_types import XYData
         >>> import pandas as pd
         >>> import numpy as np
-        >>> 
+        >>>
         >>> # Assuming you have a DataFrame 'df' with your document-term matrix
         >>> x_data = XYData(value=df)
         >>> y_pred = np.array([['word1', 'word2', 'word3'], ['word4', 'word5', 'word6']])  # Example topics
-        >>> 
+        >>>
         >>> npmi_metric = NPMI()
         >>> score = npmi_metric.evaluate(x_data, None, y_pred, f_vocab=df.columns)
         >>> print(f"NPMI Score: {score}")
     ```
     """
 
-    def evaluate(self, x_data: XYData, y_true: XYData|None, y_pred: XYData, **kwargs) -> Float|np.ndarray:
+    def evaluate(
+        self, x_data: XYData, y_true: XYData | None, y_pred: XYData, **kwargs
+    ) -> Float | np.ndarray:
         """
         Calculate the NPMI coherence score.
 
@@ -53,14 +55,17 @@ class NPMI(BaseMetric):
         Raises:
             Exception: If x_data is not a pandas DataFrame.
         """
-        f_vocab = kwargs.get('f_vocab')
-        topk = kwargs.get('topk', 10)
-        processes = kwargs.get('processes', 1)
-        coherence = Coherence(f_vocab=f_vocab, topk=topk, processes=processes, measure='c_npmi')
+        f_vocab = kwargs.get("f_vocab")
+        topk = kwargs.get("topk", 10)
+        processes = kwargs.get("processes", 1)
+        coherence = Coherence(
+            f_vocab=f_vocab, topk=topk, processes=processes, measure="c_npmi"
+        )
         if isinstance(x_data.value, pd.DataFrame):
             return coherence.evaluate(df=x_data.value, predicted=y_pred)
         else:
-            raise Exception('x_data must be a pandas DataFrame')
+            raise Exception("x_data must be a pandas DataFrame")
+
 
 @Container.bind()
 class UMASS(BaseMetric):
@@ -74,17 +79,19 @@ class UMASS(BaseMetric):
         >>> from framework3.base.base_types import XYData
         >>> import pandas as pd
         >>> import numpy as np
-        >>> 
+        >>>
         >>> # Assuming you have a DataFrame 'df' with your document-term matrix
         >>> x_data = XYData(value=df)
         >>> y_pred = np.array([['word1', 'word2', 'word3'], ['word4', 'word5', 'word6']])  # Example topics
-        >>> 
+        >>>
         >>> umass_metric = UMASS()
         >>> score = umass_metric.evaluate(x_data, None, y_pred, f_vocab=df.columns)
         >>> print(f"UMass Score: {score}")
     """
 
-    def evaluate(self, x_data: XYData, y_true: XYData|None, y_pred: XYData, **kwargs) -> Float|np.ndarray:
+    def evaluate(
+        self, x_data: XYData, y_true: XYData | None, y_pred: XYData, **kwargs
+    ) -> Float | np.ndarray:
         """
         Calculate the UMass coherence score.
 
@@ -103,16 +110,19 @@ class UMASS(BaseMetric):
         Raises:
             Exception: If x_data is not a pandas DataFrame.
         """
-        f_vocab = kwargs.get('f_vocab')
-        topk = kwargs.get('topk', 10)
-        processes = kwargs.get('processes', 1)
-        coherence = Coherence(f_vocab=f_vocab, topk=topk, processes=processes, measure='u_mass')
+        f_vocab = kwargs.get("f_vocab")
+        topk = kwargs.get("topk", 10)
+        processes = kwargs.get("processes", 1)
+        coherence = Coherence(
+            f_vocab=f_vocab, topk=topk, processes=processes, measure="u_mass"
+        )
         if isinstance(x_data.value, pd.DataFrame):
             return coherence.evaluate(df=x_data.value, predicted=y_pred)
         else:
-            raise Exception('x_data must be a pandas DataFrame')
+            raise Exception("x_data must be a pandas DataFrame")
 
-@Container.bind()     
+
+@Container.bind()
 class V(BaseMetric):
     """
     V-measure coherence metric for topic modeling evaluation.
@@ -124,17 +134,19 @@ class V(BaseMetric):
         >>> from framework3.base.base_types import XYData
         >>> import pandas as pd
         >>> import numpy as np
-        >>> 
+        >>>
         >>> # Assuming you have a DataFrame 'df' with your document-term matrix
         >>> x_data = XYData(value=df)
         >>> y_pred = np.array([['word1', 'word2', 'word3'], ['word4', 'word5', 'word6']])  # Example topics
-        >>> 
+        >>>
         >>> v_metric = V()
         >>> score = v_metric.evaluate(x_data, None, y_pred, f_vocab=df.columns)
         >>> print(f"V-measure Score: {score}")
     """
 
-    def evaluate(self, x_data: XYData, y_true: XYData|None, y_pred: XYData, **kwargs) -> Float|np.ndarray:
+    def evaluate(
+        self, x_data: XYData, y_true: XYData | None, y_pred: XYData, **kwargs
+    ) -> Float | np.ndarray:
         """
         Calculate the V-measure coherence score.
 
@@ -153,16 +165,19 @@ class V(BaseMetric):
         Raises:
             Exception: If x_data is not a pandas DataFrame.
         """
-        f_vocab = kwargs.get('f_vocab')
-        topk = kwargs.get('topk', 10)
-        processes = kwargs.get('processes', 1)
-        coherence = Coherence(f_vocab=f_vocab, topk=topk, processes=processes, measure='c_v')
+        f_vocab = kwargs.get("f_vocab")
+        topk = kwargs.get("topk", 10)
+        processes = kwargs.get("processes", 1)
+        coherence = Coherence(
+            f_vocab=f_vocab, topk=topk, processes=processes, measure="c_v"
+        )
         if isinstance(x_data.value, pd.DataFrame):
             return coherence.evaluate(df=x_data.value, predicted=y_pred)
         else:
-            raise Exception('x_data must be a pandas DataFrame')
+            raise Exception("x_data must be a pandas DataFrame")
 
-@Container.bind()   
+
+@Container.bind()
 class UCI(BaseMetric):
     """
     UCI coherence metric for topic modeling evaluation.
@@ -174,17 +189,19 @@ class UCI(BaseMetric):
         >>> from framework3.base.base_types import XYData
         >>> import pandas as pd
         >>> import numpy as np
-        >>> 
+        >>>
         >>> # Assuming you have a DataFrame 'df' with your document-term matrix
         >>> x_data = XYData(value=df)
         >>> y_pred = np.array([['word1', 'word2', 'word3'], ['word4', 'word5', 'word6']])  # Example topics
-        >>> 
+        >>>
         >>> uci_metric = UCI()
         >>> score = uci_metric.evaluate(x_data, None, y_pred, f_vocab=df.columns)
         >>> print(f"UCI Score: {score}")
     """
 
-    def evaluate(self, x_data: XYData, y_true: XYData|None, y_pred: XYData, **kwargs) -> Float|np.ndarray:
+    def evaluate(
+        self, x_data: XYData, y_true: XYData | None, y_pred: XYData, **kwargs
+    ) -> Float | np.ndarray:
         """
         Calculate the UCI coherence score.
 
@@ -203,11 +220,13 @@ class UCI(BaseMetric):
         Raises:
             Exception: If x_data is not a pandas DataFrame.
         """
-        f_vocab = kwargs.get('f_vocab')
-        topk = kwargs.get('topk', 10)
-        processes = kwargs.get('processes', 1)
-        coherence = Coherence(f_vocab=f_vocab, topk=topk, processes=processes, measure='c_uci')
+        f_vocab = kwargs.get("f_vocab")
+        topk = kwargs.get("topk", 10)
+        processes = kwargs.get("processes", 1)
+        coherence = Coherence(
+            f_vocab=f_vocab, topk=topk, processes=processes, measure="c_uci"
+        )
         if isinstance(x_data.value, pd.DataFrame):
             return coherence.evaluate(df=x_data.value, predicted=y_pred)
         else:
-            raise Exception('x_data must be a pandas DataFrame')
+            raise Exception("x_data must be a pandas DataFrame")

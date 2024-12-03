@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+recursive-include framework3 *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

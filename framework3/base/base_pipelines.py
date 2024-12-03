@@ -1,4 +1,3 @@
-  
 from abc import abstractmethod
 from typing import Optional
 from framework3.base.base_clases import BaseFilter
@@ -45,7 +44,9 @@ class BasePipeline(BaseFilter):
         ...
 
     @abstractmethod
-    def start(self, x: XYData, y: Optional[XYData], X_: Optional[XYData]) -> Optional[XYData]:
+    def start(
+        self, x: XYData, y: Optional[XYData], X_: Optional[XYData]
+    ) -> Optional[XYData]:
         """
         Start the pipeline processing.
 
@@ -85,14 +86,18 @@ class BasePipeline(BaseFilter):
         """
         ...
 
+
 class SequentialPipeline(BasePipeline):
     """
     Base class for orchestrators that manage complex data flows and combinations of filters/pipelines.
     """
+
     def _pre_fit(self, x: XYData, y: Optional[XYData]):
-        m_hash, m_str = self._get_model_key(data_hash=f'{x._hash}, {y._hash if y is not None else ""}')
-        m_path = f'{self._get_model_name()}/{m_hash}'
-        
+        m_hash, m_str = self._get_model_key(
+            data_hash=f'{x._hash}, {y._hash if y is not None else ""}'
+        )
+        m_path = f"{self._get_model_name()}/{m_hash}"
+
         self._m_hash = m_hash
         self._m_path = m_path
         self._m_str = m_str
@@ -103,19 +108,19 @@ class SequentialPipeline(BasePipeline):
             filter._pre_fit(new_x, y)
             new_x = filter._pre_predict(new_x)
 
-            
-
         return m_hash, m_path, m_str
-    
+
     def _pre_predict(self, x: XYData):
         if not self._m_hash or not self._m_path or not self._m_str:
             raise ValueError("Cached filter model not trained or loaded")
-        
+
         aux_x = x
         for filter in self.filters:
             aux_x = filter._pre_predict(aux_x)
         return aux_x
 
-class ParallelPipeline(BasePipeline):...
 
-class GridPipeline(BasePipeline):...
+class ParallelPipeline(BasePipeline): ...
+
+
+class GridPipeline(BasePipeline): ...

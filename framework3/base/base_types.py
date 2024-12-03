@@ -1,27 +1,28 @@
 from __future__ import annotations
-import itertools
-from typing import Callable, Generic, Iterable, Literal, Sequence, TypeVar, List, Any, cast
+from typing import Callable, Generic, Iterable, Literal, Sequence, TypeVar, Any, cast
 import pandas as pd
 import numpy as np
 import torch
-from scipy import sparse
-from sympy import SparseMatrix
 import typing_extensions
 from multimethod import multimethod
 from scipy.sparse import spmatrix, hstack, vstack
+from typing import TypeAlias
 
 from dataclasses import dataclass, field
 
-__all__=  ["XYData", "VData", "SkVData", "IncEx", "TypePlugable"]
+__all__ = ["XYData", "VData", "SkVData", "IncEx", "TypePlugable"]
 
 Float = float | np.float16 | np.float32 | np.float64
-IncEx: typing_extensions.TypeAlias = 'set[int] | set[str] | dict[int, Any] | dict[str, Any] | None'
+IncEx: typing_extensions.TypeAlias = (
+    "set[int] | set[str] | dict[int, Any] | dict[str, Any] | None"
+)
 
-VData = np.ndarray | pd.DataFrame | spmatrix | list | torch.Tensor
-SkVData = np.ndarray | pd.DataFrame | spmatrix
+VData: TypeAlias = np.ndarray | pd.DataFrame | spmatrix | list | torch.Tensor
+SkVData: TypeAlias = np.ndarray | pd.DataFrame | spmatrix
 
-TypePlugable = TypeVar('TypePlugable')
-TxyData = TypeVar('TxyData', SkVData,  VData)
+TypePlugable = TypeVar("TypePlugable")
+TxyData = TypeVar("TxyData", SkVData, VData)
+
 
 @dataclass(slots=True, frozen=True)
 class XYData(Generic[TxyData]):
@@ -54,19 +55,15 @@ class XYData(Generic[TxyData]):
 
         Example:
             ```python
-            
+
             >>> mock_data = XYData.mock(np.random.rand(10, 5))
             >>> mock_data.value.shape
             (10, 5)
             ```
 
         """
-        return XYData(
-            _hash="Mock",
-            _path='',
-            _value=value
-        )
-    
+        return XYData(_hash="Mock", _path="", _value=value)
+
     @property
     def value(self) -> TxyData:
         """
@@ -79,15 +76,15 @@ class XYData(Generic[TxyData]):
             VData: The actual data (numpy array, pandas DataFrame, or scipy sparse matrix).
         """
         return self._value() if callable(self._value) else self._value
-    
+
     @staticmethod
-    def concat(x: Sequence[TxyData], axis: int=-1) -> XYData:
+    def concat(x: Sequence[TxyData], axis: int = -1) -> XYData:
         return concat(x, axis=axis)
-    
+
     @staticmethod
-    def ensure_dim(x: list|np.ndarray)-> list|np.ndarray:
+    def ensure_dim(x: list | np.ndarray) -> list | np.ndarray:
         return ensure_dim(x)
-    
+
     def as_iterable(self) -> Iterable:
         """
         Convert the `_value` attribute to an iterable, regardless of its underlying type.
@@ -108,21 +105,23 @@ class XYData(Generic[TxyData]):
             raise TypeError(f"El tipo {type(value)} no es compatible con iteración.")
 
 
-@multimethod 
-def concat(x:Any, axis:int) -> 'XYData':
+@multimethod
+def concat(x: Any, axis: int) -> "XYData":
     raise TypeError(f"Cannot concatenate this type of data, only {VData} compatible")
 
-@concat.register # type: ignore
-def _(x: list[np.ndarray], axis: int = -1) -> 'XYData':
+
+@concat.register  # type: ignore
+def _(x: list[np.ndarray], axis: int = -1) -> "XYData":
     return XYData.mock(np.concatenate(x, axis=axis))
 
-@concat.register # type: ignore
-def _(x: list[pd.DataFrame], axis: int = -1) -> 'XYData':
-    return XYData.mock(pd.concat(x, axis=axis)) # type: ignore
+
+@concat.register  # type: ignore
+def _(x: list[pd.DataFrame], axis: int = -1) -> "XYData":
+    return XYData.mock(pd.concat(x, axis=axis))  # type: ignore
 
 
-@concat.register # type: ignore
-def _(x: list[spmatrix], axis: Literal[0, 1, -1]) -> 'XYData':
+@concat.register  # type: ignore
+def _(x: list[spmatrix], axis: Literal[0, 1, -1]) -> "XYData":
     if axis == 1:
         return XYData.mock(value=cast(spmatrix, hstack(x)))
     elif axis == 0:
@@ -130,19 +129,18 @@ def _(x: list[spmatrix], axis: Literal[0, 1, -1]) -> 'XYData':
     raise ValueError("Invalid axis for concatenating sparse matrices")
 
 
-
-@multimethod 
-def ensure_dim(x:Any) -> SkVData:
+@multimethod
+def ensure_dim(x: Any) -> SkVData:
     raise TypeError(f"Cannot concatenate this type of data, only {VData} compatible")
 
-@ensure_dim.register # type: ignore
+
+@ensure_dim.register  # type: ignore
 def _(x: np.ndarray) -> SkVData:
     if x.ndim == 1:  # Verifica si es unidimensional
         return x[:, None]  # Agrega una nueva dimensión
     return x  # No cambia el array si tiene más dimensiones
 
-@ensure_dim.register # type: ignore
+
+@ensure_dim.register  # type: ignore
 def _(x: list) -> SkVData:
     return ensure_dim(np.array(x))
-
-

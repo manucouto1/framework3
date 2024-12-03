@@ -1,14 +1,14 @@
-from typing import Callable, Dict, Optional, Tuple, cast
+from typing import Callable, Optional, Tuple, cast
 from framework3.container.container import Container
 from framework3.base import BaseFilter
 from framework3.base import BaseStorage
 from framework3.base import XYData, VData
 
-import functools
 from rich import print as rprint
 import pickle
 
-__all__ = ['Cached']
+__all__ = ["Cached"]
+
 
 @Container.bind()
 class Cached(BaseFilter):
@@ -35,7 +35,7 @@ class Cached(BaseFilter):
         from your_custom_filter import CustomFilter
              # Configurar el almacenamiento
         Container.storage = LocalStorage(storage_path='cache')
-        
+
         # Crear un filtro personalizado y envolverlo con Cached
         custom_filter = CustomFilter()
         cached_filter = Cached(
@@ -53,21 +53,35 @@ class Cached(BaseFilter):
         cached_filter.clear_cache()
         ```
     """
-    def __init__(self, filter: BaseFilter, cache_data: bool = True, cache_filter: bool = True, overwrite: bool=False, storage:BaseStorage|None=None):
-        super().__init__(filter=filter, cache_data=cache_data, cache_filter=cache_filter, overwrite=overwrite, storage=storage)
+
+    def __init__(
+        self,
+        filter: BaseFilter,
+        cache_data: bool = True,
+        cache_filter: bool = True,
+        overwrite: bool = False,
+        storage: BaseStorage | None = None,
+    ):
+        super().__init__(
+            filter=filter,
+            cache_data=cache_data,
+            cache_filter=cache_filter,
+            overwrite=overwrite,
+            storage=storage,
+        )
         self.filter: BaseFilter = filter
         self.cache_data = cache_data
         self.cache_filter = cache_filter
         self.overwrite = overwrite
         self._storage: BaseStorage = Container.storage if storage is None else storage
-        self._lambda_filter: Callable[...,BaseFilter]|None = None
+        self._lambda_filter: Callable[..., BaseFilter] | None = None
 
-    def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData]):
+    def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData]) -> None:
         return self._original_fit(x, y)
-        
-    def _pre_predict_wrapp(self, x: XYData, *args, **kwargs) -> XYData:
-        return self._original_predict(x, *args, **kwargs)
-    
+
+    def _pre_predict_wrapp(self, x: XYData) -> XYData:
+        return self._original_predict(x)
+
     def _get_model_name(self) -> str:
         """
         Obtiene el nombre del modelo del filtro subyacente.
@@ -77,7 +91,7 @@ class Cached(BaseFilter):
         """
         return self.filter._get_model_name()
 
-    def _get_model_key(self, data_hash:str) -> Tuple[str, str] :
+    def _get_model_key(self, data_hash: str) -> Tuple[str, str]:
         """
         Genera la clave del modelo basada en el hash de los datos.
 
@@ -89,7 +103,7 @@ class Cached(BaseFilter):
         """
         return BaseFilter._get_model_key(self.filter, data_hash)
 
-    def _get_data_key(self, model_str:str, data_hash:str) -> Tuple[str, str]:
+    def _get_data_key(self, model_str: str, data_hash: str) -> Tuple[str, str]:
         """
         Genera la clave de los datos basada en el modelo y el hash de los datos.
 
@@ -110,29 +124,37 @@ class Cached(BaseFilter):
             x (XYData): Los datos de entrada.
             y (Optional[XYData]): Los datos objetivo, si existen.
         """
-        
-        self.filter._pre_fit(x,y)
 
-        if not self._storage.check_if_exists(
-            hashcode='model', 
-            context=f'{self._storage.get_root_path()}/{self.filter._m_path}'
-        ) or self.overwrite:
-            rprint(f"\t - El filtro {self.filter} con hash {self.filter._m_hash} No existe, se va a entrenar.")
+        self.filter._pre_fit(x, y)
+
+        if (
+            not self._storage.check_if_exists(
+                hashcode="model",
+                context=f"{self._storage.get_root_path()}/{self.filter._m_path}",
+            )
+            or self.overwrite
+        ):
+            rprint(
+                f"\t - El filtro {self.filter} con hash {self.filter._m_hash} No existe, se va a entrenar."
+            )
             self.filter._original_fit(x, y)
 
             if self.cache_filter:
                 rprint(f"\t - El filtro {self.filter} Se cachea.")
 
                 self._storage.upload_file(
-                    file=pickle.dumps(self.filter), 
-                    file_name='model', 
-                    context=f'{self._storage.get_root_path()}/{self.filter._m_path}'
+                    file=pickle.dumps(self.filter),
+                    file_name="model",
+                    context=f"{self._storage.get_root_path()}/{self.filter._m_path}",
                 )
         else:
             rprint(f"\t - El filtro {self.filter} Existe, se crea lambda.")
-            self._lambda_filter = lambda: cast(BaseFilter, self._storage.download_file('model', f'{self._storage.get_root_path()}/{self.filter._m_path}'))
-
-        
+            self._lambda_filter = lambda: cast(
+                BaseFilter,
+                self._storage.download_file(
+                    "model", f"{self._storage.get_root_path()}/{self.filter._m_path}"
+                ),
+            )
 
     def predict(self, x: XYData) -> XYData:
         """
@@ -146,33 +168,49 @@ class Cached(BaseFilter):
         """
         x = self.filter._pre_predict(x)
 
-        if not self._storage.check_if_exists(x._hash, context=f'{self._storage.get_root_path()}/{x._path}') or self.overwrite:
+        if (
+            not self._storage.check_if_exists(
+                x._hash, context=f"{self._storage.get_root_path()}/{x._path}"
+            )
+            or self.overwrite
+        ):
             rprint(f"\t - El dato {x} No existe, se va a crear.")
             if self._lambda_filter is not None:
-                rprint(f"\t - Existe un Lambda por lo que se recupera el filtro del storage.")
+                rprint(
+                    "\t - Existe un Lambda por lo que se recupera el filtro del storage."
+                )
                 self.filter = self._lambda_filter()
 
-            value =XYData(
+            value = XYData(
                 _hash=x._hash,
                 _path=x._path,
-                _value=self.filter._original_predict(x)._value
+                _value=self.filter._original_predict(x)._value,
             )
             if self.cache_data:
                 rprint(f"\t - El dato {x} Se cachea.")
-                self._storage.upload_file(file=pickle.dumps(value.value), file_name=x._hash, context=f'{self._storage.get_root_path()}/{x._path}')
+                self._storage.upload_file(
+                    file=pickle.dumps(value.value),
+                    file_name=x._hash,
+                    context=f"{self._storage.get_root_path()}/{x._path}",
+                )
         else:
             rprint(f"\t - El dato {x} Existe, se crea lambda.")
             value = XYData(
                 _hash=x._hash,
                 _path=x._path,
-                _value=lambda: cast(VData, self._storage.download_file(x._hash, f'{self._storage.get_root_path()}/{x._path}'))
+                _value=lambda: cast(
+                    VData,
+                    self._storage.download_file(
+                        x._hash, f"{self._storage.get_root_path()}/{x._path}"
+                    ),
+                ),
             )
         return value
 
     def clear_cache(self):
         """
         Limpia el caché en el almacenamiento.
-        
+
         Nota: Esta función aún no está implementada.
         """
         # Implementa la lógica para limpiar el caché en el almacenamiento

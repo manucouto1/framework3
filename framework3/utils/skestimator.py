@@ -1,12 +1,10 @@
 from framework3.base.base_clases import BaseFilter
-from typing import Any, Dict, Generic, List, Tuple, Type, Optional, TypeVar
 from sklearn.base import BaseEstimator
 
 from framework3.base.base_types import XYData
 
 
 class SkWrapper(BaseEstimator):
-
     """
     A wrapper class for BaseFilter that implements scikit-learn's BaseEstimator interface.
 
@@ -18,17 +16,17 @@ class SkWrapper(BaseEstimator):
     Example:
         >>> from framework3.plugins.filters.clasification.svm import ClassifierSVMPlugin
         >>> import numpy as np
-        >>> 
+        >>>
         >>> # Create a sample BaseFilter
         >>> class SampleFilter(ClassifierSVMPlugin):
         ...     pass
-        >>> 
+        >>>
         >>> # Set the class to be wrapped
         >>> SkFilterWrapper.z_clazz = SampleFilter
-        >>> 
+        >>>
         >>> # Create an instance of SkFilterWrapper
         >>> wrapper = SkFilterWrapper(C=1.0, kernel='rbf')
-        >>> 
+        >>>
         >>> # Use the wrapper with sklearn's GridSearchCV
         >>> X = np.array([[1, 2], [2, 3], [3, 4], [4, 5]])
         >>> y = np.array([0, 0, 1, 1])
@@ -36,22 +34,20 @@ class SkWrapper(BaseEstimator):
         >>> print(wrapper.predict([[2.5, 3.5]]))
     """
 
-    
-
-    def __init__(self, z_clazz:type[BaseFilter], **kwargs):
+    def __init__(self, z_clazz: type[BaseFilter], **kwargs):
         """
         Initialize the SkFilterWrapper.
 
         Args:
             **kwargs: Keyword arguments to be passed to the wrapped BaseFilter class.
         """
-        self._z_clazz:type[BaseFilter] = z_clazz
-        self._model:BaseFilter
+        self._z_clazz: type[BaseFilter] = z_clazz
+        self._model: BaseFilter
         self.kwargs = kwargs
-    
+
     def get_zclazz(self) -> str:
         return self._z_clazz.__name__
-    
+
     def fit(self, x, y, *args, **kwargs):
         """
         Fit the wrapped model to the given data.
@@ -79,7 +75,7 @@ class SkWrapper(BaseEstimator):
             The predicted values.
         """
         return self._model.predict(XYData.mock(x)).value
-    
+
     def transform(self, x):
         """
         Make predictions using the wrapped model.
@@ -91,7 +87,7 @@ class SkWrapper(BaseEstimator):
             The predicted values.
         """
         return self._model.predict(XYData.mock(x)).value
-    
+
     def get_params(self, deep=True):
         """
         Get the parameters of the estimator.
@@ -103,7 +99,7 @@ class SkWrapper(BaseEstimator):
         Returns:
             dict: Parameter names mapped to their values.
         """
-        return self.kwargs | {'z_clazz':self._z_clazz}
+        return self.kwargs | {"z_clazz": self._z_clazz}
 
     def set_params(self, **parameters):
         """
@@ -116,7 +112,7 @@ class SkWrapper(BaseEstimator):
             self: Estimator instance.
         """
         for param, value in parameters.items():
-            if param == 'z_clazz':
+            if param == "z_clazz":
                 self._z_clazz = value
             else:
                 self.kwargs[param] = value

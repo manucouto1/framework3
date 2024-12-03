@@ -4,7 +4,9 @@ from framework3.base.base_clases import BaseFilter
 from framework3.container.container import Container
 from sklearn.decomposition import PCA
 
-__all__ = ['PCAPlugin']
+__all__ = ["PCAPlugin"]
+
+
 @Container.bind()
 class PCAPlugin(BaseFilter):
     """
@@ -22,17 +24,17 @@ class PCAPlugin(BaseFilter):
     Examples:
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
-        >>> 
+        >>>
         >>> # Create a PCAPlugin instance
         >>> pca_plugin = PCAPlugin(n_components=2)
-        >>> 
+        >>>
         >>> # Create some sample data
         >>> X = XYData.mock(np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
         >>> y = None  # PCA doesn't use y for fitting
-        >>> 
+        >>>
         >>> # Fit the PCA model
         >>> pca_plugin.fit(X, y)
-        >>> 
+        >>>
         >>> # Transform new data
         >>> new_data = XYData.mock(np.array([[2, 3, 4], [5, 6, 7]]))
         >>> transformed_data = pca_plugin.predict(new_data)
@@ -46,9 +48,11 @@ class PCAPlugin(BaseFilter):
         Args:
             n_components (int): The number of components to keep after dimensionality reduction.
         """
-        super().__init__(n_components=n_components)  # Initialize the BaseFilter and BasePlugin parent classes.
+        super().__init__(
+            n_components=n_components
+        )  # Initialize the BaseFilter and BasePlugin parent classes.
         self._pca = PCA(n_components=n_components)
-    
+
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         """
         Fit the PCA model to the input data.
@@ -73,7 +77,7 @@ class PCAPlugin(BaseFilter):
             XYData: The transformed data with reduced dimensionality.
         """
         return XYData.mock(self._pca.transform(x.value))
-    
+
     @staticmethod
-    def item_grid(n_components: List[int]) ->  Dict[str, Any]:
-        return {'PCAPlugin__n_components': n_components}
+    def item_grid(n_components: List[int]) -> Dict[str, Any]:
+        return {"PCAPlugin__n_components": n_components}

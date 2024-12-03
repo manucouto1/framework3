@@ -1,12 +1,12 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import inspect
 from typing import Dict, Optional, get_type_hints
 import pytest
-from regex import F
 import typeguard
 import numpy as np
 from framework3.base import BasePlugin, BaseFilter, BaseMetric, BasePipeline
-from framework3.base.base_types import XYData, VData
+from framework3.base.base_types import XYData
+
 
 class ConcreteFilter(BaseFilter):
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
@@ -14,7 +14,7 @@ class ConcreteFilter(BaseFilter):
 
     def predict(self, x: XYData) -> XYData:
         return x
-    
+
 
 def test_type_checking_init():
     class TestPlugin(BasePlugin):
@@ -26,7 +26,8 @@ def test_type_checking_init():
 
     # Should raise TypeError
     with pytest.raises(typeguard.TypeCheckError):
-        TestPlugin(a="not an int", b=123) # type: ignore
+        TestPlugin(a="not an int", b=123)  # type: ignore
+
 
 def test_inherit_type_annotations():
     class AbstractBase(BasePlugin):
@@ -40,19 +41,20 @@ def test_inherit_type_annotations():
 
     concrete_instance = ConcreteClass()
     method_annotations = get_type_hints(concrete_instance.abstract_method)
-    
-    assert 'x' in method_annotations
-    assert method_annotations['x'] == int
-    assert 'y' in method_annotations
-    assert method_annotations['y'] == str
-    assert 'return' in method_annotations
-    assert method_annotations['return'] == float
+
+    assert "x" in method_annotations
+    assert method_annotations["x"] is int
+    assert "y" in method_annotations
+    assert method_annotations["y"] is str
+    assert "return" in method_annotations
+    assert method_annotations["return"] is float
+
 
 def test_type_checking_concrete_methods():
     class TestPlugin(BasePlugin):
         def __init__(self):
             super().__init__()
-        
+
         def concrete_method(self, x: int) -> str:
             return str(x)
 
@@ -64,7 +66,8 @@ def test_type_checking_concrete_methods():
 
     # Should raise TypeError
     with pytest.raises(typeguard.TypeCheckError):
-        test_instance.concrete_method("not an int") # type: ignore
+        test_instance.concrete_method("not an int")  # type: ignore
+
 
 def test_multiple_inheritance_annotation_inheritance():
     class BaseA(BasePlugin):
@@ -85,19 +88,20 @@ def test_multiple_inheritance_annotation_inheritance():
             return y > 0
 
     concrete_instance = ConcreteClass()
-    
+
     method_a_annotations = get_type_hints(concrete_instance.method_a)
     method_b_annotations = get_type_hints(concrete_instance.method_b)
 
-    assert 'x' in method_a_annotations
-    assert method_a_annotations['x'] == int
-    assert 'return' in method_a_annotations
-    assert method_a_annotations['return'] == str
+    assert "x" in method_a_annotations
+    assert method_a_annotations["x"] is int
+    assert "return" in method_a_annotations
+    assert method_a_annotations["return"] is str
 
-    assert 'y' in method_b_annotations
-    assert method_b_annotations['y'] == float
-    assert 'return' in method_b_annotations
-    assert method_b_annotations['return'] == bool
+    assert "y" in method_b_annotations
+    assert method_b_annotations["y"] is float
+    assert "return" in method_b_annotations
+    assert method_b_annotations["return"] is bool
+
 
 def test_base_plugin_allows_extra_params():
     class TestPlugin(BasePlugin):
@@ -113,13 +117,14 @@ def test_base_plugin_allows_extra_params():
     assert plugin.extra_param == "extra"
 
     # Verify that the original parameters are also present
-    assert plugin.param1 == 1 # type: ignore
-    assert plugin.param2 == "test" # type: ignore
+    assert plugin.param1 == 1  # type: ignore
+    assert plugin.param2 == "test"  # type: ignore
 
     # Check if the extra parameter is included in the model dump
     dump = plugin.model_dump()
     assert "extra_param" in dump
     assert dump["extra_param"] == "extra"
+
 
 def test_base_plugin_item_dump():
     class TestPlugin(BasePlugin):
@@ -128,30 +133,30 @@ def test_base_plugin_item_dump():
             self._param3 = kwargs["param3"]
 
     plugin = TestPlugin(param1=1, param2="test", param3=3)
-    
+
     # Test default behavior
     dump = plugin.item_dump()
-    
+
     assert isinstance(dump, dict)
-    assert "param1" in dump['params']
-    assert dump['params']["param1"] == 1
-    assert "param2" in dump['params']
-    assert dump['params']["param2"] == "test"
+    assert "param1" in dump["params"]
+    assert dump["params"]["param1"] == 1
+    assert "param2" in dump["params"]
+    assert dump["params"]["param2"] == "test"
 
     # Test with exclude
     dump = plugin.item_dump(exclude={"param2"})
-    assert "param1" in dump['params']
-    assert "param2" not in dump['params']
+    assert "param1" in dump["params"]
+    assert "param2" not in dump["params"]
 
     # Test with include
     dump = plugin.item_dump(include={"param1"})
-    assert "param1" in dump['params']
-    assert "param2" not in dump['params']
+    assert "param1" in dump["params"]
+    assert "param2" not in dump["params"]
 
     # Test with mode='json'
     extra = plugin.get_extra()
     assert "_param3" in extra
-    
+
     assert isinstance(dump, dict)
     assert all(isinstance(key, str) for key in dump.keys())
 
@@ -165,9 +170,9 @@ def test_base_filter_subclass_initialization():
             return XYData.mock(x.value)
 
     concrete_filter = ConcreteFilter()
-    
-    assert hasattr(concrete_filter, 'fit')
-    assert hasattr(concrete_filter, 'predict')
+
+    assert hasattr(concrete_filter, "fit")
+    assert hasattr(concrete_filter, "predict")
     assert callable(concrete_filter.fit)
     assert callable(concrete_filter.predict)
 
@@ -193,9 +198,11 @@ def test_basepipeline_abstract_methods():
             return x
 
     with pytest.raises(TypeError) as excinfo:
-        IncompleteBasePipeline() # type: ignore
+        IncompleteBasePipeline()  # type: ignore
 
-    assert "Can't instantiate abstract class IncompleteBasePipeline" in str(excinfo.value)
+    assert "Can't instantiate abstract class IncompleteBasePipeline" in str(
+        excinfo.value
+    )
     assert "abstract methods" in str(excinfo.value)
     assert "init" in str(excinfo.value)
     assert "start" in str(excinfo.value)
@@ -213,7 +220,9 @@ def test_basepipeline_abstract_methods():
         def init(self) -> None:
             pass
 
-        def start(self, x: XYData, y: Optional[XYData], X_: Optional[XYData]) -> Optional[XYData]:
+        def start(
+            self, x: XYData, y: Optional[XYData], X_: Optional[XYData]
+        ) -> Optional[XYData]:
             return None
 
         def log_metrics(self) -> None:
@@ -222,15 +231,20 @@ def test_basepipeline_abstract_methods():
         def finish(self) -> None:
             pass
 
-        def evaluate(self, x_data: XYData, y_true: XYData|None, y_pred: XYData) -> Dict[str, float]:
+        def evaluate(
+            self, x_data: XYData, y_true: XYData | None, y_pred: XYData
+        ) -> Dict[str, float]:
             return {}
 
     # Should not raise any exception
     CompleteBasePipeline()
 
+
 def test_base_metric_evaluate_implementation():
     class ConcreteMetric(BaseMetric):
-        def evaluate(self, x_data: XYData, y_true: XYData|None, y_pred: XYData) -> float:
+        def evaluate(
+            self, x_data: XYData, y_true: XYData | None, y_pred: XYData
+        ) -> float:
             return 0.5
 
     class InvalidMetric(BaseMetric):
@@ -238,18 +252,22 @@ def test_base_metric_evaluate_implementation():
 
     # Valid implementation
     concrete_metric = ConcreteMetric()
-    result = concrete_metric.evaluate(XYData.mock(np.array([1, 2, 3])), XYData.mock(np.array([1, 2, 3])), XYData.mock(np.array([1, 2, 3])))
+    result = concrete_metric.evaluate(
+        XYData.mock(np.array([1, 2, 3])),
+        XYData.mock(np.array([1, 2, 3])),
+        XYData.mock(np.array([1, 2, 3])),
+    )
     assert isinstance(result, (float, np.ndarray))
 
     # Invalid implementation (missing evaluate method)
     with pytest.raises(TypeError):
-        InvalidMetric() # type: ignore
+        InvalidMetric()  # type: ignore
 
     # Check if the evaluate method has the correct signature
     evaluate_signature = inspect.signature(ConcreteMetric.evaluate)
-    expected_params = ['self', 'x_data', 'y_true', 'y_pred']
+    expected_params = ["self", "x_data", "y_true", "y_pred"]
     assert list(evaluate_signature.parameters.keys()) == expected_params
-    assert evaluate_signature.return_annotation == float
+    assert evaluate_signature.return_annotation is float
 
 
 def test_no_init_method_defined():
@@ -265,9 +283,9 @@ def test_no_init_method_defined():
     assert isinstance(plugin, BasePlugin)
 
     # Ensure that the method is present and callable
-    assert hasattr(plugin, 'some_method')
+    assert hasattr(plugin, "some_method")
     assert callable(plugin.some_method)
 
     # Verify that type checking is still applied to other methods
     with pytest.raises(TypeError):
-        plugin.some_method("invalid argument") # type: ignore
+        plugin.some_method("invalid argument")  # type: ignore

@@ -1,11 +1,12 @@
 from typing import Optional
 from sklearn.preprocessing import StandardScaler
-from framework3.base.base_types import XYData, VData
+from framework3.base.base_types import XYData
 from framework3.base.base_clases import BaseFilter
 from framework3.container.container import Container
 
 
-__all__=['StandardScalerPlugin']
+__all__ = ["StandardScalerPlugin"]
+
 
 @Container.bind()
 class StandardScalerPlugin(BaseFilter):
@@ -21,17 +22,17 @@ class StandardScalerPlugin(BaseFilter):
     Examples:
         >>> import numpy as np
         >>> from framework3.base.base_types import XYData
-        >>> 
+        >>>
         >>> # Create a StandardScalerPlugin instance
         >>> scaler_plugin = StandardScalerPlugin()
-        >>> 
+        >>>
         >>> # Create some sample data
         >>> X = XYData.mock(np.array([[0, 0], [0, 0], [1, 1], [1, 1]]))
         >>> y = None  # StandardScaler doesn't use y for fitting
-        >>> 
+        >>>
         >>> # Fit the StandardScaler
         >>> scaler_plugin.fit(X, y)
-        >>> 
+        >>>
         >>> # Transform new data
         >>> new_data = XYData.mock(np.array([[2, 2], [-1, -1]]))
         >>> scaled_data = scaler_plugin.predict(new_data)
@@ -47,7 +48,7 @@ class StandardScalerPlugin(BaseFilter):
         """
         super().__init__()  # Call the BaseFilter constructor to initialize the plugin's parameters
         self._scaler = StandardScaler()
-    
+
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         """
         Fit the StandardScaler to the input data.
@@ -62,7 +63,7 @@ class StandardScalerPlugin(BaseFilter):
             None
         """
         self._scaler.fit(x.value)
-    
+
     def predict(self, x: XYData) -> XYData:
         """
         Perform standardization by centering and scaling the input data.
@@ -74,4 +75,3 @@ class StandardScalerPlugin(BaseFilter):
             XYData: The standardized version of the input data.
         """
         return XYData.mock(self._scaler.transform(x.value))
-    

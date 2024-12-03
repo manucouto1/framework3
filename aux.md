@@ -27,15 +27,15 @@ pipeline = F3Pipeline(
                     cache_filter=True,
                     overwrite=True
                 ),
-                
+
                 F3Pipeline(plugins=[
-                    StandardScalerPlugin(), 
-                    PCAPlugin(n_components=3), 
+                    StandardScalerPlugin(),
+                    PCAPlugin(n_components=3),
                     ClassifierSVMPlugin(kernel='rbf'),
                 ]),
                 F3Pipeline(plugins=[
-                    StandardScalerPlugin(), 
-                    PCAPlugin(n_components=1), 
+                    StandardScalerPlugin(),
+                    PCAPlugin(n_components=1),
                     ClassifierSVMPlugin(kernel='linear')
                 ])
             ]),

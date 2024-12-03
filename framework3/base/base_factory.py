@@ -4,6 +4,7 @@ from rich import print as rprint
 
 __all__ = ["BaseFactory"]
 
+
 class BaseFactory(Generic[TypePlugable]):
     """
     A generic factory class for managing and creating pluggable components.
@@ -13,7 +14,7 @@ class BaseFactory(Generic[TypePlugable]):
 
     Example:
     ```python
-    
+
     from framework3.base.base_factory import BaseFactory
     from framework3.base.base_plugin import BasePlugin
 
@@ -50,7 +51,9 @@ class BaseFactory(Generic[TypePlugable]):
         """
         if name in self._foundry:
             return self._foundry[name]
-        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+        raise AttributeError(
+            f"'{self.__class__.__name__}' object has no attribute '{name}'"
+        )
 
     def __setattr__(self, name: str, value: Type[TypePlugable]) -> None:
         """
@@ -60,7 +63,7 @@ class BaseFactory(Generic[TypePlugable]):
             name (str): The name to assign to the component.
             value (Type[TypePlugable]): The component class to register.
         """
-        if name == '_foundry':
+        if name == "_foundry":
             super().__setattr__(name, value)
         else:
             self._foundry[name] = value
@@ -73,12 +76,14 @@ class BaseFactory(Generic[TypePlugable]):
             name (str): The name to assign to the component.
             value (Type[TypePlugable]): The component class to register.
         """
-        if name == '_foundry':
+        if name == "_foundry":
             super().__setattr__(name, value)
         else:
             self._foundry[name] = value
 
-    def __getitem__(self, name: str, default: Type[TypePlugable] | None = None) -> Type[TypePlugable]:
+    def __getitem__(
+        self, name: str, default: Type[TypePlugable] | None = None
+    ) -> Type[TypePlugable]:
         """
         Retrieve a component using dictionary-like syntax.
 
@@ -96,7 +101,9 @@ class BaseFactory(Generic[TypePlugable]):
             return self._foundry[name]
         else:
             if default is None:
-                raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+                raise AttributeError(
+                    f"'{self.__class__.__name__}' object has no attribute '{name}'"
+                )
             return default
 
     def __iter__(self) -> Iterator[Tuple[str, Type[TypePlugable]]]:
@@ -120,7 +127,9 @@ class BaseFactory(Generic[TypePlugable]):
         """
         return item in self._foundry
 
-    def get(self, name: str, default: Type[TypePlugable] | None = None) -> Type[TypePlugable]:
+    def get(
+        self, name: str, default: Type[TypePlugable] | None = None
+    ) -> Type[TypePlugable]:
         """
         Retrieve a component by name.
 
@@ -138,9 +147,11 @@ class BaseFactory(Generic[TypePlugable]):
             return self._foundry[name]
         else:
             if default is None:
-                raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+                raise AttributeError(
+                    f"'{self.__class__.__name__}' object has no attribute '{name}'"
+                )
             return default
-    
+
     def print_available_components(self):
         """
         Print a list of all available components in the factory.

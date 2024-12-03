@@ -3,9 +3,9 @@ from framework3.container.container import Container
 from framework3.base.base_types import XYData
 from sklearn.cluster import KMeans
 from typing import Literal, Optional, Dict, Any
-import numpy as np
 
-__all__ = ['KMeansFilter']
+__all__ = ["KMeansFilter"]
+
 
 @Container.bind()
 class KMeansFilter(BaseFilter):
@@ -23,15 +23,15 @@ class KMeansFilter(BaseFilter):
         >>> from framework3.plugins.filters.clustering.kmeans import KMeansFilter
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
-        >>> 
+        >>>
         >>> # Create sample data
         >>> X = np.array([[1, 2], [1, 4], [1, 0], [4, 2], [4, 4], [4, 0]])
         >>> X_data = XYData(_hash='X_data', _path='/tmp', _value=X)
-        >>> 
+        >>>
         >>> # Create and fit the KMeans filter
         >>> kmeans = KMeansFilter(n_clusters=2, random_state=42)
         >>> kmeans.fit(X_data)
-        >>> 
+        >>>
         >>> # Make predictions
         >>> X_test = XYData(_hash='X_test', _path='/tmp', _value=np.array([[0, 0], [4, 4]]))
         >>> predictions = kmeans.predict(X_test)
@@ -39,9 +39,16 @@ class KMeansFilter(BaseFilter):
         ```
     """
 
-    def __init__(self, n_clusters: int = 8, init: Literal['k-means++','random'] = 'k-means++', n_init: int = 10,
-                 max_iter: int = 300, tol: float = 1e-4, random_state: Optional[int] = None,
-                 algorithm: Literal["lloyd", "elkan"] = 'lloyd'):
+    def __init__(
+        self,
+        n_clusters: int = 8,
+        init: Literal["k-means++", "random"] = "k-means++",
+        n_init: int = 10,
+        max_iter: int = 300,
+        tol: float = 1e-4,
+        random_state: Optional[int] = None,
+        algorithm: Literal["lloyd", "elkan"] = "lloyd",
+    ):
         """
         Initialize the KMeansFilter.
 
@@ -61,13 +68,13 @@ class KMeansFilter(BaseFilter):
                 Defaults to 'auto'.
         """
         super().__init__(
-             n_clusters=n_clusters,
+            n_clusters=n_clusters,
             init=init,
             n_init=n_init,
             max_iter=max_iter,
             tol=tol,
             random_state=random_state,
-            algorithm=algorithm
+            algorithm=algorithm,
         )
         self._clf = KMeans(
             n_clusters=n_clusters,
@@ -76,7 +83,7 @@ class KMeansFilter(BaseFilter):
             max_iter=max_iter,
             tol=tol,
             random_state=random_state,
-            algorithm=algorithm
+            algorithm=algorithm,
         )
 
     def fit(self, x: XYData, y: Optional[XYData] = None) -> None:
@@ -126,5 +133,5 @@ class KMeansFilter(BaseFilter):
         Returns:
             Dict[str, Any]: A dictionary of parameter names and their possible values.
         """
-        
-        return dict(map(lambda x: (f'KMeansFilter__{x[0]}', x[1]), kwargs.items()))
+
+        return dict(map(lambda x: (f"KMeansFilter__{x[0]}", x[1]), kwargs.items()))

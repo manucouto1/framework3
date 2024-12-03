@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Tuple, Type, TypeVar, get_type_hints, Dict, Optional, Any
+from typing import Tuple, Type, TypeVar, get_type_hints, Dict, Optional, Any
 from typeguard import typechecked
 from abc import ABC, abstractmethod
 from fastapi.encoders import jsonable_encoder
@@ -12,7 +12,8 @@ import hashlib
 
 __all__ = ["BasePlugin", "BaseFilter", "BaseMetric"]
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class BasePlugin(ABC):
     """
@@ -30,7 +31,7 @@ class BasePlugin(ABC):
         and inherits type annotations from abstract methods in parent classes.
         """
         instance = super().__new__(cls)
-        
+
         # Apply typechecked to the __init__ method
         init_method = cls.__init__
         if init_method is not object.__init__:
@@ -41,11 +42,11 @@ class BasePlugin(ABC):
 
         # Apply typechecked to all methods defined in the class
         for attr_name, attr_value in cls.__dict__.items():
-            if inspect.isfunction(attr_value) and attr_name != '__init__':
+            if inspect.isfunction(attr_value) and attr_name != "__init__":
                 setattr(cls, attr_name, typechecked(attr_value))
 
         return instance
-    
+
     @classmethod
     def __inherit_annotations(cls):
         """
@@ -53,13 +54,18 @@ class BasePlugin(ABC):
         """
         for base in cls.__bases__:
             for name, method in base.__dict__.items():
-                if getattr(method, '__isabstractmethod__', False):
+                if getattr(method, "__isabstractmethod__", False):
                     if hasattr(cls, name):
                         concrete_method = getattr(cls, name)
                         abstract_annotations = get_type_hints(method)
                         concrete_annotations = get_type_hints(concrete_method)
-                        combined_annotations = {**abstract_annotations, **concrete_annotations}
-                        setattr(concrete_method, '__annotations__', combined_annotations)
+                        combined_annotations = {
+                            **abstract_annotations,
+                            **concrete_annotations,
+                        }
+                        setattr(
+                            concrete_method, "__annotations__", combined_annotations
+                        )
 
     def __init__(self, **kwargs):
         """
@@ -67,18 +73,24 @@ class BasePlugin(ABC):
 
         Separates public and private attributes based on their naming.
         """
-        self.__dict__['_public_attributes'] = {k: v for k, v in kwargs.items() if not k.startswith("_")}
-        self.__dict__['_private_attributes'] = {k: v for k, v in kwargs.items() if k.startswith("_")}
+        self.__dict__["_public_attributes"] = {
+            k: v for k, v in kwargs.items() if not k.startswith("_")
+        }
+        self.__dict__["_private_attributes"] = {
+            k: v for k, v in kwargs.items() if k.startswith("_")
+        }
 
     def __getattr__(self, name):
         """
         Custom attribute getter that checks both public and private attribute dictionaries.
         """
-        if name in self.__dict__.get('_public_attributes', {}):
-            return self.__dict__['_public_attributes'][name]
-        elif name in self.__dict__.get('_private_attributes', {}):
-            return self.__dict__['_private_attributes'][name]
-        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+        if name in self.__dict__.get("_public_attributes", {}):
+            return self.__dict__["_public_attributes"][name]
+        elif name in self.__dict__.get("_private_attributes", {}):
+            return self.__dict__["_private_attributes"][name]
+        raise AttributeError(
+            f"'{self.__class__.__name__}' object has no attribute '{name}'"
+        )
 
     def __setattr__(self, name, value):
         """
@@ -89,9 +101,9 @@ class BasePlugin(ABC):
             super().__setattr__(name, value)
         else:
             if name.startswith("_"):
-                self.__dict__['_private_attributes'][name] = value
+                self.__dict__["_private_attributes"][name] = value
             else:
-                self.__dict__['_public_attributes'][name] = value
+                self.__dict__["_public_attributes"][name] = value
             super().__setattr__(name, value)
 
     def __repr__(self):
@@ -123,25 +135,25 @@ class BasePlugin(ABC):
         Return a dictionary representation of the plugin, including its class name and parameters.
         """
         return {
-            'clazz': self.__class__.__name__,
-            'params': jsonable_encoder(
+            "clazz": self.__class__.__name__,
+            "params": jsonable_encoder(
                 self._public_attributes,
                 custom_encoder={
-                    BasePlugin: lambda v: v.item_dump(), 
-                    type: lambda v: {'clazz': v.__name__},
+                    BasePlugin: lambda v: v.item_dump(),
+                    type: lambda v: {"clazz": v.__name__},
                     np.integer: lambda x: int(x),
                     np.floating: lambda x: float(x),
                 },
-                **kwargs
-            )
+                **kwargs,
+            ),
         }
-    
-    def get_extra(self)->Dict[str, Any]:
+
+    def get_extra(self) -> Dict[str, Any]:
         """
         Return a copy of the private attributes.
         """
         return self._private_attributes.copy()
-    
+
     def __getstate__(self):
         """
         Prepare the object for pickling.
@@ -172,29 +184,34 @@ class BasePlugin(ABC):
             yield key, value
 
     @staticmethod
-    def build_from_dump(dump_dict:Dict[str, Any], factory:BaseFactory[BasePlugin]) -> BasePlugin|Type[BasePlugin]:
+    def build_from_dump(
+        dump_dict: Dict[str, Any], factory: BaseFactory[BasePlugin]
+    ) -> BasePlugin | Type[BasePlugin]:
         """
         Reconstruct a plugin instance from a dumped dictionary representation.
 
         This method handles nested plugin structures and uses a factory to create instances.
         """
-        level_clazz:Type[BasePlugin] = factory[dump_dict['clazz']]
-        
-        if 'params' in dump_dict:
-            level_params={}
-            for k,v in dump_dict['params'].items():
+        level_clazz: Type[BasePlugin] = factory[dump_dict["clazz"]]
+
+        if "params" in dump_dict:
+            level_params: Dict[str, Any] = {}
+            for k, v in dump_dict["params"].items():
                 if isinstance(v, dict):
-                    if 'clazz' in v:
-                        level_params[k]=BasePlugin.build_from_dump(v, factory)
+                    if "clazz" in v:
+                        level_params[k] = BasePlugin.build_from_dump(v, factory)
                     else:
-                        level_params[k]=v
+                        level_params[k] = v
                 elif isinstance(v, list):
-                    level_params[k] = [BasePlugin.build_from_dump(i, factory) for i in v]
+                    level_params[k] = [
+                        BasePlugin.build_from_dump(i, factory) for i in v
+                    ]
                 else:
-                    level_params[k]=v
+                    level_params[k] = v
             return level_clazz(**level_params)
         else:
             return level_clazz
+
 
 class BaseFilter(BasePlugin):
     """
@@ -214,7 +231,7 @@ class BaseFilter(BasePlugin):
             class MyCustomFilter(BaseFilter):
                 def __init__(self, param1: int = 0, param2: float = 1.0):
                     super().__init__(param1=param1, param2=param2)
-                
+
                 def fit(self, x: XYData, y: Optional[XYData]) -> None:
                     # Implement fitting logic here
                     pass
@@ -242,28 +259,29 @@ class BaseFilter(BasePlugin):
         # # Store original methods
         # setattr(instance, "_original_fit", instance.fit if hasattr(instance, 'fit') else None)
         # setattr(instance, "_original_predict", instance.predict if hasattr(instance, 'predict') else None)
-        
+
         # # Wrap fit and predict methods
         # if hasattr(instance, 'fit'):
         #     instance.fit = instance._pre_fit_wrapp(instance.fit)
         # if hasattr(instance, 'predict'):
         #     instance.predict = instance._pre_predict_wrapp(instance.predict)
-        
+
         # return instance
         instance = super().__new__(cls)
-        
-        # Store original methods
-        instance._original_fit = instance.fit if hasattr(instance, 'fit') else None
-        instance._original_predict = instance.predict if hasattr(instance, 'predict') else None
-        
-        # Replace fit and predict methods
-        if hasattr(instance, 'fit'):
-            instance.fit = instance._pre_fit_wrapp
-        if hasattr(instance, 'predict'):
-            instance.predict = instance._pre_predict_wrapp
-        
-        return instance
 
+        # Store original methods
+        instance._original_fit = instance.fit if hasattr(instance, "fit") else None
+        instance._original_predict = (
+            instance.predict if hasattr(instance, "predict") else None
+        )
+
+        # Replace fit and predict methods
+        if hasattr(instance, "fit"):
+            instance.fit = instance._pre_fit_wrapp
+        if hasattr(instance, "predict"):
+            instance.predict = instance._pre_predict_wrapp
+
+        return instance
 
     def __init__(self, *args, **kwargs):
         """
@@ -277,48 +295,47 @@ class BaseFilter(BasePlugin):
         self._m_path: str
 
     def _pre_fit(self, x: XYData, y: Optional[XYData]):
-        m_hash, m_str = self._get_model_key(data_hash=f'{x._hash}, {y._hash if y is not None else ""}')
-        m_path = f'{self._get_model_name()}/{m_hash}'
-       
+        m_hash, m_str = self._get_model_key(
+            data_hash=f'{x._hash}, {y._hash if y is not None else ""}'
+        )
+        m_path = f"{self._get_model_name()}/{m_hash}"
+
         self._m_hash = m_hash
         self._m_path = m_path
         self._m_str = m_str
         return m_hash, m_path, m_str
-        
 
     def _pre_predict(self, x: XYData):
         if not self._m_hash or not self._m_path or not self._m_str:
             raise ValueError("Cached filter model not trained or loaded")
-        
+
         d_hash, _ = self._get_data_key(self._m_str, x._hash)
-        
+
         new_x = XYData(
             _hash=d_hash,
             _value=x._value,
-            _path=f'{self._get_model_name()}/{self._m_hash}',
+            _path=f"{self._get_model_name()}/{self._m_hash}",
         )
 
         return new_x
 
-    def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData], *args, **kwargs):
+    def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData]) -> None:
         self._pre_fit(x, y)
-        return self._original_fit(x, y, *args, **kwargs)
+        return self._original_fit(x, y)
 
-    def _pre_predict_wrapp(self, x: XYData, *args, **kwargs) -> XYData:
+    def _pre_predict_wrapp(self, x: XYData) -> XYData:
         new_x = self._pre_predict(x)
         return XYData(
             _hash=new_x._hash,
             _path=new_x._path,
-            _value=self._original_predict(new_x, *args, **kwargs)._value
+            _value=self._original_predict(new_x)._value,
         )
-
-
 
     def __getstate__(self):
         state = super().__getstate__()
         # Ensure we're storing the original methods for serialization
-        state['fit'] = self._original_fit
-        state['predict'] = self._original_predict
+        state["fit"] = self._original_fit
+        state["predict"] = self._original_predict
         return state
 
     def __setstate__(self, state):
@@ -326,7 +343,7 @@ class BaseFilter(BasePlugin):
         # Restore the wrapper methods after deserialization
         self.fit = self._pre_fit_wrapp
         self.predict = self._pre_predict_wrapp
-    
+
     @abstractmethod
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         """
@@ -371,9 +388,9 @@ class BaseFilter(BasePlugin):
             Tuple[str, str]: A tuple containing the model hash and a string representation.
         """
         model_str = f"<{self.item_dump(exclude='extra_params')}>({data_hash})"
-        model_hashcode = hashlib.sha1(model_str.encode('utf-8')).hexdigest()
+        model_hashcode = hashlib.sha1(model_str.encode("utf-8")).hexdigest()
         return model_hashcode, model_str
-    
+
     def _get_data_key(self, model_str: str, data_hash: str) -> Tuple[str, str]:
         """
         Generate a unique key for the data based on the model and input data.
@@ -386,9 +403,10 @@ class BaseFilter(BasePlugin):
             Tuple[str, str]: A tuple containing the data hash and a string representation.
         """
         data_str = f"{model_str}.predict({data_hash})"
-        data_hashcode = hashlib.sha1(data_str.encode('utf-8')).hexdigest()
+        data_hashcode = hashlib.sha1(data_str.encode("utf-8")).hexdigest()
         return data_hashcode, data_str
-  
+
+
 class BaseMetric(BasePlugin):
     """
     Base class for implementing metric calculations.
@@ -410,8 +428,11 @@ class BaseMetric(BasePlugin):
 
         ```
     """
+
     @abstractmethod
-    def evaluate(self, x_data:XYData, y_true: XYData|None, y_pred: XYData) -> Float|np.ndarray: 
+    def evaluate(
+        self, x_data: XYData, y_true: XYData | None, y_pred: XYData
+    ) -> Float | np.ndarray:
         """
         Evaluate the metric based on the provided data.
 

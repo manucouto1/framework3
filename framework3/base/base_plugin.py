@@ -18,7 +18,7 @@
 
 # class PydanticWrapper(BaseModel):
 #     model_config = ConfigDict(extra='allow', arbitrary_types_allowed=True)
-    
+
 
 # class BasePlugin(ABC):
 
@@ -66,7 +66,6 @@
 #         for key, value in self._pydantic_model:
 #             yield key, value
 
-        
 
 #     @staticmethod
 #     def build_from_dump(dump_dict:Dict[str, Any], factory:BaseFactory[BasePlugin]) -> BasePlugin|Type[BasePlugin]:
@@ -120,9 +119,9 @@
 #                 if param_name not in new_cls.__annotations__:
 #                     # Anotar dinámicamente los campos
 #                     new_cls.__annotations__[param_name] = annotations.get(param_name, param.annotation)
-        
+
 #         return new_cls
-        
+
 #     @staticmethod
 #     def _type_check_inherit_methods(new_cls):
 #         # Aplicar typechecked a métodos concretos
@@ -150,7 +149,7 @@
 #                             setattr(ccls, attr_name, concrete_method)
 
 #         return ccls
-    
+
 # class BasePlugin( ABC, BaseModel, metaclass=MetaBasePlugin):
 #     model_config = ConfigDict(extra='allow', arbitrary_types_allowed=True)
 #     def item_dump(self, **kwargs) -> dict[str, Any]:

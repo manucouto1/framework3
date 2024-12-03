@@ -1,4 +1,4 @@
-from typing import List, Any, Dict, Sequence
+from typing import Any, Dict, Sequence
 from framework3.base import XYData, BaseFilter
 from framework3.base import ParallelPipeline
 from framework3.map_reduce.pyspark import PySparkMapReduce
@@ -6,7 +6,8 @@ from framework3.base.base_types import VData
 
 import numpy as np
 
-__all__=["HPCPipeline"]
+__all__ = ["HPCPipeline"]
+
 
 class HPCPipeline(ParallelPipeline):
     """
@@ -21,7 +22,13 @@ class HPCPipeline(ParallelPipeline):
         _map_reduce (PySparkMapReduce): The MapReduce implementation used for parallel processing.
     """
 
-    def __init__(self, filters: Sequence[BaseFilter], app_name: str, master: str = "local", numSlices: int = 4):
+    def __init__(
+        self,
+        filters: Sequence[BaseFilter],
+        app_name: str,
+        master: str = "local",
+        numSlices: int = 4,
+    ):
         """
         Initialize the MapReduceFeatureExtractorPipeline.
 
@@ -36,7 +43,6 @@ class HPCPipeline(ParallelPipeline):
         self.numSlices = numSlices
         self.app_name = app_name
         self.master = master
-        
 
     def init(self):
         """
@@ -79,10 +85,11 @@ class HPCPipeline(ParallelPipeline):
             x (XYData): The input data to fit the filters on.
             y (XYData | None, optional): The target data, if available. Defaults to None.
         """
+
         def fit_function(filter):
             filter.fit(x, y)
             return filter
-        
+
         spark = PySparkMapReduce(self.app_name, self.master)
         # Apply fit in parallel to the filters
         rdd = spark.map(self.filters, fit_function, numSlices=self.numSlices)
@@ -103,20 +110,23 @@ class HPCPipeline(ParallelPipeline):
         Returns:
             XYData: The combined predictions from all filters.
         """
-        def predict_function(filter:BaseFilter) -> VData:
-            result:XYData = filter.predict(x)
-            m_hash,_= filter._get_model_key(x._hash)
+
+        def predict_function(filter: BaseFilter) -> VData:
+            result: XYData = filter.predict(x)
+            m_hash, _ = filter._get_model_key(x._hash)
             return XYData.ensure_dim(result.value)
-        
+
         # Apply predict in parallel to the filters
         spark = PySparkMapReduce(self.app_name, self.master)
         spark.map(self.filters, predict_function, numSlices=self.numSlices)
-        aux = spark.reduce(lambda x, y: np.hstack([x,y]))
+        aux = spark.reduce(lambda x, y: np.hstack([x, y]))
         spark.stop()
         # Reduce the results
         return XYData.mock(aux)
 
-    def evaluate(self, x_data: XYData, y_true: XYData | None, y_pred: XYData) -> Dict[str, Any]:
+    def evaluate(
+        self, x_data: XYData, y_true: XYData | None, y_pred: XYData
+    ) -> Dict[str, Any]:
         """
         Evaluate the pipeline's performance.
 
@@ -146,4 +156,3 @@ class HPCPipeline(ParallelPipeline):
 
         This method is called to perform any necessary cleanup or finalization steps.
         """
-  

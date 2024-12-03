@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, Type
 
 from sklearn.base import BaseEstimator
 from sklearn.pipeline import Pipeline
@@ -9,7 +9,9 @@ from sklearn.model_selection import GridSearchCV
 
 from framework3.utils.skestimator import SkWrapper
 
-__all__ = ['GridSearchCVPlugin']
+__all__ = ["GridSearchCVPlugin"]
+
+
 class SkFilterWrapper(BaseEstimator):
     """
     A wrapper class for BaseFilter that implements scikit-learn's BaseEstimator interface.
@@ -22,17 +24,17 @@ class SkFilterWrapper(BaseEstimator):
     Example:
         >>> from framework3.plugins.filters.clasification.svm import ClassifierSVMPlugin
         >>> import numpy as np
-        >>> 
+        >>>
         >>> # Create a sample BaseFilter
         >>> class SampleFilter(ClassifierSVMPlugin):
         ...     pass
-        >>> 
+        >>>
         >>> # Set the class to be wrapped
         >>> SkFilterWrapper.z_clazz = SampleFilter
-        >>> 
+        >>>
         >>> # Create an instance of SkFilterWrapper
         >>> wrapper = SkFilterWrapper(C=1.0, kernel='rbf')
-        >>> 
+        >>>
         >>> # Use the wrapper with sklearn's GridSearchCV
         >>> X = np.array([[1, 2], [2, 3], [3, 4], [4, 5]])
         >>> y = np.array([0, 0, 1, 1])
@@ -51,7 +53,7 @@ class SkFilterWrapper(BaseEstimator):
         """
         self._model = clazz(**kwargs)
         self.kwargs = kwargs
-    
+
     def fit(self, x, y, *args, **kwargs):
         """
         Fit the wrapped model to the given data.
@@ -79,7 +81,7 @@ class SkFilterWrapper(BaseEstimator):
             The predicted values.
         """
         return self._model.predict(XYData.mock(x)).value
-    
+
     def get_params(self, deep=True):
         """
         Get the parameters of the estimator.
@@ -105,6 +107,7 @@ class SkFilterWrapper(BaseEstimator):
         """
         self._model = SkFilterWrapper.z_clazz(**parameters)
         return self
+
 
 @Container.bind()
 class GridSearchCVPlugin(BaseFilter):
@@ -149,20 +152,20 @@ class GridSearchCVPlugin(BaseFilter):
         >>> from framework3.plugins.filters.clasification.svm import ClassifierSVMPlugin
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
-        >>> 
+        >>>
         >>> # Create sample data
         >>> X = np.array([[1, 2], [2, 3], [3, 4], [4, 5]])
         >>> y = np.array([0, 0, 1, 1])
         >>> X_data = XYData(_hash='X_data', _path='/tmp', _value=X)
         >>> y_data = XYData(_hash='y_data', _path='/tmp', _value=y)
-        >>> 
+        >>>
         >>> # Define the parameter grid
         >>> param_grid = {
         ...     'C': [0.1, 1, 10],
         ...     'kernel': ['linear', 'rbf'],
         ...     'gamma': ['scale', 'auto']
         ... }
-        >>> 
+        >>>
         >>> # Create the GridSearchCVPlugin
         >>> grid_search = GridSearchCVPlugin(
         ...     filterx=ClassifierSVMPlugin,
@@ -170,21 +173,27 @@ class GridSearchCVPlugin(BaseFilter):
         ...     scoring='accuracy',
         ...     cv=3
         ... )
-        >>> 
+        >>>
         >>> # Fit the grid search
         >>> grid_search.fit(X_data, y_data)
-        >>> 
+        >>>
         >>> # Make predictions
         >>> X_test = XYData(_hash='X_test', _path='/tmp', _value=np.array([[2.5, 3.5]]))
         >>> predictions = grid_search.predict(X_test)
         >>> print(predictions.value)
-        >>> 
+        >>>
         >>> # Access the best parameters
         >>> print(grid_search._clf.best_params_)
         ```
     """
 
-    def __init__(self, filterx: Type[BaseFilter], param_grid: Dict[str, Any], scoring: str, cv: int = 2):
+    def __init__(
+        self,
+        filterx: Type[BaseFilter],
+        param_grid: Dict[str, Any],
+        scoring: str,
+        cv: int = 2,
+    ):
         """
         Initialize the GridSearchCVPlugin.
 
@@ -198,12 +207,12 @@ class GridSearchCVPlugin(BaseFilter):
         super().__init__(filterx=filterx, param_grid=param_grid, scoring=scoring, cv=cv)
 
         self._clf: GridSearchCV = GridSearchCV(
-            estimator=Pipeline(steps=[(filterx.__name__, SkWrapper(filterx))]), 
-            param_grid=param_grid, 
-            scoring=scoring, 
-            cv=cv, 
+            estimator=Pipeline(steps=[(filterx.__name__, SkWrapper(filterx))]),
+            param_grid=param_grid,
+            scoring=scoring,
+            cv=cv,
             refit=True,
-            verbose=0
+            verbose=0,
         )
 
     def fit(self, x, y):
@@ -215,7 +224,7 @@ class GridSearchCVPlugin(BaseFilter):
             y (XYData): The target values.
         """
         self._clf.fit(x.value, y.value)  # type: ignore
-    
+
     def predict(self, x):
         """
         Make predictions using the best estimator found by GridSearchCV.

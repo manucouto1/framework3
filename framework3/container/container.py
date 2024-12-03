@@ -9,10 +9,10 @@ from framework3.base import BasePipeline
 from framework3.container.overload import fundispatch
 
 
+F = TypeVar("F", bound=type)
 
-F = TypeVar('F', bound=type)
+__all__ = ["Container"]
 
-__all__=["Container"]
 
 class Container:
     """
@@ -70,6 +70,7 @@ class Container:
 
         ```
     """
+
     storage: BaseStorage
     ff: BaseFactory[BaseFilter] = BaseFactory[BaseFilter]()
     pf: BaseFactory[BasePipeline] = BaseFactory[BasePipeline]()
@@ -78,7 +79,7 @@ class Container:
     pif: BaseFactory[BasePlugin] = BaseFactory[BasePlugin]()
 
     @staticmethod
-    def bind(manager:Optional[Any] = dict, wrapper:Optional[Any] = dict):
+    def bind(manager: Optional[Any] = dict, wrapper: Optional[Any] = dict):
         """
         A decorator for binding various components to the Container.
 
@@ -95,40 +96,38 @@ class Container:
         Raises:
             NotImplementedError: If no decorator is registered for the given function.
         """
-        @fundispatch # type: ignore
-        def inner(func:Any):
-            raise NotImplementedError(f"No decorator registered for {func.__name__}")
-        
 
-        @inner.register(BaseFilter) # type: ignore
-        def _(func:Type[BaseFilter]) -> Type[BaseFilter]:
+        @fundispatch  # type: ignore
+        def inner(func: Any):
+            raise NotImplementedError(f"No decorator registered for {func.__name__}")
+
+        @inner.register(BaseFilter)  # type: ignore
+        def _(func: Type[BaseFilter]) -> Type[BaseFilter]:
             Container.ff[func.__name__] = func
             Container.pif[func.__name__] = func
             return func
-    
-        @inner.register(BasePipeline) # type: ignore
-        def _(func:Type[BasePipeline]) -> Type[BasePipeline]:
+
+        @inner.register(BasePipeline)  # type: ignore
+        def _(func: Type[BasePipeline]) -> Type[BasePipeline]:
             Container.pf[func.__name__] = func
             Container.pif[func.__name__] = func
             return func
-        
-        @inner.register(BaseMetric) # type: ignore
-        def _(func:Type[BaseMetric]) -> Type[BaseMetric]:
+
+        @inner.register(BaseMetric)  # type: ignore
+        def _(func: Type[BaseMetric]) -> Type[BaseMetric]:
             Container.mf[func.__name__] = func
             Container.pif[func.__name__] = func
             return func
-        
-        @inner.register(BaseStorage) # type: ignore
-        def _(func:Type[BaseStorage]) -> Type[BaseStorage]:
+
+        @inner.register(BaseStorage)  # type: ignore
+        def _(func: Type[BaseStorage]) -> Type[BaseStorage]:
             Container.sf[func.__name__] = func
             Container.pif[func.__name__] = func
             return func
-        
-        @inner.register(BasePlugin) # type: ignore
-        def _(func:Type[BasePlugin]) -> Type[BasePlugin]:
+
+        @inner.register(BasePlugin)  # type: ignore
+        def _(func: Type[BasePlugin]) -> Type[BasePlugin]:
             Container.pif[func.__name__] = func
             return func
-        
-        return inner
-    
 
+        return inner

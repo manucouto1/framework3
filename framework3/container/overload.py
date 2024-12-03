@@ -1,9 +1,9 @@
 from functools import singledispatch, update_wrapper
 from typing import Any, Callable, Protocol, TypeVar, cast
-from functools import wraps
 
 T = TypeVar("T")
 R = TypeVar("R")  # Return type of registered functions
+
 
 class DispatchableMethod(Protocol[R]):
     """
@@ -12,6 +12,7 @@ class DispatchableMethod(Protocol[R]):
     This protocol defines the interface for a method that can be dispatched
     based on the type of its arguments and can register new implementations.
     """
+
     def __call__(self, *args: Any, **kwargs: Any) -> R:
         """Call the method with the given arguments."""
         ...
@@ -20,6 +21,7 @@ class DispatchableMethod(Protocol[R]):
         """Register a new implementation for the given class."""
         ...
 
+
 class SingleDispatch(Protocol[R]):
     """
     Protocol for a single dispatch function.
@@ -27,6 +29,7 @@ class SingleDispatch(Protocol[R]):
     This protocol defines the interface for a function that can be dispatched
     based on the type of its first argument and can register new implementations.
     """
+
     def __call__(self, *args: Any, **kwargs: Any) -> R:
         """Call the function with the given arguments."""
         ...
@@ -38,6 +41,7 @@ class SingleDispatch(Protocol[R]):
     def dispatch(self, cls: type) -> Callable[..., R]:
         """Return the implementation for the given class."""
         ...
+
 
 def methdispatch(func: Callable[..., R]) -> DispatchableMethod[R]:
     """
@@ -55,13 +59,13 @@ def methdispatch(func: Callable[..., R]) -> DispatchableMethod[R]:
     dispatcher = singledispatch(func)
 
     def wrapper(*args, **kw):
-        # Dispatch based on the type of the second argument (args[1])
         return dispatcher.dispatch(args[1].__class__)(*args, **kw)
-    
+
     wrapper = cast(DispatchableMethod[R], wrapper)
-    wrapper.register = dispatcher.register  # Add the register method
-    update_wrapper(wrapper, func)           # Preserve metadata
+    setattr(wrapper, "register", dispatcher.register)
+    update_wrapper(wrapper, func)
     return wrapper
+
 
 def fundispatch(func: SingleDispatch[R]) -> SingleDispatch[R]:
     """
@@ -88,40 +92,36 @@ def fundispatch(func: SingleDispatch[R]) -> SingleDispatch[R]:
             Container.ff[func.__name__] = func
             Container.pif[func.__name__] = func
             return func
-    
+
         @inner.register(BasePipeline) # type: ignore
         def _(func:Type[BasePipeline]) -> Type[BasePipeline]:
             Container.pf[func.__name__] = func
             Container.pif[func.__name__] = func
             return func
-        
+
         @inner.register(BaseMetric) # type: ignore
         def _(func:Type[BaseMetric]) -> Type[BaseMetric]:
             Container.mf[func.__name__] = func
             Container.pif[func.__name__] = func
             return func
-        
+
         @inner.register(BaseStorage) # type: ignore
         def _(func:Type[BaseStorage]) -> Type[BaseStorage]:
             Container.sf[func.__name__] = func
             Container.pif[func.__name__] = func
             return func
-        
+
         return inner
     ```
     """
     dispatcher = singledispatch(func)
-    
+
     def wrapper(*args: Any, **kwargs: Any) -> R:
-        # Determine the type of the first argument (args[0])
         arg_type = args[0] if isinstance(args[0], type) else type(args[0])
-        # Use the dispatcher to call the registered function
         return dispatcher.dispatch(arg_type)(*args, **kwargs)
 
-    # Associate the register and dispatch functions from the original dispatcher
     wrapper = cast(SingleDispatch[R], wrapper)
-    wrapper.register = dispatcher.register
-    wrapper.dispatch = dispatcher.dispatch
-    # Preserve metadata and type annotations from the original function
+    setattr(wrapper, "register", dispatcher.register)
+    setattr(wrapper, "dispatch", dispatcher.dispatch)
     update_wrapper(wrapper, func)
     return wrapper

@@ -2,9 +2,11 @@ from framework3.base import BaseFilter, BasePlugin, XYData
 from framework3.container.container import Container
 from sklearn.linear_model import LogisticRegression
 
-__all__ = ['LogistiRegressionlugin']
+__all__ = ["LogistiRegressionlugin"]
 
 Container.bind()
+
+
 class LogistiRegressionlugin(BaseFilter, BasePlugin):
     """
     A plugin that implements logistic regression using scikit-learn's LogisticRegression.
@@ -18,22 +20,22 @@ class LogistiRegressionlugin(BaseFilter, BasePlugin):
     Example:
         >>> import numpy as np
         >>> from framework3.base import XYData
-        >>> 
+        >>>
         >>> # Create sample data
         >>> X = np.array([[1, 2], [2, 3], [3, 4], [4, 5]])
         >>> y = np.array([0, 0, 1, 1])
         >>> X_data = XYData(_hash='X_data', _path='/tmp', _value=X)
         >>> y_data = XYData(_hash='y_data', _path='/tmp', _value=y)
-        >>> 
+        >>>
         >>> # Create and fit the LogistiRegressionlugin
         >>> log_reg = LogistiRegressionlugin(max_ite=100, tol=1e-4)
         >>> log_reg.fit(X_data, y_data)
-        >>> 
+        >>>
         >>> # Make predictions
         >>> X_test = XYData(_hash='X_test', _path='/tmp', _value=np.array([[2.5, 3.5]]))
         >>> predictions = log_reg.predict(X_test)
         >>> print(predictions.value)
-        >>> 
+        >>>
         >>> # Access the underlying scikit-learn model
         >>> print(log_reg._logistic.coef_)
     """
@@ -47,7 +49,7 @@ class LogistiRegressionlugin(BaseFilter, BasePlugin):
             tol (float): Tolerance for stopping criteria.
         """
         self._logistic = LogisticRegression(max_iter=max_ite, tol=tol)
-    
+
     def fit(self, x: XYData, y: XYData | None) -> None:
         """
         Fit the logistic regression model.
@@ -68,7 +70,9 @@ class LogistiRegressionlugin(BaseFilter, BasePlugin):
             >>> log_reg.fit(X_data, y_data)
         """
         if y is None:
-            raise ValueError("Target values (y) cannot be None for logistic regression.")
+            raise ValueError(
+                "Target values (y) cannot be None for logistic regression."
+            )
         self._logistic.fit(x._value, y._value)  # type: ignore
 
     def predict(self, x: XYData) -> XYData:

@@ -4,16 +4,17 @@ from abc import abstractmethod
 from typing import Dict, List, Any, Type
 
 from framework3.base import BasePlugin
-from typing import Any
 
 __all__ = ["BaseStorage", "BaseSingleton"]
+
 
 class BaseSingleton:
     """
     A base class for implementing the Singleton pattern.
-    
+
     This class ensures that only one instance of each derived class is created.
     """
+
     _instances: Dict[Type[BaseSingleton], Any] = {}
 
     def __new__(cls: Type[BaseSingleton], *args: Any, **kwargs: Any) -> BaseStorage:
@@ -28,8 +29,9 @@ class BaseSingleton:
             BaseStorage: The single instance of the class.
         """
         if cls not in cls._instances:
-            cls._instances[cls] = super().__new__(cls) # type: ignore
+            cls._instances[cls] = super().__new__(cls)  # type: ignore
         return cls._instances[cls]
+
 
 class BaseStorage(BasePlugin, BaseSingleton):
     """
@@ -102,7 +104,9 @@ class BaseStorage(BasePlugin, BaseSingleton):
         ...
 
     @abstractmethod
-    def upload_file(self, file: object, file_name: str, context: str, direct_stream: bool = False) -> str | None:
+    def upload_file(
+        self, file: object, file_name: str, context: str, direct_stream: bool = False
+    ) -> str | None:
         """
         Upload a file to the storage.
 
@@ -158,6 +162,7 @@ class BaseStorage(BasePlugin, BaseSingleton):
         """
         ...
 
+    @abstractmethod
     def check_if_exists(self, hashcode: str, context: str) -> bool:
         """
         Check if a file exists in the storage.
