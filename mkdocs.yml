@@ -58,18 +58,22 @@ nav:
       - Base:
           - Types: api/base/base_types.md
           - Clases: api/base/base_clases.md
+          - Pipeline: api/base/base_pipelines.md
           - Factory: api/base/base_factory.md
           - Storage: api/base/base_storage.md
       - Container: 
           - Container: api/container/container.md
           - Overload: api/container/overload.md
       - Plugins:
-          - Pipelines: 
-              - F3pipeline: api/plugins/pipelines/f3_pipeline.md
-              - Gridpipeline: api/plugins/pipelines/g3_pipeline.md
-              - Feature Extraction:
-                  - Sequential: api/plugins/pipelines/sequential.md
-                  - MapReduce: api/plugins/pipelines/map_reduce_pipeline.md
+          - Pipelines:
+              - Parallel:
+                  - Sequential: api/plugins/pipelines/parallel/mono_pipeline.md
+                  - MapReduce: api/plugins/pipelines/parallel/hpc_pipeline.md
+              - Sequential:
+                  - F3pipeline: api/plugins/pipelines/sequential/f3_pipeline.md
+              - Grid:
+                  - GridSearchPipeline: api/plugins/pipelines/grid/g3_pipeline.md
+                  
           - Filters:
               - Classification: api/plugins/filters/classification.md
               - Clustering: api/plugins/filters/clustering.md

@@ -1,6 +1,6 @@
 # F3Pipeline
 
-::: framework3.plugins.pipelines.f3_pipeline
+::: framework3.plugins.pipelines.sequential.f3_pipeline
 
 ## Overview
 

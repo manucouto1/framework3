@@ -39,16 +39,6 @@ This page documents the base classes provided by the `framework3.base.base_clase
 - `_get_model_key(data_hash: str) -> Tuple[str, str]`: Generate a unique key for the model based on input data.
 - `_get_data_key(model_str: str, data_hash: str) -> Tuple[str, str]`: Generate a unique key for the output data.
 
-## BasePipeline
-
-`BasePipeline` extends `BaseFilter` and provides a structure for creating sequences of filters that can be applied to data in a specific order.
-
-### Key Methods:
-
-- `add(filter: BaseFilter) -> None`: Add a filter to the pipeline.
-- `fit(x: XYData, y: Optional[XYData]) -> None`: Train all filters in the pipeline.
-- `predict(x: XYData) -> XYData`: Apply all filters in the pipeline to the input data.
-
 ## BaseMetric
 
 `BaseMetric` extends `BasePlugin` and serves as the base class for all metric implementations. Metrics are used to evaluate the performance of filters or pipelines.

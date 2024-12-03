@@ -109,15 +109,43 @@ class SkFilterWrapper(BaseEstimator):
 @Container.bind()
 class GridSearchCVPlugin(BaseFilter):
     """
-    A plugin that performs grid search cross-validation on a BaseFilter.
-
-    This plugin uses scikit-learn's GridSearchCV to perform hyperparameter tuning
-    on a given BaseFilter.
+    GridSearchCVPlugin is a plugin designed to perform hyperparameter tuning on a BaseFilter
+    using scikit-learn's GridSearchCV. It automates the process of finding the best parameters
+    for a given model by evaluating different combinations of parameters through cross-validation.
 
     Attributes:
         _clf (GridSearchCV): The GridSearchCV object used for hyperparameter tuning.
 
+    Args:
+        filterx (Type[BaseFilter]): The BaseFilter class to be tuned. This is the model for which
+                                    hyperparameters will be optimized.
+        param_grid (Dict[str, Any]): A dictionary where keys are parameter names and values are
+                                     lists of parameter settings to try. This defines the search space.
+        scoring (str): The strategy to evaluate the performance of the cross-validated model on the test set.
+                       Common options include 'accuracy', 'f1', 'roc_auc', etc.
+        cv (int, optional): Determines the cross-validation splitting strategy. Defaults to 2. It specifies
+                            the number of folds in a (Stratified)KFold.
+
+    Methods:
+        fit(x: XYData, y: XYData):
+            Fits the GridSearchCV object to the provided data. It searches for the best parameter
+            combination based on the provided scoring metric.
+
+            Args:
+                x (XYData): The input features wrapped in an XYData object.
+                y (XYData): The target values wrapped in an XYData object.
+
+        predict(x: XYData) -> XYData:
+            Makes predictions using the best estimator found by GridSearchCV.
+
+            Args:
+                x (XYData): The input features wrapped in an XYData object.
+
+            Returns:
+                (XYData): The predicted values wrapped in an XYData object.
+
     Example:
+        ```python
         >>> from framework3.plugins.filters.clasification.svm import ClassifierSVMPlugin
         >>> from framework3.base.base_types import XYData
         >>> import numpy as np
@@ -153,6 +181,7 @@ class GridSearchCVPlugin(BaseFilter):
         >>> 
         >>> # Access the best parameters
         >>> print(grid_search._clf.best_params_)
+        ```
     """
 
     def __init__(self, filterx: Type[BaseFilter], param_grid: Dict[str, Any], scoring: str, cv: int = 2):

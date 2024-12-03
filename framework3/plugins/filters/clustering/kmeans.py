@@ -121,7 +121,7 @@ class KMeansFilter(BaseFilter):
         Generate a parameter grid for hyperparameter tuning.
 
         Args:
-            **kwargs: Keyword arguments to override default parameter ranges.
+            **kwargs (Any): Keyword arguments to override default parameter ranges.
 
         Returns:
             Dict[str, Any]: A dictionary of parameter names and their possible values.

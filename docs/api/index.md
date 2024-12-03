@@ -12,53 +12,100 @@ Framework3 is built around several core components. Here's an overview of the ma
 
 ### 1. Pipelines
 
-Pipelines are the backbone of Framework3, orchestrating the flow of data through various processing steps.
+Pipelines are the backbone of Framework3, orchestrating the flow of data through various processing steps. We have four types of pipelines divided into three categories:
 
-- [F3Pipeline](plugins/pipelines/f3_pipeline.md): The basic pipeline structure.
-- [MapReduceCombinerPipeline](plugins/pipelines/map_reduce_pipeline.md): Advanced pipeline for parallel processing.
+#### Sequential Pipeline
+- [F3Pipeline](plugins/pipelines/sequential/f3_pipeline.md): The basic sequential pipeline structure.
+
+#### Parallel Pipelines
+- [MonoPipeline](plugins/pipelines/parallel/mono_pipeline.md): A pipeline for parallel processing of independent tasks.
+- [HPCPipeline](plugins/pipelines/parallel/hpc_pipeline.md): A pipeline designed for high-performance computing environments.
+
+#### Grid Search Pipeline
+- [GridSearchPipeline](plugins/pipelines/grid/g3_pipeline.md): A pipeline for performing grid search over hyperparameters.
 
 ### 2. Filters
 
-Filters are individual processing units that can be combined within pipelines.
-
-#### Transformation Filters
-- [StandardScalerPlugin](plugins/filters/transformation.md#standard-scaler): Standardize features by removing the mean and scaling to unit variance.
-- [PCAPlugin](plugins/filters/transformation.md#pca-principal-component-analysis): Perform Principal Component Analysis for dimensionality reduction.
+Filters are individual processing units that can be combined within pipelines. Framework3 provides several categories of filters:
 
 #### Classification Filters
-- [ClassifierSVMPlugin](plugins/filters/classification.md#svm-classifier): Support Vector Machine classifier.
-- [KnnFilter](plugins/filters/classification.md#k-nearest-neighbors-classifier): K-Nearest Neighbors classifier.
+- [SVMClassifier](plugins/filters/classification.md#svm-classifier): Support Vector Machine classifier.
+- [KNNClassifier](plugins/filters/classification.md#k-nearest-neighbors-classifier): K-Nearest Neighbors classifier.
+
+#### Clustering Filters
+- [KMeansCluster](plugins/filters/clustering.md): K-Means clustering algorithm.
+- [DBSCANCluster](plugins/filters/clustering.md): Density-Based Spatial Clustering of Applications with Noise.
+
+#### Transformation Filters
+- [StandardScalerFilter](plugins/filters/transformation.md#standard-scaler): Standardize features by removing the mean and scaling to unit variance.
+- [PCAFilter](plugins/filters/transformation.md#pca-principal-component-analysis): Perform Principal Component Analysis for dimensionality reduction.
+
+#### Regression Filters
+- [LinearRegression](plugins/filters/regression.md#linear-regression): Simple linear regression model.
+- [RandomForestRegressor](plugins/filters/regression.md): Random Forest regression model.
+
+#### Grid Search Filters
+- [GridSearchCVFilter](plugins/filters/grid_search.md): Exhaustive search over specified parameter values for an estimator.
+
+#### Cache Filters
+- [CachedFilter](plugins/filters/cache.md): A filter that caches the results of other filters to improve performance.
+
+Each filter category serves a specific purpose in the data processing and machine learning pipeline. You can combine these filters in various ways to create complex data processing workflows.
 
 ### 3. Metrics
 
-Metrics are used to evaluate the performance of your models.
+Metrics are used to evaluate the performance of your models. Framework3 provides metrics in several categories:
 
-- [F1](plugins/metrics/classification.md#f1-score): F1 score metric.
-- [Accuracy](plugins/metrics/classification.md#accuracy-score): Accuracy score metric.
-- [Precision](plugins/metrics/classification.md#precision-score): Precision score metric.
-- [Recall](plugins/metrics/classification.md#recall-score): Recall score metric.
+#### Classification Metrics
+- [F1Score](plugins/metrics/classification.md#f1-score): F1 score metric.
+- [AccuracyScore](plugins/metrics/classification.md#accuracy-score): Accuracy score metric.
+- [PrecisionScore](plugins/metrics/classification.md#precision-score): Precision score metric.
+- [RecallScore](plugins/metrics/classification.md#recall-score): Recall score metric.
 
-### 4. Base Classes
+#### Clustering Metrics
+- [SilhouetteScore](plugins/metrics/clustering.md#silhouette-score): Silhouette score for evaluating cluster quality.
+- [CalinskiHarabaszScore](plugins/metrics/clustering.md): Calinski-Harabasz Index for cluster validation.
 
-These are the foundational classes upon which Framework3 is built.
+#### Coherence Metrics
+- [TopicCoherence](plugins/metrics/coherence.md): Measures the semantic coherence of topics in topic modeling.
+- [WordEmbeddingCoherence](plugins/metrics/coherence.md): Evaluates coherence using word embeddings.
 
-- [XYData](base/base_types.md#base-types-used-to-move-data-through-the-framework3): Base class for handling input and target data.
-- [Plugin](base/base_clases.md): Base class for all plugins (filters and metrics).
+Each metric category is designed to evaluate different aspects of model performance, allowing you to choose the most appropriate metrics for your specific machine learning tasks.
+
+### 4. Container
+
+The Container is a central component in Framework3 that manages the registration and retrieval of various components such as filters, pipelines, metrics, and storage.
+
+- [Container](container/container.md): Manages the registration and retrieval of components.
+- [bind](container/container.md): A decorator for binding components to the Container.
 
 ## Using the API
 
-To use any component of Framework3, you typically need to import it from its respective module. For example:
+To use any component of Framework3, you typically need to import it from its respective module and use the Container for registration and retrieval. For example:
 
 ```python
-from framework3.plugins.pipelines.f3_pipeline import F3Pipeline
-from framework3.plugins.filters.classification import ClassifierSVMPlugin
-from framework3.plugins.metrics.classification import F1
+from framework3.container import Container
+from framework3.base import BaseFilter, BasePipeline, BaseMetric
+
+@Container.bind()
+class MyFilter(BaseFilter):
+    # Filter implementation
+
+@Container.bind()
+class MyPipeline(BasePipeline):
+    # Pipeline implementation
+
+@Container.bind()
+class MyMetric(BaseMetric):
+    # Metric implementation
+
+# Retrieving components
+my_filter = Container.ff["MyFilter"]()
+my_pipeline = Container.pf["MyPipeline"]()
+my_metric = Container.mf["MyMetric"]()
 ```
 
-Then you can use these components to build your data processing and machine learning pipelines.
-
 ## Advanced Topics
-
 
 > ⚠️ **Alerta:** Under development.
 
@@ -75,46 +122,13 @@ For a complete list of all classes and functions, refer to the [Full API Referen
 To see Framework3 in action, check out our [Examples](../examples/index.md) section, which provides practical use cases and code samples.
 
 ## Contributing to Framework3
-<!-- If you're interested in contributing to Framework3, please read our [Contribution Guidelines](../contributing.md) and [Code of Conduct](../code_of_conduct.md). -->
+
 > ⚠️ **Alerta:** Under development.
+
+<!-- If you're interested in contributing to Framework3, please read our [Contribution Guidelines](../contributing.md) and [Code of Conduct](../code_of_conduct.md). -->
 
 ## Need Help?
+
 > ⚠️ **Alerta:** Under development.
+
 <!-- If you encounter any issues or have questions about using Framework3, please check our [FAQ](../faq.md) or reach out to the community through our [GitHub Issues](https://github.com/your-username/framework3/issues) page. -->
-
-This `api/index.md` file provides a comprehensive overview of the Framework3 API, guiding users through the main components and providing links to more detailed documentation for each part. It also includes sections on how to use the API, advanced topics, and where to find additional resources.
-
-To include this API index in your MkDocs configuration, you should update the `nav` section of your `mkdocs.yml` file. Here's how you can modify it:
-
-**File: /home/manuel.couto.pintos/Documents/code/framework3/mkdocs.yml**
-```yaml
-nav:
-  - Home: index.md
-  - Installation: installation.md
-  - Quick Start: quick_start.md
-  - API Documentation:
-    - Overview: api/index.md
-    - Pipelines:
-      - F3Pipeline: api/pipelines/f3_pipeline.md
-      - MapReduceCombinerPipeline: api/pipelines/map_reduce_pipeline.md
-    - Filters:
-      - Transformation:
-        - StandardScalerPlugin: api/filters/transformation/scaler.md
-        - PCAPlugin: api/filters/transformation/pca.md
-      - Classification:
-        - ClassifierSVMPlugin: api/filters/classification/svm.md
-        - KnnFilter: api/filters/classification/knn.md
-    - Metrics:
-      - Classification Metrics: api/metrics/classification.md
-    - Base Classes:
-      - XYData: api/base/xy_data.md
-      - Plugin: api/base/plugin.md
-    - Advanced Topics:
-      - Custom Plugin Development: api/advanced/custom_plugins.md
-      - Pipeline Optimization: api/advanced/pipeline_optimization.md
-      - Distributed Computing: api/advanced/distributed_computing.md
-    - Full API Reference: api/index.md
-  - Examples: examples/index.md
-  - Contributing: contributing.md
-  - Code of Conduct: code_of_conduct.md
-  - FAQ: faq.md
