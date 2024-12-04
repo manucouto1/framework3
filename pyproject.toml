@@ -50,6 +50,7 @@ poetry-dynamic-versioning = "^0.21.1"
 enable = true
 vcs = "git"
 style = "semver"
+pattern = "^(?P<base>\\d+\\.\\d+\\.\\d+)$"
 
 [tool.poetry.urls]
 Homepage = "https://github.com/manucouto1/framework3"
