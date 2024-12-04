@@ -1,4 +1,4 @@
-name: Tests and Build
+name: upload_on_tag
 
 on:
   push:
