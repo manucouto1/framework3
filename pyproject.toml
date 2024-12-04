@@ -1,16 +1,23 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry]
 name = "framework3"
 version = "0.0.0"  # Esto será reemplazado dinámicamente
 description = "A flexible framework for machine learning pipelines"
 authors = ["Manuel Couto Pintos <manuel.couto.pintos@usc.es>"]
-license = "GNU Affero General Public License v3"
+license = "AGPL-3.0-or-later"
 readme = "README.md"
 packages = [{include = "framework3"}]
-keywords = ["machine learning", "framework", "pipeline"]
+keywords = [
+    "machine learning",
+    "framework",
+    "pipeline",
+    "ML",
+    "AI",
+    "data science",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -48,9 +55,8 @@ poetry-dynamic-versioning = "^0.21.1"
 
 [tool.poetry-dynamic-versioning]
 enable = true
-vcs = "git"
-style = "semver"
-pattern = "^(?P<base>\\d+\\.\\d+\\.\\d+)$"
+style = "pep440"  # Asegura que el formato sea compatible con PyPI (ej. 1.2.3)
+source = "git-tag"  # Usa el tag de Git como fuente de la versión
 
 [tool.poetry.urls]
 Homepage = "https://github.com/manucouto1/framework3"
