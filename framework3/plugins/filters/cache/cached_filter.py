@@ -141,7 +141,6 @@ class Cached(BaseFilter):
 
             if self.cache_filter:
                 rprint(f"\t - El filtro {self.filter} Se cachea.")
-
                 self._storage.upload_file(
                     file=pickle.dumps(self.filter),
                     file_name="model",

@@ -1,8 +1,7 @@
-from typing import Callable, List, Optional
+from typing import Optional
 import pytest
 import numpy as np
 
-from sklearn.metrics import homogeneity_score, make_scorer
 from sklearn.model_selection import GridSearchCV
 from framework3.container.container import Container
 from framework3.plugins.filters.clustering.kmeans import KMeansFilter

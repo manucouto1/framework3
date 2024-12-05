@@ -1,7 +1,8 @@
 from typing import Any, Dict, Sequence
 from framework3.base import XYData, BaseFilter
 from framework3.base import ParallelPipeline
-from framework3.map_reduce.pyspark import PySparkMapReduce
+from framework3.container import Container
+from framework3.utils.pyspark import PySparkMapReduce
 from framework3.base.base_types import VData
 
 import numpy as np
@@ -9,6 +10,7 @@ import numpy as np
 __all__ = ["HPCPipeline"]
 
 
+@Container.bind()
 class HPCPipeline(ParallelPipeline):
     """
     A pipeline that uses MapReduce to extract features in parallel using multiple filters.
