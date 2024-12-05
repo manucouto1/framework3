@@ -44,6 +44,7 @@ tqdm = "4.67.1"
 nltk = "3.9.1"
 transformers = "4.46.3"
 gensim = "4.3.3"
+wandb = "0.18.7"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
