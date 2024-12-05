@@ -1,9 +1,7 @@
-from fileinput import filename
 from pathlib import Path
 import pytest
 import os
 import pickle
-import io
 from framework3.plugins.storage import LocalStorage
 
 

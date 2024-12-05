@@ -149,9 +149,10 @@ def test_base_plugin_item_dump():
     assert "param2" not in dump["params"]
 
     # Test with include
-    dump = plugin.item_dump(include={"param1"})
+    dump = plugin.item_dump(include={"_param3"})
     assert "param1" in dump["params"]
-    assert "param2" not in dump["params"]
+    assert "param2" in dump["params"]
+    assert "_param3" in dump
 
     # Test with mode='json'
     extra = plugin.get_extra()

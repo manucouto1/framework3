@@ -1,14 +1,15 @@
-from __future__ import annotations
-from typing import Tuple, Type, TypeVar, get_type_hints, Dict, Optional, Any
-from typeguard import typechecked
-from abc import ABC, abstractmethod
-from fastapi.encoders import jsonable_encoder
-from framework3.base.base_types import Float
-from framework3.base.base_types import XYData
-from framework3.base.base_factory import BaseFactory
-import inspect
-import numpy as np
+from __future__ import annotations  # noqa: D100
 import hashlib
+import inspect
+from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional, Tuple, Type, TypeVar, get_type_hints
+
+import numpy as np
+from fastapi.encoders import jsonable_encoder
+from typeguard import typechecked
+
+from framework3.base.base_factory import BaseFactory
+from framework3.base.base_types import Float, XYData
 
 __all__ = ["BasePlugin", "BaseFilter", "BaseMetric"]
 
@@ -49,9 +50,7 @@ class BasePlugin(ABC):
 
     @classmethod
     def __inherit_annotations(cls):
-        """
-        Inherit type annotations from abstract methods in parent classes.
-        """
+        """Inherit type annotations from abstract methods in parent classes."""
         for base in cls.__bases__:
             for name, method in base.__dict__.items():
                 if getattr(method, "__isabstractmethod__", False):
@@ -130,16 +129,17 @@ class BasePlugin(ABC):
         """
         return jsonable_encoder(self._public_attributes, **kwargs)
 
-    def item_dump(self, **kwargs) -> Dict[str, Any]:
+    def item_dump(self, include=[], **kwargs) -> Dict[str, Any]:
         """
         Return a dictionary representation of the plugin, including its class name and parameters.
         """
-        return {
+        included = {k: v for k, v in self._private_attributes.items() if k in include}
+        dump = {
             "clazz": self.__class__.__name__,
             "params": jsonable_encoder(
                 self._public_attributes,
                 custom_encoder={
-                    BasePlugin: lambda v: v.item_dump(),
+                    BasePlugin: lambda v: v.item_dump(include=include, **kwargs),
                     type: lambda v: {"clazz": v.__name__},
                     np.integer: lambda x: int(x),
                     np.floating: lambda x: float(x),
@@ -147,6 +147,21 @@ class BasePlugin(ABC):
                 **kwargs,
             ),
         }
+        if include != []:
+            dump.update(
+                **jsonable_encoder(
+                    included,
+                    custom_encoder={
+                        BasePlugin: lambda v: v.item_dump(include=include, **kwargs),
+                        type: lambda v: {"clazz": v.__name__},
+                        np.integer: lambda x: int(x),
+                        np.floating: lambda x: float(x),
+                    },
+                    **kwargs,
+                )
+            )
+
+        return dump
 
     def get_extra(self) -> Dict[str, Any]:
         """
@@ -243,53 +258,23 @@ class BaseFilter(BasePlugin):
 
     """
 
-    def __new__(cls, *args, **kwargs):
-        """
-        Create a new instance of the BaseFilter class.
-
-        This method stores the original fit and predict methods and wraps them
-        with pre-processing functionality.
-
-        Returns:
-            (BaseFilter): A new instance of the BaseFilter class.
-
-        """
-        # instance = super().__new__(cls)
-
-        # # Store original methods
-        # setattr(instance, "_original_fit", instance.fit if hasattr(instance, 'fit') else None)
-        # setattr(instance, "_original_predict", instance.predict if hasattr(instance, 'predict') else None)
-
-        # # Wrap fit and predict methods
-        # if hasattr(instance, 'fit'):
-        #     instance.fit = instance._pre_fit_wrapp(instance.fit)
-        # if hasattr(instance, 'predict'):
-        #     instance.predict = instance._pre_predict_wrapp(instance.predict)
-
-        # return instance
-        instance = super().__new__(cls)
-
-        # Store original methods
-        instance._original_fit = instance.fit if hasattr(instance, "fit") else None
-        instance._original_predict = (
-            instance.predict if hasattr(instance, "predict") else None
-        )
-
-        # Replace fit and predict methods
-        if hasattr(instance, "fit"):
-            instance.fit = instance._pre_fit_wrapp
-        if hasattr(instance, "predict"):
-            instance.predict = instance._pre_predict_wrapp
-
-        return instance
-
     def __init__(self, *args, **kwargs):
         """
         Initialize the BaseFilter instance.
 
         This method sets up attributes for storing model-related information.
         """
+        self._original_fit = self.fit
+        self._original_predict = self.predict
+
+        # Replace fit and predict methods
+        if hasattr(self, "fit"):
+            self.fit = self._pre_fit_wrapp
+        if hasattr(self, "predict"):
+            self.predict = self._pre_predict_wrapp
+
         super().__init__(*args, **kwargs)
+
         self._m_hash: str
         self._m_str: str
         self._m_path: str
@@ -406,6 +391,20 @@ class BaseFilter(BasePlugin):
         data_hashcode = hashlib.sha1(data_str.encode("utf-8")).hexdigest()
         return data_hashcode, data_str
 
+    def grid(self, **kwargs) -> BaseFilter:
+        """
+        Implement grid search functionality here.
+        Checks if the provided kwargs are valid parameters for the __init__ method.
+        """
+        init_params = inspect.signature(self.__class__.__init__).parameters
+        invalid_params = set(kwargs.keys()) - set(init_params.keys())
+        if invalid_params:
+            raise ValueError(
+                f"Invalid parameters for grid search: {', '.join(invalid_params)}"
+            )
+        self._grid = kwargs
+        return self
+
 
 class BaseMetric(BasePlugin):
     """
@@ -428,6 +427,8 @@ class BaseMetric(BasePlugin):
 
         ```
     """
+
+    higher_better: bool = True
 
     @abstractmethod
     def evaluate(

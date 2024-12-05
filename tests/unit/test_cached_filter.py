@@ -3,10 +3,9 @@ from typing import cast
 import pytest
 import numpy as np
 import pickle
-from unittest.mock import ANY, patch, MagicMock
-from framework3.container.container import Container
+from unittest.mock import ANY, MagicMock
 from framework3.base import BaseFilter, BaseStorage
-from framework3.base import XYData, VData
+from framework3.base import XYData
 from framework3.plugins.filters.cache.cached_filter import Cached
 from numpy.typing import ArrayLike
 
@@ -52,6 +51,7 @@ def test_cache_filter_model_when_not_exists(mock_storage, simple_filter):
 
     mock_storage.upload_file.assert_called_once()
     calls = mock_storage.upload_file.mock_calls
+
     assert calls[0].kwargs["file_name"] == "model"
     assert (
         calls[0].kwargs["context"]

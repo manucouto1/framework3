@@ -1,6 +1,5 @@
 import pytest
-import numpy as np
-from framework3.map_reduce.pyspark import PySparkMapReduce
+from framework3.utils.pyspark import PySparkMapReduce
 from framework3.base import XYData
 
 

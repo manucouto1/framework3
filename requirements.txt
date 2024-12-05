@@ -13,3 +13,4 @@ tqdm==4.67.1
 nltk==3.9.1
 transformers==4.46.3
 gensim==4.3.3
+wandb==0.18.7
