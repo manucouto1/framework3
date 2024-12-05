@@ -10,11 +10,28 @@ Framework3 is an innovative platform designed to simplify and accelerate the dev
 - Support for distributed processing with MapReduce
 - Integrated model evaluation and optimization tools
 
-## Installation
+## Prerequisites
 
-To install Framework3, follow these steps:
+Before installing Framework3, ensure you have the following prerequisites:
 
-1. Make sure you have Python 3.7 or higher installed on your system.
+1. Python 3.11 or higher
+2. pip (Python package installer)
+
+## Installation Options
+
+You have two options to install Framework3:
+
+### Option 1: Install from PyPI
+
+The easiest way to install Framework3 is directly from PyPI using pip:
+
+```bash
+pip install framework3
+```
+
+This will install the latest stable version of Framework3 and its dependencies.
+
+### Option 2: Install from Source
 
 2. Clone the repository:
    ```
