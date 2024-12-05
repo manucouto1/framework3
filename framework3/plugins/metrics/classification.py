@@ -64,7 +64,10 @@ class F1(BaseMetric):
         if y_true is None:
             raise ValueError("Ground truth (y_true) must be provided.")
         return f1_score(
-            y_true.value, y_pred.value, zero_division=0, average=self.average
+            y_true.value,
+            y_pred.value,
+            zero_division=0,
+            average=self.average,  # type: ignore
         )  # type: ignore
 
 
@@ -121,7 +124,11 @@ class Precission(BaseMetric):
         if y_true is None:
             raise ValueError("Ground truth (y_true) must be provided.")
         return precision_score(
-            y_true.value, y_pred.value, zero_division=0, average=self.average, **kwargs
+            y_true.value,
+            y_pred.value,
+            zero_division=0,
+            average=self.average,
+            **kwargs,  # type: ignore
         )  # type: ignore
 
 
@@ -180,5 +187,9 @@ class Recall(BaseMetric):
         if y_true is None:
             raise ValueError("Ground truth (y_true) must be provided.")
         return recall_score(
-            y_true.value, y_pred.value, zero_division=0, average=self.average, **kwargs
+            y_true.value,
+            y_pred.value,
+            zero_division=0,
+            average=self.average,
+            **kwargs,  # type: ignore
         )  # type: ignore

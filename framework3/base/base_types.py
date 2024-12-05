@@ -1,11 +1,12 @@
 from __future__ import annotations
+import hashlib
 from typing import Callable, Generic, Iterable, Literal, Sequence, TypeVar, Any, cast
 import pandas as pd
 import numpy as np
 import torch
 import typing_extensions
 from multimethod import multimethod
-from scipy.sparse import spmatrix, hstack, vstack
+from scipy.sparse import spmatrix, csr_matrix, hstack, vstack
 from typing import TypeAlias
 
 from dataclasses import dataclass, field
@@ -18,7 +19,7 @@ IncEx: typing_extensions.TypeAlias = (
 )
 
 VData: TypeAlias = np.ndarray | pd.DataFrame | spmatrix | list | torch.Tensor
-SkVData: TypeAlias = np.ndarray | pd.DataFrame | spmatrix
+SkVData: TypeAlias = np.ndarray | pd.DataFrame | spmatrix | csr_matrix
 
 TypePlugable = TypeVar("TypePlugable")
 TxyData = TypeVar("TxyData", SkVData, VData)
@@ -41,6 +42,41 @@ class XYData(Generic[TxyData]):
     _hash: str = field(init=True)
     _path: str = field(init=True)
     _value: TxyData | Callable[..., TxyData] = field(init=True, repr=False)
+
+    def split(self, indices: Iterable[int]) -> XYData:
+        """
+        Split the data into a new XYData instance with the specified indices.
+
+        Args:
+            indices (Iterable[int]): The indices to split the data.
+
+        Returns:
+            XYData: A new XYData instance with the split data.
+
+        Example:
+            ```python
+
+            >>> data = XYData.mock(np.random.rand(10, 5))
+            >>> split_data = data.split(range(5, 10))
+            >>> split_data.value.shape
+            (5, 5)
+            ```
+
+        """
+
+        def split_data(self, indices: Iterable[int]) -> Any:
+            value = self.value
+            if isinstance(value, spmatrix):
+                value = csr_matrix(value)
+
+            return cast(spmatrix, value[indices])
+
+        indices_hash = hashlib.sha1(str(indices).encode()).hexdigest()
+        return XYData(
+            _hash=f"{self._hash}[{indices_hash}]",
+            _path=self._path,
+            _value=lambda: split_data(self, indices),
+        )
 
     @staticmethod
     def mock(value: TxyData | Callable[..., TxyData]) -> XYData:

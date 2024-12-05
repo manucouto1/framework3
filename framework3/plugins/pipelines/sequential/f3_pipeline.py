@@ -188,7 +188,9 @@ class F3Pipeline(SequentialPipeline):
         Returns:
             Dict[str, float]: A dictionary of metric names and their corresponding values.
         """
+        rprint("_" * 100)
         rprint("Evaluating pipeline...")
+        rprint("_" * 100)
         evaluations = {}
         for metric in self.metrics:
             evaluations[metric.__class__.__name__] = metric.evaluate(

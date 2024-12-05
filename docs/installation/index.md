@@ -2,7 +2,6 @@
 icon: material/download
 ---
 
-
 # Installation Guide for Framework3
 
 This guide will walk you through the process of installing Framework3 and its dependencies.
@@ -13,7 +12,24 @@ Before installing Framework3, ensure you have the following prerequisites:
 
 1. Python 3.11 or higher
 2. pip (Python package installer)
-3. Git (for cloning the repository)
+
+## Installation Options
+
+You have two options to install Framework3:
+
+### Option 1: Install from PyPI
+
+The easiest way to install Framework3 is directly from PyPI using pip:
+
+```bash
+pip install framework3
+```
+
+This will install the latest stable version of Framework3 and its dependencies.
+
+### Option 2: Install from Source
+
+If you want to install the latest development version or contribute to the project, you can install Framework3 from the source code.
 
 ## Step 1: Clone the Repository
 
