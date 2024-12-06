@@ -82,6 +82,11 @@ class SequentialPipeline(BasePipeline):
     Base class for orchestrators that manage complex data flows and combinations of filters/pipelines.
     """
 
+    def init(self):
+        super().init()
+        for filter in self.filters:
+            filter.init()
+
     def _pre_fit(self, x: XYData, y: Optional[XYData]):
         m_hash, m_str = self._get_model_key(
             data_hash=f'{x._hash}, {y._hash if y is not None else ""}'
