@@ -76,6 +76,9 @@ class Cached(BaseFilter):
         self._storage: BaseStorage = Container.storage if storage is None else storage
         self._lambda_filter: Callable[..., BaseFilter] | None = None
 
+    def init(self) -> None:
+        self.filter.init()
+
     def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData]) -> None:
         return self._original_fit(x, y)
 
