@@ -290,3 +290,63 @@ def test_no_init_method_defined():
     # Verify that type checking is still applied to other methods
     with pytest.raises(TypeError):
         plugin.some_method("invalid argument")  # type: ignore
+
+
+def test_base_filter_equality():
+    class ExampleFilter(BaseFilter):
+        def fit(self, x: XYData, y: Optional[XYData]) -> None:
+            pass
+
+        def predict(self, x: XYData) -> XYData:
+            return x
+
+    # Test equality
+    filter1 = ExampleFilter(bert_uncased="bert-base-uncased")
+    filter2 = ExampleFilter(bert_uncased="bert-base-uncased")
+    assert filter1 == filter2 == ExampleFilter(bert_uncased="bert-base-uncased")
+
+    # Test inequality
+    filter3 = ExampleFilter(bert_uncased="bert-large-uncased")
+    assert filter1 != filter3
+
+    # Test inequality with different types
+    assert filter1 != "not a filter"
+
+    # Test hash consistency
+    assert hash(filter1) == hash(filter2)
+    assert hash(filter1) != hash(filter3)
+
+
+def test_base_filter_repr():
+    class ExampleFilter(BaseFilter):
+        def fit(self, x: XYData, y: Optional[XYData]) -> None:
+            pass
+
+        def predict(self, x: XYData) -> XYData:
+            return x
+
+    filter = ExampleFilter(bert_uncased="bert-base-uncased")
+    expected_repr = "ExampleFilter({'bert_uncased': 'bert-base-uncased'})"
+    assert repr(filter) == expected_repr
+
+
+def test_base_filter_with_multiple_params():
+    class ComplexFilter(BaseFilter):
+        def __init__(self, param1: int, param2: str):
+            ...
+            # super().__init__(param1=param1, param2=param2)
+
+        def fit(self, x: XYData, y: Optional[XYData]) -> None:
+            pass
+
+        def predict(self, x: XYData) -> XYData:
+            return x
+
+    filter1 = ComplexFilter(param1=1, param2="test")
+    filter2 = ComplexFilter(param1=1, param2="test")
+    filter3 = ComplexFilter(param1=1, param2="different")
+
+    assert filter1 == filter2
+    assert filter1 != filter3
+    assert hash(filter1) == hash(filter2)
+    assert hash(filter1) != hash(filter3)

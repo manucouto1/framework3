@@ -1,4 +1,5 @@
 from typing import Dict, List, Optional
+from framework3.base.exceptions import NotTrainableFilterError
 
 from pydantic import ConfigDict
 from framework3.base import XYData
@@ -128,25 +129,24 @@ class F3Pipeline(SequentialPipeline):
         """Finish pipeline execution (e.g., close logger)."""
         # TODO: Finalize logger, possibly wandb
 
-    def fit(self, x: XYData, y: Optional[XYData]):
-        """
-        Fit the pipeline to the input data.
-
-        Args:
-            x (XYData): Input data.
-            y (Optional[XYData]): Target data.
-        """
+    def fit(self, x: XYData, y: Optional[XYData]) -> None:
         rprint("_" * 100)
         rprint("Fitting pipeline...")
         rprint("*" * 100)
         if self._filters:
             self._filters = []
 
-        for filters in self.filters:
-            rprint(f"\n* {filters}:")
-            filters.fit(x, y)
-            x = filters.predict(x)
-            self._filters.append(filters)
+        for filter in self.filters:
+            rprint(f"\n* {filter}:")
+            try:
+                filter.fit(x, y)
+            except NotTrainableFilterError:
+                filter.init()  # Initialize filter
+                # Si el filtro no es entrenable, simplemente continuamos
+
+            x = filter.predict(x)
+            self._filters.append(filter)
+        self._fitted = True
 
     def predict(self, x: XYData) -> XYData:
         """

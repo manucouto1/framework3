@@ -2,6 +2,7 @@ from framework3.base.base_clases import BaseFilter
 from sklearn.base import BaseEstimator
 
 from framework3.base.base_types import XYData
+from framework3.base.exceptions import NotTrainableFilterError
 
 
 class SkWrapper(BaseEstimator):
@@ -61,7 +62,11 @@ class SkWrapper(BaseEstimator):
         Returns:
             self: The fitted estimator.
         """
-        self._model.fit(XYData.mock(x), XYData.mock(y))
+        try:
+            self._model.fit(XYData.mock(x), XYData.mock(y))
+        except NotTrainableFilterError:
+            self._model.init()
+
         return self
 
     def predict(self, x):

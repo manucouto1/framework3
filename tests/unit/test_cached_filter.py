@@ -12,12 +12,6 @@ from numpy.typing import ArrayLike
 
 # Implementación simple de BaseFilter para testing
 class SimpleFilter(BaseFilter):
-    def __init__(self):
-        super().__init__()
-        self._m_hash = "model_hash"
-        self._m_path = "model_path"
-        self._m_str = "model_str"
-
     def fit(self, x, y):
         pass
 
@@ -103,6 +97,8 @@ def test_cache_processed_data_when_cache_data_is_true(mock_storage, simple_filte
         filter=simple_filter, cache_data=True, cache_filter=False, storage=mock_storage
     )
 
+    cached_filter.init()
+
     result = cached_filter.predict(x)
     mock_storage.upload_file.assert_called_once()
 
@@ -130,7 +126,7 @@ def test_use_cached_data_when_exists(mock_storage, simple_filter):
     x = XYData(_hash="input_hash", _path="/input/path", _value=np.array([1, 2, 3]))
 
     cached_filter = Cached(filter=simple_filter, cache_data=True, storage=mock_storage)
-
+    cached_filter.init()
     result = cached_filter.predict(x)
 
     assert isinstance(result._value, types.FunctionType)
@@ -200,7 +196,7 @@ def test_predict_with_untrained_model(mock_storage, simple_filter):
     with pytest.raises(ValueError) as excinfo:
         cached_filter.predict(x)
 
-    assert str(excinfo.value) == "Cached filter model not trained or loaded"
+    assert str(excinfo.value) == "Trainable filter model not trained or loaded"
 
 
 def test_create_lambda_filter_when_exists(mock_storage, simple_filter):
