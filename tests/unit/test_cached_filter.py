@@ -429,3 +429,71 @@ def test_cached_non_trainable_filter(non_trainable_filter, mock_storage):
 
     # La predicción debería funcionar ahora
     cached_filter.predict(x)
+
+
+def test_cached_non_trainable_filter_init():
+    non_trainable_filter = NonTrainableFilter()
+    cached_filter = Cached(filter=non_trainable_filter, cache_filter=False)
+
+    # Verificar que se puede llamar a init() sin errores
+    cached_filter.init()
+
+    assert cached_filter.filter._m_hash is not None
+    assert cached_filter.filter._m_str is not None
+    assert cached_filter.filter._m_path is not None
+
+
+def test_cached_non_trainable_filter_fit():
+    non_trainable_filter = NonTrainableFilter()
+    cached_filter = Cached(filter=non_trainable_filter, cache_filter=False)
+
+    x = XYData.mock([1, 2, 3])
+    y = XYData.mock([4, 5, 6])
+
+    # Verificar que se puede llamar a fit() sin errores
+    with pytest.raises(NotTrainableFilterError):
+        cached_filter.fit(x, y)
+
+    non_trainable_filter2 = NonTrainableFilter()
+
+    non_trainable_filter2.init()
+
+    # Asegurarse de que el filtro interno no ha cambiado
+    assert cached_filter.filter._m_hash == non_trainable_filter2._m_hash
+    assert cached_filter.filter._m_str == non_trainable_filter2._m_str
+    assert cached_filter.filter._m_path == non_trainable_filter2._m_path
+
+
+def test_cached_non_trainable_filter_predict():
+    non_trainable_filter = NonTrainableFilter()
+    cached_filter = Cached(filter=non_trainable_filter, cache_filter=False)
+
+    x = XYData.mock([1, 2, 3])
+
+    cached_filter.init()
+
+    # Verificar que se puede llamar a predict() sin errores
+    result = cached_filter.predict(x)
+
+    assert result is not None  # El filtro no trainable devuelve los mismos datos
+
+
+def test_cached_non_trainable_filter_in_pipeline():
+    from framework3.plugins.pipelines import F3Pipeline
+
+    non_trainable_filter = NonTrainableFilter()
+    cached_filter = Cached(filter=non_trainable_filter, cache_filter=False)
+
+    pipeline = F3Pipeline(filters=[cached_filter])
+
+    x = XYData.mock([1, 2, 3])
+    y = XYData.mock([4, 5, 6])
+
+    # Verificar que se puede inicializar y ajustar el pipeline sin errores
+    pipeline.init()
+    pipeline.fit(x, y)
+
+    # Verificar que se puede predecir sin errores
+    result = pipeline.predict(x)
+
+    assert result is not None  # El filtro no trainable devuelve los mismos datos

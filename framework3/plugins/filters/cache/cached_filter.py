@@ -80,6 +80,7 @@ class Cached(BaseFilter):
 
     def init(self) -> None:
         self.filter.init()
+        super().init()
 
     def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData]) -> None:
         return self._original_fit(x, y)
