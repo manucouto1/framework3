@@ -90,10 +90,6 @@ class F3Pipeline(SequentialPipeline):
         self.log = log
         self._filters: List[BaseFilter] = []
 
-    def init(self):
-        """Initialize the pipeline (e.g., set up logging)."""
-        # TODO: Initialize logger, possibly wandb
-
     def start(
         self, x: XYData, y: Optional[XYData], X_: Optional[XYData]
     ) -> Optional[XYData]:
