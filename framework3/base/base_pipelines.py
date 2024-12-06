@@ -34,16 +34,6 @@ class BasePipeline(BaseFilter):
     """
 
     @abstractmethod
-    def init(self) -> None:
-        """
-        Initialize the pipeline.
-
-        This method should be implemented to perform any necessary setup or initialization
-        before the pipeline starts processing data.
-        """
-        ...
-
-    @abstractmethod
     def start(
         self, x: XYData, y: Optional[XYData], X_: Optional[XYData]
     ) -> Optional[XYData]:
