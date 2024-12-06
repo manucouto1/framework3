@@ -88,7 +88,10 @@ class F3Pipeline(SequentialPipeline):
         self.overwrite = overwrite
         self.store = store
         self.log = log
-        self._filters: List[BaseFilter] = []
+        # self._filters: List[BaseFilter] = []
+
+    def init(self):
+        super().init()
 
     def start(
         self, x: XYData, y: Optional[XYData], X_: Optional[XYData]
@@ -129,8 +132,6 @@ class F3Pipeline(SequentialPipeline):
         rprint("_" * 100)
         rprint("Fitting pipeline...")
         rprint("*" * 100)
-        if self._filters:
-            self._filters = []
 
         for filter in self.filters:
             rprint(f"\n* {filter}:")
@@ -141,8 +142,6 @@ class F3Pipeline(SequentialPipeline):
                 # Si el filtro no es entrenable, simplemente continuamos
 
             x = filter.predict(x)
-            self._filters.append(filter)
-        self._fitted = True
 
     def predict(self, x: XYData) -> XYData:
         """
@@ -157,14 +156,11 @@ class F3Pipeline(SequentialPipeline):
         Raises:
             ValueError: If no filters have been trained yet.
         """
-        print("#### Quinto llama a los predict de los filtros desde el pipeline")
-        if not self._filters:
-            raise ValueError("No filters have been trained yet")
         rprint("_" * 100)
         rprint("Predicting pipeline...")
         rprint("*" * 100)
 
-        for filter_ in self._filters:
+        for filter_ in self.filters:
             rprint(f"\n* {filter_}")
             x = filter_.predict(x)
 
@@ -187,6 +183,7 @@ class F3Pipeline(SequentialPipeline):
         rprint("_" * 100)
         rprint("Evaluating pipeline...")
         rprint("_" * 100)
+
         evaluations = {}
         for metric in self.metrics:
             evaluations[metric.__class__.__name__] = metric.evaluate(

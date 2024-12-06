@@ -142,7 +142,7 @@ def test_grid_search_with_specified_parameters():
     grid_search_plugin = next(
         (
             plugin
-            for plugin in pipeline._filters
+            for plugin in pipeline.filters
             if isinstance(plugin, GridSearchCVPlugin)
         ),
         None,
