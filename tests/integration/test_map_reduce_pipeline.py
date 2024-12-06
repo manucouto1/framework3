@@ -97,9 +97,9 @@ def test_map_reduce_combiner_pipeline_fit():
 
     # Check if fit was called on all filters
     for filter in pipeline.filters:
-        assert filter._filters
+        assert filter.filters
 
-        for f in filter._filters:
+        for f in filter.filters:
             assert hasattr(f, "_m_hash")  # This attribute is set after fitting
             assert hasattr(f, "_m_path")  # This attribute is set after fitting
             assert hasattr(f, "_m_str")  # This attribute is set after fitting
@@ -183,9 +183,9 @@ def test_caching_map_reduce_combiner_pipeline():
     pipeline.fit(x, y)
 
     for filter in pipeline.filter.filters:
-        assert filter._filters
+        assert filter.filters
 
-        for f in filter._filters:
+        for f in filter.filters:
             assert hasattr(f, "_m_hash")  # This attribute is set after fitting
             assert hasattr(f, "_m_path")  # This attribute is set after fitting
             assert hasattr(f, "_m_str")  # This attribute is set after fitting

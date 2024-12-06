@@ -497,3 +497,24 @@ def test_cached_non_trainable_filter_in_pipeline():
     result = pipeline.predict(x)
 
     assert result is not None  # El filtro no trainable devuelve los mismos datos
+
+
+def test_pipeline_with_not_trainable_filters():
+    from framework3.plugins.pipelines import F3Pipeline
+
+    non_trainable_filter = NonTrainableFilter()
+    cached_filter = Cached(filter=non_trainable_filter, cache_filter=False)
+
+    pipeline = F3Pipeline(filters=[cached_filter])
+
+    x = XYData.mock([1, 2, 3])
+    y = XYData.mock([4, 5, 6])
+
+    # Verificar que se puede inicializar y ajustar el pipeline sin errores
+    pipeline.init()
+
+    # Verificar que se puede predecir sin errores
+    result = pipeline.predict(x)
+
+    assert any(result.value != x.value)
+    assert result is not None  # El filtro no trainable devuelve los mismos datos
