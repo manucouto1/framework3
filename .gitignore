@@ -174,3 +174,5 @@ main*.py
 
 /test/cache
 /cache
+/tmp
+/tmp/*

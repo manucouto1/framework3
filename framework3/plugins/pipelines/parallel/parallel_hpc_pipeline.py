@@ -1,6 +1,7 @@
 from typing import Any, Dict, Sequence
 from framework3.base import XYData, BaseFilter
 from framework3.base import ParallelPipeline
+from framework3.base.exceptions import NotTrainableFilterError
 from framework3.container import Container
 from framework3.utils.pyspark import PySparkMapReduce
 from framework3.base.base_types import VData
@@ -89,7 +90,10 @@ class HPCPipeline(ParallelPipeline):
         """
 
         def fit_function(filter):
-            filter.fit(x, y)
+            try:
+                filter.fit(x, y)
+            except NotTrainableFilterError:
+                filter.init()
             return filter
 
         spark = PySparkMapReduce(self.app_name, self.master)

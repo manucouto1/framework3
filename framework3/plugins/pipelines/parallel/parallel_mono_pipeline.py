@@ -2,6 +2,7 @@ from typing import List, Dict, Any, Sequence
 from framework3.base import XYData
 from framework3.base import BaseFilter
 from framework3.base import ParallelPipeline
+from framework3.base.exceptions import NotTrainableFilterError
 from framework3.container.container import Container
 
 __all__ = ["MonoPipeline"]
@@ -64,7 +65,10 @@ class MonoPipeline(ParallelPipeline):
             >>> pipeline.fit(x_train, y_train)
         """
         for filter in self.filters:
-            filter.fit(x, y)
+            try:
+                filter.fit(x, y)
+            except NotTrainableFilterError:
+                filter.init()
 
     def predict(self, x: XYData) -> XYData:
         """

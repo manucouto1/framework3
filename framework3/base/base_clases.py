@@ -2,6 +2,7 @@ from __future__ import annotations  # noqa: D100
 import hashlib
 import inspect
 from abc import ABC, abstractmethod
+from framework3.base.exceptions import NotTrainableFilterError
 from typing import Any, Dict, Optional, Tuple, Type, TypeVar, get_type_hints
 
 import numpy as np
@@ -32,6 +33,20 @@ class BasePlugin(ABC):
         and inherits type annotations from abstract methods in parent classes.
         """
         instance = super().__new__(cls)
+
+        # Obtener la firma del método __init__
+        init_signature = inspect.signature(cls.__init__)
+
+        instance.__dict__["_public_attributes"] = {
+            k: v
+            for k, v in kwargs.items()
+            if not k.startswith("_") and k in init_signature.parameters
+        }
+        instance.__dict__["_private_attributes"] = {
+            k: v
+            for k, v in kwargs.items()
+            if k.startswith("_") and k in init_signature.parameters
+        }
 
         # Apply typechecked to the __init__ method
         init_method = cls.__init__
@@ -279,6 +294,24 @@ class BaseFilter(BasePlugin):
         self._m_str: str
         self._m_path: str
 
+    def init(self):
+        m_hash, m_str = self._get_model_key(data_hash=" , ")
+
+        self._m_hash: str = m_hash
+        self._m_str: str = m_str
+        self._m_path: str = f"{self._get_model_name()}/{m_hash}"
+
+    def __eq__(self, other):
+        if not isinstance(other, BaseFilter):
+            return NotImplemented
+        return (
+            type(self) is type(other)
+            and self._public_attributes == other._public_attributes
+        )
+
+    def __hash__(self):
+        return hash((type(self), frozenset(self._public_attributes.items())))
+
     def _pre_fit(self, x: XYData, y: Optional[XYData]):
         m_hash, m_str = self._get_model_key(
             data_hash=f'{x._hash}, {y._hash if y is not None else ""}'
@@ -291,18 +324,19 @@ class BaseFilter(BasePlugin):
         return m_hash, m_path, m_str
 
     def _pre_predict(self, x: XYData):
-        if not self._m_hash or not self._m_path or not self._m_str:
-            raise ValueError("Cached filter model not trained or loaded")
+        try:
+            d_hash, _ = self._get_data_key(self._m_str, x._hash)
 
-        d_hash, _ = self._get_data_key(self._m_str, x._hash)
+            new_x = XYData(
+                _hash=d_hash,
+                _value=x._value,
+                _path=f"{self._get_model_name()}/{self._m_hash}",
+            )
 
-        new_x = XYData(
-            _hash=d_hash,
-            _value=x._value,
-            _path=f"{self._get_model_name()}/{self._m_hash}",
-        )
+            return new_x
 
-        return new_x
+        except Exception:
+            raise ValueError("Trainable filter model not trained or loaded")
 
     def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData]) -> None:
         self._pre_fit(x, y)
@@ -329,16 +363,18 @@ class BaseFilter(BasePlugin):
         self.fit = self._pre_fit_wrapp
         self.predict = self._pre_predict_wrapp
 
-    @abstractmethod
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         """
-        Abstract method for fitting the filter to the data.
+        Method for fitting the filter to the data.
 
         Args:
             x (XYData): The input data.
             y (Optional[XYData]): The target data, if applicable.
+
+        Raises:
+            NotTrainableFilterError: If the filter does not support fitting.
         """
-        ...
+        raise NotTrainableFilterError("This filter does not support fitting.")
 
     @abstractmethod
     def predict(self, x: XYData) -> XYData:
