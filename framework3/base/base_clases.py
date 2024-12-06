@@ -374,6 +374,7 @@ class BaseFilter(BasePlugin):
         Raises:
             NotTrainableFilterError: If the filter does not support fitting.
         """
+        self.init()
         raise NotTrainableFilterError("This filter does not support fitting.")
 
     @abstractmethod
