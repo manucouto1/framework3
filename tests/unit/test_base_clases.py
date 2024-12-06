@@ -205,11 +205,9 @@ def test_basepipeline_abstract_methods():
         excinfo.value
     )
     assert "abstract methods" in str(excinfo.value)
-    assert "init" in str(excinfo.value)
     assert "start" in str(excinfo.value)
     assert "log_metrics" in str(excinfo.value)
     assert "finish" in str(excinfo.value)
-    # assert "evaluate" in str(excinfo.value)
 
     class CompleteBasePipeline(BasePipeline):
         def fit(self, x: XYData, y: Optional[XYData]) -> None:

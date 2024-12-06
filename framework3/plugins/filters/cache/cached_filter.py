@@ -7,6 +7,8 @@ from framework3.base import XYData, VData
 from rich import print as rprint
 import pickle
 
+from framework3.utils.utils import method_is_overridden
+
 __all__ = ["Cached"]
 
 
@@ -142,7 +144,7 @@ class Cached(BaseFilter):
             )
             self.filter._original_fit(x, y)
 
-            if self.cache_filter:
+            if self.cache_filter and method_is_overridden(self.filter.__class__, "fit"):
                 rprint(f"\t - El filtro {self.filter} Se cachea.")
                 self._storage.upload_file(
                     file=pickle.dumps(self.filter),

@@ -6,8 +6,24 @@ import pickle
 from unittest.mock import ANY, MagicMock
 from framework3.base import BaseFilter, BaseStorage
 from framework3.base import XYData
+from framework3.base.exceptions import NotTrainableFilterError
 from framework3.plugins.filters.cache.cached_filter import Cached
 from numpy.typing import ArrayLike
+
+
+class NonTrainableFilter(BaseFilter):
+    def __init__(self):
+        super().__init__()
+
+    def predict(self, x):
+        return XYData(
+            _hash="output_hash", _path="/output/path", _value=np.array([7, 8, 9])
+        )
+
+
+@pytest.fixture
+def non_trainable_filter():
+    return NonTrainableFilter()
 
 
 # Implementación simple de BaseFilter para testing
@@ -374,3 +390,42 @@ def test_manage_storage_paths_for_different_models_and_data(
     )
 
     assert mock_storage2.upload_file.call_count == 8
+
+
+def test_non_trainable_filter_initialization(non_trainable_filter, mock_storage):
+    x = XYData(_hash="input_hash", _path="/input/path", _value=np.array([1, 2, 3]))
+
+    # Sin inicialización
+    with pytest.raises(
+        ValueError, match="Trainable filter model not trained or loaded"
+    ):
+        non_trainable_filter.predict(x)
+
+    # Con inicialización
+    non_trainable_filter.init()
+    result = non_trainable_filter.predict(x)
+    assert np.array_equal(result.value, np.array([7, 8, 9]))
+
+
+def test_cached_non_trainable_filter(non_trainable_filter, mock_storage):
+    x = XYData(_hash="input_hash", _path="/input/path", _value=np.array([1, 2, 3]))
+    y = XYData(_hash="target_hash", _path="/target/path", _value=np.array([4, 5, 6]))
+
+    mock_storage.check_if_exists.return_value = False
+
+    cached_filter = Cached(
+        filter=non_trainable_filter, cache_filter=True, storage=mock_storage
+    )
+
+    # Intentar entrenar el filtro no entrenable
+    with pytest.raises(NotTrainableFilterError):
+        cached_filter.fit(x, y)
+
+    # Verificar que no se ha intentado guardar el modelo
+    mock_storage.upload_file.assert_not_called()
+
+    # Inicializar el filtro
+    cached_filter.init()
+
+    # La predicción debería funcionar ahora
+    cached_filter.predict(x)
