@@ -1,6 +1,6 @@
 from __future__ import annotations
 import hashlib
-from typing import Callable, Generic, Iterable, Literal, Sequence, TypeVar, Any, cast
+from typing import Callable, Generic, Iterable, TypeVar, Any, cast
 import pandas as pd
 import numpy as np
 import torch
@@ -114,7 +114,13 @@ class XYData(Generic[TxyData]):
         return self._value() if callable(self._value) else self._value
 
     @staticmethod
-    def concat(x: Sequence[TxyData], axis: int = -1) -> XYData:
+    def concat(x: list[TxyData], axis: int = -1) -> XYData:
+        if all(isinstance(item, spmatrix) for item in x):
+            if axis == 1:
+                return XYData.mock(value=cast(spmatrix, hstack(x)))
+            elif axis == 0:
+                return XYData.mock(value=cast(spmatrix, vstack(x)))
+            raise ValueError("Invalid axis for concatenating sparse matrices")
         return concat(x, axis=axis)
 
     @staticmethod
@@ -137,6 +143,8 @@ class XYData(Generic[TxyData]):
             return value.iterrows()  # Devuelve un iterable sobre las filas
         elif isinstance(value, spmatrix):
             return value.toarray()  # type: ignore # Convierte la matriz dispersa a un array denso
+        elif isinstance(value, torch.Tensor):
+            return value
         else:
             raise TypeError(f"El tipo {type(value)} no es compatible con iteración.")
 
@@ -157,17 +165,15 @@ def _(x: list[pd.DataFrame], axis: int = -1) -> "XYData":
 
 
 @concat.register  # type: ignore
-def _(x: list[spmatrix], axis: Literal[0, 1, -1]) -> "XYData":
-    if axis == 1:
-        return XYData.mock(value=cast(spmatrix, hstack(x)))
-    elif axis == 0:
-        return XYData.mock(value=cast(spmatrix, vstack(x)))
-    raise ValueError("Invalid axis for concatenating sparse matrices")
+def _(x: list[torch.Tensor], axis: int = -1) -> "XYData":
+    return XYData.mock(torch.cat(x, axis=axis))  # type: ignore
 
 
 @multimethod
-def ensure_dim(x: Any) -> SkVData:
-    raise TypeError(f"Cannot concatenate this type of data, only {VData} compatible")
+def ensure_dim(x: Any) -> SkVData | VData:
+    raise TypeError(
+        f"Cannot concatenate this type of data, only {VData} or {SkVData} compatible"
+    )
 
 
 @ensure_dim.register  # type: ignore
@@ -175,6 +181,13 @@ def _(x: np.ndarray) -> SkVData:
     if x.ndim == 1:  # Verifica si es unidimensional
         return x[:, None]  # Agrega una nueva dimensión
     return x  # No cambia el array si tiene más dimensiones
+
+
+@ensure_dim.register  # type: ignore
+def _(x: torch.Tensor) -> VData:
+    if x.ndim == 1:  # Verifica si es unidimensional
+        return x.unsqueeze(-1)
+    return x  # No cambia el tensor si tiene más dimensiones
 
 
 @ensure_dim.register  # type: ignore

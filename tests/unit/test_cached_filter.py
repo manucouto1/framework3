@@ -107,7 +107,6 @@ def test_cache_processed_data_when_cache_data_is_true(mock_storage, simple_filte
     mock_storage.get_root_path.return_value = "/root"
 
     x = XYData(_hash="input_hash", _path="/input/path", _value=np.array([1, 2, 3]))
-    y = XYData(_hash="target_hash", _path="/target/path", _value=np.array([4, 5, 6]))
 
     cached_filter = Cached(
         filter=simple_filter, cache_data=True, cache_filter=False, storage=mock_storage
@@ -508,7 +507,6 @@ def test_pipeline_with_not_trainable_filters():
     pipeline = F3Pipeline(filters=[cached_filter])
 
     x = XYData.mock([1, 2, 3])
-    y = XYData.mock([4, 5, 6])
 
     # Verificar que se puede inicializar y ajustar el pipeline sin errores
     pipeline.init()

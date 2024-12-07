@@ -133,11 +133,9 @@ class MonoPipeline(ParallelPipeline):
             This method assumes that all filter outputs can be concatenated along the last axis.
             Make sure that your filters produce compatible outputs.
         """
-        return XYData.concat([output.value for output in pipeline_outputs], axis=-1)
-
-    def init(self):
-        """Initialize the pipeline (e.g., set up logging)."""
-        # TODO: Initialize logger, possibly wandb
+        return XYData.concat(
+            [XYData.ensure_dim(output.value) for output in pipeline_outputs], axis=-1
+        )
 
     def start(self, x: XYData, y: XYData | None, X_: XYData | None) -> XYData | None:
         """

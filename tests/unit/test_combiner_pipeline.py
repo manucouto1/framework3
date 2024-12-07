@@ -55,10 +55,11 @@ def test_predict(combiner_pipeline, sample_data):
     result = combiner_pipeline.predict(x)
     assert isinstance(result, XYData)
     assert result.value.shape == (
-        6,
+        3,
+        2,
     )  # 2 filtros con un ejemplo de 3 features por ejemplo
     np.testing.assert_array_equal(
-        result.value, np.array([3.0, 7.0, 11.0, 3.0, 7.0, 11.0])
+        result.value, np.array([[3.0, 3.0], [7.0, 7.0], [11.0, 11.0]])
     )  # type: ignore
 
 
@@ -104,5 +105,5 @@ def test_different_input_shapes():
     result2 = pipeline.predict(x2)
     assert x1.value.shape == (2, 2)
     assert x2.value.shape == (2, 2, 3)
-    assert result1.value.shape == (4,)
+    assert result1.value.shape == (2, 2)
     assert result2.value.shape == (2, 6)
