@@ -1,12 +1,26 @@
+from typing import Optional
 import numpy as np
 from sklearn import datasets
+from framework3 import HPCPipeline, MonoPipeline
 from framework3.base.base_types import XYData
+from framework3.base.exceptions import NotTrainableFilterError
 from framework3.container import Container
+from framework3.container.container import BaseFilter
 from framework3.plugins.filters.classification.svm import ClassifierSVMPlugin
 from framework3.plugins.filters.grid_search.cv_grid_search import GridSearchCVPlugin
 from framework3.plugins.filters.transformation.pca import PCAPlugin
 from framework3.plugins.metrics.classification import F1, Precission, Recall
 from framework3.plugins.pipelines.sequential.f3_pipeline import F3Pipeline
+
+
+class NonTrainableFilter(BaseFilter):
+    def init(self):
+        self._m_hash = "non_trainable"
+        self._m_str = "non_trainable"
+        self._m_path = "/"
+
+    def predict(self, x: XYData) -> XYData:
+        return x
 
 
 def test_pipeline_iris_dataset():
@@ -169,7 +183,7 @@ def test_grid_search_with_specified_parameters():
 
     # Check if the scoring and cv parameters are correctly set
     assert (
-        grid_search_plugin._clf.scoring == "f1_weighted"
+        grid_search_plugin._clf.scoring == "f1_weighted"  # type: ignore
     ), "Incorrect scoring parameter"  # type: ignore
     assert grid_search_plugin._clf.cv == 2, "Incorrect cv parameter"  # type: ignore
 
@@ -186,3 +200,83 @@ def test_grid_search_with_specified_parameters():
     assert (
         "ClassifierSVMPlugin__kernel" in grid_search_plugin._clf.best_params_
     ), "kernel parameter not found in best_params_"
+
+
+def test_f3_pipeline_with_non_trainable_filter():
+    class NonTrainableFilter(BaseFilter):
+        def init(self):
+            self._m_hash = "non_trainable"
+            self._m_str = "non_trainable"
+            self._m_path = "/"
+
+        def fit(self, x: XYData, y: Optional[XYData]) -> None:
+            raise NotTrainableFilterError("This filter is not trainable")
+
+        def predict(self, x: XYData) -> XYData:
+            return x
+
+    non_trainable_filter = NonTrainableFilter()
+    pipeline = F3Pipeline(filters=[non_trainable_filter], metrics=[])
+
+    x = XYData.mock([1, 2, 3])
+    y = XYData.mock([4, 5, 6])
+
+    pipeline.init()
+    assert hasattr(
+        non_trainable_filter, "_m_hash"
+    ), "Filter should be initialized after pipeline.init()"
+
+    pipeline.fit(x, y)  # This should not raise an error
+    result = pipeline.predict(x)
+    assert result.value == x.value, "Non-trainable filter should return input unchanged"
+
+
+def test_parallel_mono_pipeline_with_non_trainable_filter():
+    class NonTrainableFilter(BaseFilter):
+        def init(self):
+            self._m_hash = "non_trainable"
+            self._m_str = "non_trainable"
+            self._m_path = "/"
+
+        def predict(self, x: XYData) -> XYData:
+            return x  # type: ignore
+
+    non_trainable_filter = NonTrainableFilter()
+    pipeline = MonoPipeline(filters=[non_trainable_filter, non_trainable_filter])
+
+    x = XYData.mock([1, 2, 3])
+    y = XYData.mock([4, 5, 6])
+
+    pipeline.init()
+    assert hasattr(
+        non_trainable_filter, "_m_hash"
+    ), "Filter should be initialized after pipeline.init()"
+
+    pipeline.fit(x, y)  # This should not raise an error
+    result = pipeline.predict(x)
+
+    assert (
+        result.value.shape[-1] == 2
+    ), "Non-trainable filter should return input doubled las dimention"
+
+
+def test_parallel_hpc_pipeline_with_non_trainable_filter():
+    non_trainable_filter = NonTrainableFilter()
+    pipeline = HPCPipeline(
+        app_name="test_parallel", filters=[non_trainable_filter, non_trainable_filter]
+    )
+
+    x = XYData.mock([1, 2, 3])
+    y = XYData.mock([4, 5, 6])
+
+    pipeline.init()
+    assert hasattr(
+        non_trainable_filter, "_m_hash"
+    ), "Filter should be initialized after pipeline.init()"
+
+    pipeline.fit(x, y)  # This should not raise an error
+    result = pipeline.predict(x)
+
+    assert (
+        result.value.shape[-1] == 2
+    ), "Non-trainable filter should return input doubled las dimention"

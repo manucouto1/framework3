@@ -47,15 +47,6 @@ class HPCPipeline(ParallelPipeline):
         self.app_name = app_name
         self.master = master
 
-    def init(self):
-        """
-        Initialize the pipeline.
-
-        This method is called to perform any necessary setup before the pipeline is used.
-        """
-        # Initialization of the pipeline
-        pass
-
     def start(self, x: XYData, y: XYData | None, X_: XYData | None) -> XYData | None:
         """
         Start the pipeline by fitting the model and making predictions.
