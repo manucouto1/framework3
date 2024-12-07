@@ -90,9 +90,6 @@ class F3Pipeline(SequentialPipeline):
         self.log = log
         # self._filters: List[BaseFilter] = []
 
-    def init(self):
-        super().init()
-
     def start(
         self, x: XYData, y: Optional[XYData], X_: Optional[XYData]
     ) -> Optional[XYData]:
