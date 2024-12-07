@@ -6,6 +6,23 @@ from framework3.base.base_clases import BaseMetric
 
 
 class DummyFilter(BaseFilter):
+    def __init__(self):
+        super().__init__()
+
+    def fit(self, x, y=None):
+        pass
+
+    def predict(self, x):
+        return XYData(
+            _hash=f"pred_{x._hash}", _path=x._path, _value=np.mean(x.value * 2, axis=1)
+        )
+
+
+class DummyFilterWithAttr(BaseFilter):
+    def __init__(self, attr_name):
+        super().__init__(attr_name=attr_name)
+        self.attr_name = attr_name
+
     def fit(self, x, y=None):
         pass
 
@@ -84,11 +101,6 @@ def test_combine_features():
     np.testing.assert_array_equal(result.value, np.array([[1, 2, 5, 6], [3, 4, 7, 8]]))  # type: ignore
 
 
-# def test_empty_pipeline():
-#     with pytest.raises(ValueError):
-#         SequentialFeatureExtractorPipeline(filters=[])
-
-
 def test_different_input_shapes():
     filters = [DummyFilter(), DummyFilter()]
     pipeline = MonoPipeline(filters=filters)
@@ -107,3 +119,33 @@ def test_different_input_shapes():
     assert x2.value.shape == (2, 2, 3)
     assert result1.value.shape == (2, 2)
     assert result2.value.shape == (2, 6)
+
+
+def test_branch_independence(sample_data):
+    x, y = sample_data
+
+    filters = [DummyFilterWithAttr(attr_name="random1"), DummyFilter()]
+    combiner_pipeline = MonoPipeline(filters=filters)
+
+    combiner_pipeline.fit(x, y)
+
+    combiner_pipeline.filters[-1]._m_hash
+    combiner_pipeline.filters[-1]._m_path
+    combiner_pipeline.filters[-1]._m_str
+
+    filters = [DummyFilterWithAttr(attr_name="random2"), DummyFilter()]
+    combiner_pipeline2 = MonoPipeline(filters=filters)
+
+    combiner_pipeline2.fit(x, y)
+
+    assert combiner_pipeline.filters[0]._m_hash != combiner_pipeline2.filters[0]._m_hash
+    assert combiner_pipeline.filters[0]._m_path != combiner_pipeline2.filters[0]._m_path
+    assert combiner_pipeline.filters[0]._m_str != combiner_pipeline2.filters[0]._m_str
+
+    assert (
+        combiner_pipeline.filters[-1]._m_hash == combiner_pipeline2.filters[-1]._m_hash
+    )
+    assert (
+        combiner_pipeline.filters[-1]._m_path == combiner_pipeline2.filters[-1]._m_path
+    )
+    assert combiner_pipeline.filters[-1]._m_str == combiner_pipeline2.filters[-1]._m_str
