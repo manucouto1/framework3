@@ -109,9 +109,6 @@ markdown_extensions:
       permalink: true
   - pymdownx.arithmatex
   - attr_list
-  # - pymdownx.emoji:
-  #     emoji_index: !!python/name:material.extensions.emoji.twemoji
-  #     emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
       use_pygments: true
@@ -127,12 +124,18 @@ markdown_extensions:
         - name: tabs
           class: tabbed-set
           # format: !!python/name:pymdownx.superfences.fence_div_format
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - footnotes
 
 plugins:
   - search
   - mkdocstrings
+  - bibtex:
+      bib_file: "docs/references.bib"
 
 extra_css:
   - css/styles.css
 
-copyright: Manuel Cout Pintos
+copyright: Manuel Couto Pintos
