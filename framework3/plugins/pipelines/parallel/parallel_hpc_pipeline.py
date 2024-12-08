@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Any, Dict, Sequence
 from framework3.base import XYData, BaseFilter
 from framework3.base import ParallelPipeline
@@ -82,7 +83,7 @@ class HPCPipeline(ParallelPipeline):
 
         def fit_function(filter):
             try:
-                filter.fit(x, y)
+                filter.fit(deepcopy(x), y)
             except NotTrainableFilterError:
                 filter.init()
             return filter

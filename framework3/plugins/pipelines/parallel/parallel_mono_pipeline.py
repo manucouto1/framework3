@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List, Dict, Any, Sequence
 from framework3.base import XYData
 from framework3.base import BaseFilter
@@ -66,7 +67,7 @@ class MonoPipeline(ParallelPipeline):
         """
         for filter in self.filters:
             try:
-                filter.fit(x, y)
+                filter.fit(deepcopy(x), y)
             except NotTrainableFilterError:
                 filter.init()
 
