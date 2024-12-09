@@ -94,7 +94,10 @@ nav:
               - S3: api/plugins/storage/s3.md
       - Full API Reference: api/index.md
 
-  - Best Practices: CONTRIBUTING.md
+  - Best Practices:
+      - Contributing: CONTRIBUTING.md
+      - Code of Conduct: CODE_OF_CONDUCT.md
+
 
 extra:
   social:

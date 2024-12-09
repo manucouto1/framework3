@@ -91,14 +91,14 @@ Framework3 is organized into a comprehensive and modular structure, designed to 
 
 ### Configuration and Build
 
-- `setup.py`: Defines package metadata and dependencies for distribution
-- `requirements.txt`: Lists all Python dependencies for easy installation
-- `.github/`: Contains GitHub Actions workflows for CI/CD
+      - `setup.py`: Defines package metadata and dependencies for distribution
+      - `requirements.txt`: Lists all Python dependencies for easy installation
+      - `.github/`: Contains GitHub Actions workflows for CI/CD
 
 ### Development Tools
 
-- `pre_commit/`: Hooks and configurations for maintaining code quality
-- `.gitignore`: Specifies intentionally untracked files to ignore
+      - `pre_commit/`: Hooks and configurations for maintaining code quality
+      - `.gitignore`: Specifies intentionally untracked files to ignore
 
 This structure is designed to support the core philosophy of Framework3: flexibility, modularity, and transparency. It allows for easy extension and customization while maintaining a clear and organized codebase.
 
