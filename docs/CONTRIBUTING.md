@@ -5,7 +5,7 @@ Thank you for your interest in contributing to Framework3! This guide outlines t
 ## Quick Start
 
 1. Fork and clone the repository
-2. Set up the development environment ([Installation Guide](docs/installation/index.md))
+2. Set up the development environment ([Installation Guide](installation/index.md))
 3. Create a branch for your changes
 4. Make your changes, following our guidelines
 5. Submit a pull request
@@ -37,23 +37,23 @@ Use the issue tracker to report bugs or suggest enhancements. Provide detailed d
 
 ### Git Workflow
 
-We use a modified GitFlow:
-- `main`: latest stable release
-- `develop`: integration branch
-- Feature branches: `feature/description`
-- Hotfix branches: `hotfix/description`
-- Release branches: `release/vX.Y.Z`
+- We use a modified GitFlow:
+    - `main`: latest stable release
+    - `develop`: integration branch
+    - Feature branches: `feature/description`
+    - Hotfix branches: `hotfix/description`
+    - Release branches: `release/vX.Y.Z`
 
 Commit messages should be clear, use present tense and imperative mood.
 
 ### SOLID Principles
 
-Adhere to SOLID principles:
-1. Single Responsibility
-2. Open/Closed
-3. Liskov Substitution
-4. Interface Segregation
-5. Dependency Inversion
+- Adhere to SOLID principles:
+    1. Single Responsibility
+    2. Open/Closed
+    3. Liskov Substitution
+    4. Interface Segregation
+    5. Dependency Inversion
 
 ### CI/CD
 
