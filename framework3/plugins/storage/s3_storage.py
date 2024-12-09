@@ -132,7 +132,12 @@ class S3Storage(BaseStorage):
             ...     print(file['Key'])
         ```
         """
-        return self._client.list_objects_v2(Bucket=self.bucket)["Contents"]
+        return list(
+            map(
+                lambda x: x["Key"],
+                self._client.list_objects_v2(Bucket=self.bucket)["Contents"],
+            )
+        )
 
     def get_file_by_hashcode(self, hashcode: str, context: str):
         """

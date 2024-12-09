@@ -18,6 +18,7 @@ class LogistiRegressionlugin(BaseFilter, BasePlugin):
         _logistic (LogisticRegression): The underlying scikit-learn LogisticRegression model.
 
     Example:
+    ```python
         >>> import numpy as np
         >>> from framework3.base import XYData
         >>>
@@ -38,6 +39,7 @@ class LogistiRegressionlugin(BaseFilter, BasePlugin):
         >>>
         >>> # Access the underlying scikit-learn model
         >>> print(log_reg._logistic.coef_)
+    ```
     """
 
     def __init__(self, max_ite: int, tol: float):
@@ -62,12 +64,14 @@ class LogistiRegressionlugin(BaseFilter, BasePlugin):
             ValueError: If y is None.
 
         Example:
+        ```python
             >>> X = np.array([[1, 2], [2, 3], [3, 4], [4, 5]])
             >>> y = np.array([0, 0, 1, 1])
             >>> X_data = XYData(_hash='X_data', _path='/tmp', _value=X)
             >>> y_data = XYData(_hash='y_data', _path='/tmp', _value=y)
             >>> log_reg = LogistiRegressionlugin(max_ite=100, tol=1e-4)
             >>> log_reg.fit(X_data, y_data)
+        ```
         """
         if y is None:
             raise ValueError(
@@ -86,8 +90,10 @@ class LogistiRegressionlugin(BaseFilter, BasePlugin):
             XYData: The predicted values wrapped in an XYData object.
 
         Example:
+        ```python
             >>> X_test = XYData(_hash='X_test', _path='/tmp', _value=np.array([[2.5, 3.5]]))
             >>> predictions = log_reg.predict(X_test)
             >>> print(predictions.value)
+        ```
         """
         return XYData.mock(self._logistic.predict(x.value))

@@ -44,7 +44,7 @@ class LocalStorage(BaseStorage):
         """
         super().__init__()
         self.storage_path = storage_path
-        self._base_path = f"{os.getcwd()}/{self.storage_path}"
+        self._base_path = storage_path
 
     def get_root_path(self) -> str:
         """
