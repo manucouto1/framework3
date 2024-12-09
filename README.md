@@ -54,7 +54,7 @@ Here's a basic example of how to use Framework3:
 
 ```python
 from framework3.plugins.pipelines import F3Pipeline
-from framework3.plugins.filters.classification import KnnFilter
+from framework3.plugins.filters import KnnFilter
 from framework3.plugins.metrics import F1, Precision, Recall
 
 # Create a pipeline
