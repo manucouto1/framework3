@@ -104,7 +104,7 @@ This structure is designed to support the core philosophy of Framework3: flexibi
 
 ## Contributing
 
-We welcome contributions! Please read our [contribution guidelines](https://github.com/manucouto1/framework3/blob/main/CONTRIBUTING.md) before submitting pull requests.
+We welcome contributions! Please read our [contribution guidelines](https://github.com/manucouto1/framework3/blob/main/docs/CONTRIBUTING.md) before submitting pull requests.
 
 ## License
 
