@@ -176,3 +176,7 @@ main*.py
 /cache
 /tmp
 /tmp/*
+
+/examples/cache
+/examples/cache/*
+/examples/cache/**

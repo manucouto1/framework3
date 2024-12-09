@@ -47,6 +47,8 @@ nav:
   - Installation: installation/index.md
   - Tutorials:
       - index: examples/index.md
+      - Datasets Storage: examples/data_ingestion.md
+      - F3Pipeline: example/simple_f3pipeline.md
   #     - First Filter:
   #     - First Pipeline:
   #     - Caching Data:
