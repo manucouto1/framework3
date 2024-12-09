@@ -3,14 +3,12 @@ from sklearn import datasets
 from unittest.mock import MagicMock, ANY
 from framework3.plugins.filters.cache.cached_filter import Cached
 from framework3.base import XYData
-from framework3.plugins.filters.cache.cached_filter import Cached
 from framework3.plugins.filters.transformation.pca import PCAPlugin
 from framework3.plugins.filters.transformation.scaler import StandardScalerPlugin
 from framework3.plugins.pipelines.parallel.parallel_hpc_pipeline import HPCPipeline
 from framework3.plugins.pipelines.sequential.f3_pipeline import F3Pipeline
 from framework3.plugins.filters.classification.svm import ClassifierSVMPlugin
 from framework3.plugins.filters.classification.knn import KnnFilter
-from framework3.plugins.metrics.classification import F1, Precission, Recall
 from framework3.plugins.storage.local_storage import LocalStorage
 from rich import print
 
@@ -20,12 +18,12 @@ def test_data():
     iris = datasets.load_iris()
     X = XYData(
         _hash="Iris X data",
-        _path=f"datasets",
+        _path="datasets",
         _value=iris.data,  # type: ignore
     )
     y = XYData(
         _hash="Iris y data",
-        _path=f"datasets",
+        _path="datasets",
         _value=iris.target,  # type: ignore
     )
     return X, y
@@ -66,7 +64,7 @@ def test_cached_pipeline_storage_interactions(store_cached_pipelines, test_data)
     # prefit
     _, m_path, _ = filter._pre_fit(x, y)
     # pre-predict
-    new_x = filter._pre_predict(x)
+    filter._pre_predict(x)
 
     mock_storage.upload_file.assert_any_call(
         file=ANY, context=f"/root/{m_path}", file_name="model"

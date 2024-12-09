@@ -7,6 +7,10 @@ from framework3.base.exceptions import NotTrainableFilterError
 
 
 class TrainableFilter(BaseFilter):
+    def __init__(self):
+        super().__init__()
+        self.is_fitted = False
+
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         self.is_fitted = True
 

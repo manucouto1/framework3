@@ -284,9 +284,9 @@ class BaseFilter(BasePlugin):
 
         # Replace fit and predict methods
         if hasattr(self, "fit"):
-            self.fit = self._pre_fit_wrapp
+            self.__setattr__("fit", self._pre_fit_wrapp)
         if hasattr(self, "predict"):
-            self.predict = self._pre_predict_wrapp
+            self.__setattr__("predict", self._pre_predict_wrapp)
 
         super().__init__(*args, **kwargs)
 
@@ -360,8 +360,8 @@ class BaseFilter(BasePlugin):
     def __setstate__(self, state):
         super().__setstate__(state)
         # Restore the wrapper methods after deserialization
-        self.fit = self._pre_fit_wrapp
-        self.predict = self._pre_predict_wrapp
+        self.__dict__["fit"] = self._pre_fit_wrapp
+        self.__dict__["predict"] = self._pre_predict_wrapp
 
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         """
