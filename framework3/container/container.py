@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Type, Optional, TypeVar
 
-from framework3.base import BaseFactory
+from framework3.base import BaseDatasetManager, BaseFactory
 from framework3.base import BaseFilter, BaseMetric, BasePlugin
 from framework3.base import BaseStorage
 from framework3.base import BasePipeline
@@ -72,6 +72,7 @@ class Container:
     """
 
     storage: BaseStorage
+    ds: BaseDatasetManager
     ff: BaseFactory[BaseFilter] = BaseFactory[BaseFilter]()
     pf: BaseFactory[BasePipeline] = BaseFactory[BasePipeline]()
     mf: BaseFactory[BaseMetric] = BaseFactory[BaseMetric]()

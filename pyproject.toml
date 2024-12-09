@@ -53,6 +53,7 @@ ruff = "^0.8.1"
 pytest-mock = "^3.14.0"
 moto = "^5.0.22"
 poetry-dynamic-versioning = "^0.21.1"
+ipykernel = "^6.29.5"
 
 [tool.poetry-dynamic-versioning]
 enable = true

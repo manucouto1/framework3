@@ -4,7 +4,7 @@ icon: material/download
 
 # Installation Guide for Framework3
 
-This guide will walk you through the process of installing Framework3 and its dependencies.
+This guide will walk you through the process of installing Framework3 using pip.
 
 ## Prerequisites
 
@@ -13,34 +13,11 @@ Before installing Framework3, ensure you have the following prerequisites:
 1. Python 3.11 or higher
 2. pip (Python package installer)
 
-## Installation Options
+## Installation
 
-You have two options to install Framework3:
+Installing Framework3 is straightforward using pip. Follow these steps:
 
-### Option 1: Install from PyPI
-
-The easiest way to install Framework3 is directly from PyPI using pip:
-
-```bash
-pip install framework3
-```
-
-This will install the latest stable version of Framework3 and its dependencies.
-
-### Option 2: Install from Source
-
-If you want to install the latest development version or contribute to the project, you can install Framework3 from the source code.
-
-## Step 1: Clone the Repository
-
-First, clone the Framework3 repository from GitHub:
-
-```bash
-git clone https://github.com/your-username/framework3.git
-cd framework3
-```
-
-## Step 2: Set Up a Virtual Environment (Recommended)
+### Step 1: Set Up a Virtual Environment (Recommended)
 
 It's recommended to use a virtual environment to avoid conflicts with other Python projects:
 
@@ -52,34 +29,24 @@ Activate the virtual environment:
 
 - On Windows:
   ```bash
-  venv \Scripts\activate
+  venv\Scripts\activate
   ```
 - On macOS and Linux:
   ```bash
   source venv/bin/activate
   ```
 
-## Step 3: Install Dependencies
+### Step 2: Install Framework3
 
-Install the required dependencies using pip:
-
-```bash
-pip install -r requirements.txt
-```
-
-This will install all the necessary packages listed in the `requirements.txt` file.
-
-## Step 4: Install Framework3
-
-Install Framework3 in editable mode:
+Install Framework3 directly from PyPI using pip:
 
 ```bash
-pip install -e .
+pip install framework3
 ```
 
-This command installs the package in "editable" mode, which is useful for development.
+This command will install the latest stable version of Framework3 and all its dependencies.
 
-## Step 5: Verify Installation
+## Verify Installation
 
 To verify that Framework3 is installed correctly, you can run a simple Python script:
 
@@ -91,52 +58,29 @@ print(f"Framework3 version: {__version__}")
 
 If this runs without errors and prints the version number, the installation was successful.
 
-## Optional: Install Additional Dependencies
+## Updating Framework3
 
-Depending on your specific use case, you might need to install additional dependencies:
+To update Framework3 to the latest version, simply run:
 
-- For GPU support (if using deep learning components):
-  ```bash
-  pip install torch torchvision torchaudio
-  ```
-
-- For distributed computing support:
-  ```bash
-  pip install pyspark
-  ```
-
-- For advanced visualization:
-  ```bash
-  pip install matplotlib seaborn
-  ```
+```bash
+pip install --upgrade framework3
+```
 
 ## Troubleshooting
 
 If you encounter any issues during installation:
 
-1. Ensure your Python version is compatible (3.8+).
-2. Check that all prerequisites are installed correctly.
-3. Make sure your virtual environment is activated when installing and using Framework3.
-4. If you encounter any package conflicts, try creating a new virtual environment and reinstalling.
+1. Ensure your Python version is 3.11 or higher.
+2. Make sure pip is up to date: `pip install --upgrade pip`
+3. If you're using a virtual environment, ensure it's activated when installing and using Framework3.
 
 For more detailed error messages, you can use the verbose mode when installing:
 
 ```bash
-pip install -v -e .
+pip install -v framework3
 ```
 
-If problems persist, please check the project's issue tracker on GitHub or reach out to the maintainers for support.
-
-## Updating Framework3
-
-To update Framework3 to the latest version, navigate to the framework3 directory and run:
-
-```bash
-git pull origin main
-pip install -e .
-```
-
-This will fetch the latest changes and reinstall the package.
+If problems persist, please check the project's [issue tracker on GitHub](https://github.com/manucouto1/framework3/issues) or reach out to the maintainers for support.
 
 ## Next Steps
 
