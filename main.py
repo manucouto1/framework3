@@ -37,13 +37,11 @@ pipeline = F3Pipeline(
             filter=PCAPlugin(n_components=1),
             cache_data=False,
             cache_filter=True,
-            overwrite=False,
         ),
         Cached(
             filter=KnnFilter(),
             cache_data=False,
             cache_filter=True,
-            overwrite=False,
         ),
     ],
     metrics=[F1(), Precission(), Recall()],
