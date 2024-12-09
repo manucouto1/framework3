@@ -72,9 +72,8 @@ def test_list_stored_files(s3_storage, s3_client):
     # Check if the returned list contains the correct number of files
     assert len(stored_files) == len(test_files)
     # Check if all uploaded files are in the list
-    stored_keys = [file["Key"] for file in stored_files]
     for file_name in test_files:
-        assert file_name in stored_keys
+        assert file_name in stored_files
 
 
 def test_get_file_by_hashcode(s3_storage, s3_client):
