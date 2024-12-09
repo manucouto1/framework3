@@ -25,7 +25,7 @@ TypePlugable = TypeVar("TypePlugable")
 TxyData = TypeVar("TxyData", SkVData, VData)
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(slots=True)
 class XYData(Generic[TxyData]):
     """
     A dataclass representing data for machine learning tasks, typically features (X) or targets (Y).
@@ -111,7 +111,8 @@ class XYData(Generic[TxyData]):
         Returns:
             VData: The actual data (numpy array, pandas DataFrame, or scipy sparse matrix).
         """
-        return self._value() if callable(self._value) else self._value
+        self._value = self._value() if callable(self._value) else self._value
+        return self._value
 
     @staticmethod
     def concat(x: list[TxyData], axis: int = -1) -> XYData:

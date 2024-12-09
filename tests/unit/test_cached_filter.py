@@ -152,12 +152,13 @@ def test_use_cached_data_when_exists(mock_storage, simple_filter):
         context=f"/root/{cached_filter._get_model_name()}/{cached_filter.filter._m_hash}",
     )
 
+    assert callable(result._value)
+
     assert np.array_equal(cast(ArrayLike, result.value), cached_data)
     mock_storage.download_file.assert_called_once_with(
         result._hash,
         f"/root/{cached_filter._get_model_name()}/{cached_filter.filter._m_hash}",
     )
-    assert callable(result._value)
 
 
 def test_overwrite_existing_cached_data(mock_storage, simple_filter):

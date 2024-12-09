@@ -31,11 +31,11 @@ X, y = iris.data, iris.target
 # Split the data into training and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Create XYData objects
-x_train = XYData.mock(X_train)
-y_train = XYData.mock(y_train)
-x_test = XYData.mock(X_test)
-y_test = XYData.mock(y_test)
+# Crear objetos XYData
+x_train = XYData('Iris dataset X train', 'dataset', X_train)
+y_train = XYData('Iris dataset Y train', 'dataset', y_train)
+x_test = XYData('Iris dataset X test', 'dataset', X_test)
+y_test = XYData('Iris dataset Y test', 'dataset', y_test)
 ```
 
 ## 3. Creating the Pipeline with Cache
@@ -78,17 +78,17 @@ We train the model with the training data:
 pipeline.fit(x_train, y_train)
 ```
 ```bash
+____________________________________________________________________________________________________
 Fitting pipeline...
 ****************************************************************************************************
 * Cached({'filter': StandardScalerPlugin({}), 'cache_data': True, 'cache_filter': True, 'overwrite': False, 'storage': None}):
-        - El filtro StandardScalerPlugin({}) con hash 982eff29324db9dcac5b7f04df712160af35eb23 No existe, se va a
-entrenar.
+         - El filtro StandardScalerPlugin({}) con hash 4f0150e0e11419085ce0f08ab077b7e5891f817b No existe, se va a entrenar.
          - El filtro StandardScalerPlugin({}) Se cachea.
-	 * Saving in local path: cache/StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23/model
+	 * Saving in local path: cache/StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b/model
 	 * Saved !
-         - El dato XYData(_hash='74a1e6bc3696616ef498c7303636d4581d9c386e', _path='StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23') No existe, se va a crear.
-         - El dato XYData(_hash='74a1e6bc3696616ef498c7303636d4581d9c386e', _path='StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23') Se cachea.
-	 * Saving in local path: cache/StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23/74a1e6bc3696616ef498c7303636d4581d9c386e
+         - El dato XYData(_hash='f77f9d95466939988cdd6a13f0cb91260b94c99d', _path='StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b') No existe, se va a crear.
+         - El dato XYData(_hash='f77f9d95466939988cdd6a13f0cb91260b94c99d', _path='StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b') Se cachea.
+	 * Saving in local path: cache/StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b/f77f9d95466939988cdd6a13f0cb91260b94c99d
 	 * Saved !
 * ClassifierSVMPlugin({'C': 1.0, 'kernel': 'linear', 'gamma': 'scale'}):
 ```
@@ -106,13 +106,12 @@ evaluation = pipeline.evaluate(x_test, y_test, predictions)
 print("Evaluation results:", evaluation)
 ```
 ```bash
-____________________________________________________________________________________________________
 Predicting pipeline...
 ****************************************************************************************************
 * Cached({'filter': StandardScalerPlugin({}), 'cache_data': True, 'cache_filter': True, 'overwrite': False, 'storage': None})
-         - El dato XYData(_hash='4712400607293098af5ca698ea46c0ff9b7818f9', _path='StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23') No existe, se va a crear.
-         - El dato XYData(_hash='4712400607293098af5ca698ea46c0ff9b7818f9', _path='StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23') Se cachea.
-	 * Saving in local path: cache/StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23/4712400607293098af5ca698ea46c0ff9b7818f9
+         - El dato XYData(_hash='0403ab1f29eb3d1d59f857aa03f7af153d7ff357', _path='StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b') No existe, se va a crear.
+         - El dato XYData(_hash='0403ab1f29eb3d1d59f857aa03f7af153d7ff357', _path='StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b') Se cachea.
+	 * Saving in local path: cache/StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b/0403ab1f29eb3d1d59f857aa03f7af153d7ff357
 	 * Saved !
 * ClassifierSVMPlugin({'C': 1.0, 'kernel': 'linear', 'gamma': 'scale'})
 ____________________________________________________________________________________________________
@@ -127,37 +126,75 @@ Resultados de la evaluación:
 We run the pipeline again to demonstrate the use of cache:
 
 ```python
-print("Second execution (should use cached data):")
+print("Segunda ejecución (debería usar datos en caché):")
+# Crear el pipeline con Cache
+pipeline = F3Pipeline(
+    filters=[
+        Cached(
+            filter=StandardScalerPlugin(),
+            cache_data=True,
+            cache_filter=True,
+            overwrite=False,
+        ),
+        KnnFilter(),
+    ],
+    metrics=[F1()],
+)
+print(pipeline)
+
 pipeline.fit(x_train, y_train)
 predictions = pipeline.predict(x_test)
 evaluation = pipeline.evaluate(x_test, y_test, predictions)
-print("Evaluation results:", evaluation)
+
+print("Resultados de la evaluación:", evaluation)
 ```
 ```bash
 Segunda ejecución (debería usar datos en caché):
+F3Pipeline(
+    filters=[
+        Cached(filter=StandardScalerPlugin(), cache_data=True, cache_filter=True, overwrite=False, storage=None),
+        KnnFilter(
+            n_neighbors=5,
+            weights='uniform',
+            algorithm='auto',
+            leaf_size=30,
+            p=2,
+            metric='minkowski',
+            metric_params=None,
+            n_jobs=None
+        )
+    ],
+    metrics=[F1(average='weighted')],
+    overwrite=False,
+    store=False,
+    log=False
+)
 ____________________________________________________________________________________________________
 Fitting pipeline...
 ****************************************************************************************************
 * Cached({'filter': StandardScalerPlugin({}), 'cache_data': True, 'cache_filter': True, 'overwrite': False,
 'storage': None}):
          - El filtro StandardScalerPlugin({}) Existe, se crea lambda.
-         - El dato XYData(_hash='74a1e6bc3696616ef498c7303636d4581d9c386e', _path='StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23') Existe, se crea lambda.
-* ClassifierSVMPlugin({'C': 1.0, 'kernel': 'linear', 'gamma': 'scale'}):
-	 * Downloading: <_io.BufferedReader name='cache/StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23/74a1e6bc3696616ef498c7303636d4581d9c386e'>
-	 * Downloading: <_io.BufferedReader name='cache/StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23/74a1e6bc3696616ef498c7303636d4581d9c386e'>
+         - El dato XYData(_hash='f77f9d95466939988cdd6a13f0cb91260b94c99d', _path='StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b') Existe, se crea lambda.
+* KnnFilter({'n_neighbors': 5, 'weights': 'uniform', 'algorithm': 'auto', 'leaf_size': 30, 'p': 2, 'metric': 'minkowski', 'metric_params': None, 'n_jobs': None}):
+	 * Downloading: <_io.BufferedReader name='cache/StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b/f77f9d95466939988cdd6a13f0cb91260b94c99d'>
 ____________________________________________________________________________________________________
 Predicting pipeline...
 ****************************************************************************************************
-* Cached({'filter': StandardScalerPlugin({}), 'cache_data': True, 'cache_filter': True, 'overwrite': False,
-'storage': None})
-         - El dato XYData(_hash='4712400607293098af5ca698ea46c0ff9b7818f9', _path='StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23') Existe, se crea lambda.
-* ClassifierSVMPlugin({'C': 1.0, 'kernel': 'linear', 'gamma': 'scale'})
-	 * Downloading: <_io.BufferedReader name='cache/StandardScalerPlugin/982eff29324db9dcac5b7f04df712160af35eb23/4712400607293098af5ca698ea46c0ff9b7818f9'>
+* Cached({'filter': StandardScalerPlugin({}), 'cache_data': True, 'cache_filter': True, 'overwrite': False, 'storage': None})
+         - El dato XYData(_hash='a2131ee7caeb76fd704b11b77d0456223b7e0437', _path='StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b') No existe, se va a crear.
+         - Existe un Lambda por lo que se recupera el filtro del storage.
+	 * Downloading: <_io.BufferedReader name='cache/StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b/model'>
+         - El dato XYData(_hash='a2131ee7caeb76fd704b11b77d0456223b7e0437', _path='StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b') Se cachea.
+	 * Saving in local path: cache/StandardScalerPlugin/4f0150e0e11419085ce0f08ab077b7e5891f817b/a2131ee7caeb76fd704b11b77d0456223b7e0437
+	 * Saved !
+* KnnFilter({'n_neighbors': 5, 'weights': 'uniform', 'algorithm': 'auto', 'leaf_size': 30, 'p': 2, 'metric': 'minkowski', 'metric_params': None, 'n_jobs': None})
 ____________________________________________________________________________________________________
 Evaluating pipeline...
 ____________________________________________________________________________________________________
 Resultados de la evaluación:
-{'F1': 0.9664109121909632}
+{'F1': 1.0}
+
 ```
 
 In this second execution, you should notice that the `StandardScalerPlugin` uses the cached data, which may result in faster execution time.
