@@ -347,7 +347,7 @@ class BaseFilter(BasePlugin):
         return XYData(
             _hash=new_x._hash,
             _path=new_x._path,
-            _value=self._original_predict(new_x)._value,
+            _value=self._original_predict(x)._value,
         )
 
     def __getstate__(self):
