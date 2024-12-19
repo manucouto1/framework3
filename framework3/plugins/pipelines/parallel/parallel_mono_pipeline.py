@@ -87,7 +87,7 @@ class MonoPipeline(ParallelPipeline):
         Example:
             >>> predictions = pipeline.predict(x_test)
         """
-        outputs: List[XYData] = [filter.predict(x) for filter in self.filters]
+        outputs: List[XYData] = [filter.predict(deepcopy(x)) for filter in self.filters]
         return self.combine_features(outputs)
 
     def evaluate(
