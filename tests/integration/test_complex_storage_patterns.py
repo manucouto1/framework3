@@ -1,8 +1,10 @@
 import pytest
+import numpy as np
 from sklearn import datasets
 from unittest.mock import MagicMock, ANY
+from framework3 import MonoPipeline
 from framework3.plugins.filters.cache.cached_filter import Cached
-from framework3.base import XYData
+from framework3.base import BaseFilter, XYData
 from framework3.plugins.filters.transformation.pca import PCAPlugin
 from framework3.plugins.filters.transformation.scaler import StandardScalerPlugin
 from framework3.plugins.pipelines.parallel.parallel_hpc_pipeline import HPCPipeline
@@ -163,3 +165,115 @@ def test_cached_parallel_pipeline_data_is_correct(store_cached_pipelines, test_d
     assert (
         parallel_predictions.value.shape[1] == 2
     )  # Check that the predictions have the same shape as the input data
+
+
+def test_cached_filter_in_parallel_pipeline_consistency():
+    class DummyFilter(BaseFilter):
+        def __init__(self, name):
+            super().__init__()
+            self.name = name
+
+        def predict(self, x: XYData) -> XYData:
+            return XYData.mock(x.value * 2)
+
+    # Mock storage
+    mock_storage = MagicMock(spec=LocalStorage)
+
+    # Set to store hashcodes
+    stored_hashcodes = set()
+
+    # Configure mock_storage to return XYData compatible objects
+    def mock_download_file(*args, **kwargs):
+        return np.array([[2, 4, 6]])
+
+    # Simulate upload_file
+    def mock_upload_file(file, file_name, context, direct_stream=False):
+        print("TTTTT--- Uploading file: ", file_name, " ---TTTTT")
+        stored_hashcodes.add(file_name)
+        return file_name
+
+    # Simulate check_if_exists
+    def mock_check_if_exists(hashcode, context):
+        return hashcode in stored_hashcodes
+
+    mock_storage.upload_file.side_effect = mock_upload_file
+    mock_storage.check_if_exists.side_effect = mock_check_if_exists
+    mock_storage.download_file.side_effect = mock_download_file
+
+    pipeline_a = F3Pipeline(
+        filters=[
+            Cached(
+                DummyFilter("one"),
+                cache_data=True,
+                cache_filter=False,
+                storage=mock_storage,
+            ),
+            DummyFilter("two_a"),
+        ]
+    )
+    pipeline_b = F3Pipeline(
+        filters=[
+            Cached(
+                DummyFilter("one"),
+                cache_data=True,
+                cache_filter=False,
+                storage=mock_storage,
+            ),
+            DummyFilter("two_b"),
+        ]
+    )
+
+    pipeline_c = F3Pipeline(
+        filters=[
+            Cached(
+                DummyFilter("one"),
+                cache_data=True,
+                cache_filter=False,
+                storage=mock_storage,
+            ),
+            DummyFilter("two_c"),
+        ]
+    )
+
+    parallel_mono_1 = MonoPipeline(filters=[pipeline_a, pipeline_b])
+
+    parallel_mono_2 = MonoPipeline(
+        filters=[
+            pipeline_b,
+            pipeline_a,
+        ]
+    )
+    parallel_mono_3 = MonoPipeline(
+        filters=[
+            pipeline_c,
+            pipeline_b,
+            pipeline_a,
+        ]
+    )
+
+    parallel_mono_1.init()
+    parallel_mono_2.init()
+    parallel_mono_3.init()
+
+    x = XYData.mock(np.array([[1, 2, 3]]))
+
+    parallel_mono_1.predict(x)
+    parallel_mono_2.predict(x)
+    parallel_mono_3.predict(x)
+
+    # Check that upload was called only once for the cached filter
+    assert mock_storage.upload_file.call_count == 1
+
+    # Reset mock to clear call history
+    mock_storage.reset_mock()
+
+    # Second set of predictions
+    parallel_mono_1.predict(x)
+    parallel_mono_2.predict(x)
+    parallel_mono_3.predict(x)
+
+    # Check that upload was not called again
+    assert mock_storage.upload_file.call_count == 0
+
+    # Check that get_file was called instead
+    assert mock_storage.download_file.call_count == 7  # Once for each MonoPipeline
