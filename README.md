@@ -1,5 +1,4 @@
-# Framework3
-[![test_on_push](https://github.com/manucouto1/framework3/actions/workflows/test_on_push_pull.yml/badge.svg)](https://github.com/manucouto1/framework3/actions/workflows/test_on_push_pull.yml)
+# Framework3 [![test_on_push](https://github.com/manucouto1/framework3/actions/workflows/test_on_push_pull.yml/badge.svg)](https://github.com/manucouto1/framework3/actions/workflows/test_on_push_pull.yml)
 Framework3 is an innovative platform designed to simplify and accelerate the development of machine learning models. It provides data scientists and machine learning engineers with a flexible and powerful tool to create, experiment with, and deploy models efficiently and in a structured manner. [https://manucouto1.github.io/framework3](https://manucouto1.github.io/framework3)
 
 ## Key Features
