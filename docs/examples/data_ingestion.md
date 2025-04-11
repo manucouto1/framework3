@@ -236,5 +236,3 @@ This tutorial demonstrated how to use both local storage and S3 storage in Frame
 5. Delete data
 
 The `Container.ds` interface provides a consistent way to interact with different storage backends, making it easy to switch between local and S3 storage as needed.
-
-Remember to handle your AWS credentials securely and consider using environment variables or AWS IAM roles for production environments when using S3 storage.
