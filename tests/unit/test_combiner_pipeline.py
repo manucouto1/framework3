@@ -24,7 +24,7 @@ class DummyFilterWithAttr(BaseFilter):
         self.attr_name = attr_name
 
     def fit(self, x, y=None):
-        pass
+        return 0
 
     def predict(self, x):
         return XYData(

@@ -69,12 +69,19 @@ class MonoPipeline(ParallelPipeline):
             >>> pipeline.fit(x_train, y_train)
         """
         losses = []
-        for filter in self.filters:
+        for f in self.filters:
             try:
-                losses.append(filter.fit(deepcopy(x), y))
+                losses.append(f.fit(deepcopy(x), y))
             except NotTrainableFilterError:
-                filter.init()
-        return float(np.mean(losses)) if losses else None
+                f.init()
+
+        # filtre los valores None
+
+        match list(filter(lambda x: x is not None, losses)):
+            case []:
+                return None
+            case lss:
+                return float(np.mean(lss))
 
     def predict(self, x: XYData) -> XYData:
         """

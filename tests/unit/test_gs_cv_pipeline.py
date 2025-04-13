@@ -87,13 +87,11 @@ def test_grid_search_cv_pipeline_with_multiple_filters():
     assert grid_search._clf.best_params_ in [
         {
             "PCAPlugin__n_components": 2,
-            "ClassifierSVMPlugin__gamma": "scale",
             "ClassifierSVMPlugin__C": 0.1,
             "ClassifierSVMPlugin__kernel": "rbf",
         },
         {
             "PCAPlugin__n_components": 2,
-            "ClassifierSVMPlugin__gamma": "scale",
             "ClassifierSVMPlugin__C": 1,
             "ClassifierSVMPlugin__kernel": "rbf",
         },

@@ -47,23 +47,6 @@ class WandbSweepManager:
         }
 
         dumped_pipeline = pipepline.item_dump(include=["_grid"])
-        # for filter_config in dumped_pipeline["params"]["filters"]:
-        #     if "_grid" in filter_config:
-        #         filter_config["params"].update(**filter_config["_grid"])
-
-        #         f_config = {}
-        #         for k, v in filter_config["_grid"].items():
-        #             if type(v) is list:
-        #                 f_config[k] = {"values": v}
-        #             elif type(v) is dict:
-        #                 f_config[k] = v
-        #             else:
-        #                 f_config[k] = {"value": v}
-
-        #         if len(f_config) > 0:
-        #             sweep_config["parameters"]["filters"]["parameters"][
-        #                 str(filter_config["clazz"])
-        #             ] = {"parameters": f_config}
 
         WandbSweepManager.get_grid(dumped_pipeline, sweep_config)
 
@@ -89,7 +72,9 @@ class WandbSweepManager:
             "name": scorer.__class__.__name__,
             "goal": "maximize" if scorer.higher_better else "minimize",
         }
+        print("______________________SWEE CONFIG_____________________")
         print(sweep_config)
+        print("_____________________________________________________")
         return wandb.sweep(sweep_config, project=project_name)  # type: ignore
 
     def get_sweep(self, project_name, sweep_id):
