@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+from framework3.base import BaseMetric
 from framework3.base.base_types import XYData
 from framework3.base.base_clases import BaseFilter
 from framework3.container.container import Container
@@ -41,7 +42,7 @@ class PCAPlugin(BaseFilter):
         >>> print(transformed_data.value)  # This will be a 2x2 array
     """
 
-    def __init__(self, n_components: int):
+    def __init__(self, n_components: int = 2):
         """
         Initialize the PCAPlugin.
 
@@ -53,7 +54,9 @@ class PCAPlugin(BaseFilter):
         )  # Initialize the BaseFilter and BasePlugin parent classes.
         self._pca = PCA(n_components=n_components)
 
-    def fit(self, x: XYData, y: Optional[XYData]) -> None:
+    def fit(
+        self, x: XYData, y: Optional[XYData], evaluator: BaseMetric | None = None
+    ) -> Optional[float]:
         """
         Fit the PCA model to the input data.
 
@@ -65,6 +68,7 @@ class PCAPlugin(BaseFilter):
             None
         """
         self._pca.fit(x.value)
+        return None
 
     def predict(self, x: XYData) -> XYData:
         """

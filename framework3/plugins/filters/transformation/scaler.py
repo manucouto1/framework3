@@ -1,5 +1,6 @@
 from typing import Optional
 from sklearn.preprocessing import StandardScaler
+from framework3.base import BaseMetric
 from framework3.base.base_types import XYData
 from framework3.base.base_clases import BaseFilter
 from framework3.container.container import Container
@@ -49,7 +50,9 @@ class StandardScalerPlugin(BaseFilter):
         super().__init__()  # Call the BaseFilter constructor to initialize the plugin's parameters
         self._scaler = StandardScaler()
 
-    def fit(self, x: XYData, y: Optional[XYData]) -> None:
+    def fit(
+        self, x: XYData, y: Optional[XYData], evaluator: BaseMetric | None = None
+    ) -> Optional[float]:
         """
         Fit the StandardScaler to the input data.
 
@@ -63,6 +66,7 @@ class StandardScalerPlugin(BaseFilter):
             None
         """
         self._scaler.fit(x.value)
+        return None  # StandardScaler doesn't use y for fitting
 
     def predict(self, x: XYData) -> XYData:
         """

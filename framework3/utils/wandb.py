@@ -1,13 +1,38 @@
 from typing import Any, Callable, Dict, List, Literal
 import wandb
-
-from framework3.base import BaseMetric, XYData
-from framework3.plugins.pipelines.sequential import F3Pipeline
+from rich import print
+from framework3.base import BaseMetric, XYData, BaseFilter
 
 
 class WandbSweepManager:
     @staticmethod
-    def generate_config_for_pipeline(pipepline: F3Pipeline) -> Dict[str, Any]:
+    def get_grid(aux: Dict[str, Any], config: Dict[str, Any]):
+        match aux["params"]:
+            case {"filters": filters, **r}:
+                for filter_config in filters:
+                    WandbSweepManager.get_grid(filter_config, config)
+            case {"pipeline": pipeline, **r}:  # noqa: F841
+                WandbSweepManager.get_grid(pipeline, config)
+            case p_params:
+                if "_grid" in aux:
+                    f_config = {}
+                    for param, value in aux["_grid"].items():
+                        print(f"categorical param: {param}: {value}")
+                        p_params.update({param: value})
+                        match type(value):
+                            case list():
+                                f_config[param] = {"values": value}
+                            case dict():
+                                f_config[param] = value
+                            case _:
+                                f_config[param] = {"values": value}
+                    if len(f_config) > 0:
+                        config["parameters"]["filters"]["parameters"][
+                            str(aux["clazz"])
+                        ] = {"parameters": f_config}
+
+    @staticmethod
+    def generate_config_for_pipeline(pipepline: BaseFilter) -> Dict[str, Any]:
         """
         Generate a Weights & Biases sweep configuration from a dumped pipeline.
 
@@ -18,33 +43,37 @@ class WandbSweepManager:
             Dict[str, Any]: A wandb sweep configuration
         """
         sweep_config: Dict[str, Dict[str, Dict[str, Any]]] = {
-            "parameters": {"filters": {"parameters": {}}, "order": {"value": []}}
+            "parameters": {"filters": {"parameters": {}}, "pipeline": {"value": {}}}
         }
 
         dumped_pipeline = pipepline.item_dump(include=["_grid"])
-        for filter_config in dumped_pipeline["params"]["filters"]:
-            if "_grid" in filter_config:
-                filter_config["params"].update(**filter_config["_grid"])
+        # for filter_config in dumped_pipeline["params"]["filters"]:
+        #     if "_grid" in filter_config:
+        #         filter_config["params"].update(**filter_config["_grid"])
 
-            f_config = {}
-            for k, v in filter_config["params"].items():
-                if type(v) is list:
-                    f_config[k] = {"values": v}
-                elif type(v) is dict:
-                    f_config[k] = v
-                else:
-                    f_config[k] = {"value": v}
+        #         f_config = {}
+        #         for k, v in filter_config["_grid"].items():
+        #             if type(v) is list:
+        #                 f_config[k] = {"values": v}
+        #             elif type(v) is dict:
+        #                 f_config[k] = v
+        #             else:
+        #                 f_config[k] = {"value": v}
 
-            sweep_config["parameters"]["filters"]["parameters"][
-                str(filter_config["clazz"])
-            ] = {"parameters": f_config}
-            sweep_config["parameters"]["order"]["value"].append(filter_config["clazz"])
+        #         if len(f_config) > 0:
+        #             sweep_config["parameters"]["filters"]["parameters"][
+        #                 str(filter_config["clazz"])
+        #             ] = {"parameters": f_config}
+
+        WandbSweepManager.get_grid(dumped_pipeline, sweep_config)
+
+        sweep_config["parameters"]["pipeline"]["value"] = dumped_pipeline
 
         return sweep_config
 
     def create_sweep(
         self,
-        pipeline: F3Pipeline,
+        pipeline: BaseFilter,
         project_name: str,
         scorer: BaseMetric,
         x: XYData,
@@ -60,6 +89,7 @@ class WandbSweepManager:
             "name": scorer.__class__.__name__,
             "goal": "maximize" if scorer.higher_better else "minimize",
         }
+        print(sweep_config)
         return wandb.sweep(sweep_config, project=project_name)  # type: ignore
 
     def get_sweep(self, project_name, sweep_id):

@@ -1,3 +1,4 @@
+from framework3.base import BaseMetric
 from framework3.base.base_clases import BaseFilter
 from framework3.container.container import Container
 from framework3.base.base_types import XYData
@@ -88,7 +89,9 @@ class KnnFilter(BaseFilter):
             n_jobs=n_jobs,
         )
 
-    def fit(self, x: XYData, y: Optional[XYData]) -> None:
+    def fit(
+        self, x: XYData, y: Optional[XYData], evaluator: BaseMetric | None = None
+    ) -> Optional[float]:
         """
         Fit the KNN model to the given data.
 
@@ -97,6 +100,7 @@ class KnnFilter(BaseFilter):
             y (XYData): The target values.
         """
         self._clf.fit(x.value, y.value)  # type: ignore
+        return self._clf.score(x.value, y.value)  # type: ignore
 
     def predict(self, x: XYData) -> XYData:
         """

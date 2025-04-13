@@ -3,11 +3,12 @@ import hashlib
 import inspect
 from abc import ABC, abstractmethod
 from framework3.base.exceptions import NotTrainableFilterError
-from typing import Any, Dict, Optional, Tuple, Type, TypeVar, get_type_hints
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, get_type_hints
 
 import numpy as np
 from fastapi.encoders import jsonable_encoder
 from typeguard import typechecked
+
 
 from framework3.base.base_factory import BaseFactory
 from framework3.base.base_types import Float, XYData
@@ -338,7 +339,7 @@ class BaseFilter(BasePlugin):
         except Exception:
             raise ValueError("Trainable filter model not trained or loaded")
 
-    def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData]) -> None:
+    def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData]) -> Optional[float]:
         self._pre_fit(x, y)
         return self._original_fit(x, y)
 
@@ -363,7 +364,7 @@ class BaseFilter(BasePlugin):
         self.__dict__["fit"] = self._pre_fit_wrapp
         self.__dict__["predict"] = self._pre_predict_wrapp
 
-    def fit(self, x: XYData, y: Optional[XYData]) -> None:
+    def fit(self, x: XYData, y: Optional[XYData]) -> Optional[float]:
         """
         Method for fitting the filter to the data.
 
@@ -428,18 +429,11 @@ class BaseFilter(BasePlugin):
         data_hashcode = hashlib.sha1(data_str.encode("utf-8")).hexdigest()
         return data_hashcode, data_str
 
-    def grid(self, **kwargs) -> BaseFilter:
-        """
-        Implement grid search functionality here.
-        Checks if the provided kwargs are valid parameters for the __init__ method.
-        """
-        init_params = inspect.signature(self.__class__.__init__).parameters
-        invalid_params = set(kwargs.keys()) - set(init_params.keys())
-        if invalid_params:
-            raise ValueError(
-                f"Invalid parameters for grid search: {', '.join(invalid_params)}"
-            )
-        self._grid = kwargs
+    def grid(self, grid: Dict[str, List[Any] | Tuple[Any, Any]]) -> BaseFilter:
+        self._grid = grid
+        return self
+
+    def unwrap(self) -> BaseFilter:
         return self
 
 

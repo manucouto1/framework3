@@ -43,7 +43,7 @@ class SkWrapper(BaseEstimator):
             **kwargs: Keyword arguments to be passed to the wrapped BaseFilter class.
         """
         self._z_clazz: type[BaseFilter] = z_clazz
-        self._model: BaseFilter
+        self._model: BaseFilter = self._z_clazz(**kwargs)
         self.kwargs = kwargs
 
     def get_zclazz(self) -> str:

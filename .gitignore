@@ -180,3 +180,6 @@ main*.py
 /examples/cache
 /examples/cache/*
 /examples/cache/**
+
+*.html
+*.db

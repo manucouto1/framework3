@@ -5,7 +5,7 @@ import pytest
 import typeguard
 import numpy as np
 
-from framework3 import WandbPipeline
+from framework3 import WandbOptimizer
 
 
 def test_wandb_pipeline_init_raises_value_error():
@@ -14,7 +14,7 @@ def test_wandb_pipeline_init_raises_value_error():
     with pytest.raises(
         ValueError, match="Either pipeline or sweep_id must be provided"
     ):
-        WandbPipeline(
+        WandbOptimizer(
             project="test_project",
             pipeline=None,
             sweep_id=None,
@@ -29,7 +29,7 @@ def test_wandb_pipeline_init_raises_value_error_for_invalid_project():
     with pytest.raises(
         ValueError, match="Either pipeline or sweep_id must be provided"
     ):
-        WandbPipeline(
+        WandbOptimizer(
             project="",
             pipeline=MagicMock(),
             sweep_id=None,
@@ -38,7 +38,7 @@ def test_wandb_pipeline_init_raises_value_error_for_invalid_project():
         )
 
     with pytest.raises(typeguard.TypeCheckError):
-        WandbPipeline(
+        WandbOptimizer(
             project=None,  # type: ignore
             pipeline=MagicMock(),
             sweep_id=None,
@@ -54,7 +54,7 @@ def test_wandb_pipeline_init_with_valid_parameters():
     mock_scorer = MagicMock(spec=BaseMetric)
     mock_metrics = [MagicMock(spec=BaseMetric)]
 
-    wandb_pipeline = WandbPipeline(
+    wandb_pipeline = WandbOptimizer(
         project="test_project",
         pipeline=mock_pipeline,
         sweep_id=None,
@@ -85,7 +85,7 @@ def test_wandb_pipeline_init_and_fit():
             F1,
             F3Pipeline,
             StandardScalerPlugin,
-            WandbPipeline,
+            WandbOptimizer,
             XYData,
         )
         from framework3.base import BaseMetric
@@ -107,7 +107,7 @@ def test_wandb_pipeline_init_and_fit():
         mock_y = XYData.mock(np.random.randint(0, 2, 100))
 
         # Initialize WandbPipeline
-        wandb_pipeline = WandbPipeline(
+        wandb_pipeline = WandbOptimizer(
             project="test_project",
             pipeline=real_pipeline,
             sweep_id=None,

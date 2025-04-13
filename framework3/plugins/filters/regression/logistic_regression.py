@@ -1,4 +1,5 @@
-from framework3.base import BaseFilter, BasePlugin, XYData
+from typing import Optional
+from framework3.base import BaseFilter, BaseMetric, BasePlugin, XYData
 from framework3.container.container import Container
 from sklearn.linear_model import LogisticRegression
 
@@ -52,7 +53,9 @@ class LogistiRegressionlugin(BaseFilter, BasePlugin):
         """
         self._logistic = LogisticRegression(max_iter=max_ite, tol=tol)
 
-    def fit(self, x: XYData, y: XYData | None) -> None:
+    def fit(
+        self, x: XYData, y: Optional[XYData], evaluator: BaseMetric | None = None
+    ) -> Optional[float]:
         """
         Fit the logistic regression model.
 
@@ -78,6 +81,7 @@ class LogistiRegressionlugin(BaseFilter, BasePlugin):
                 "Target values (y) cannot be None for logistic regression."
             )
         self._logistic.fit(x._value, y._value)  # type: ignore
+        return self._logistic.score(x._value, y._value)  # type: ignore
 
     def predict(self, x: XYData) -> XYData:
         """

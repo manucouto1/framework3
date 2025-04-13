@@ -1,3 +1,4 @@
+from typing import Literal
 from sklearn.metrics import f1_score, precision_score, recall_score
 from framework3.base.base_types import Float
 from framework3.base.base_types import XYData
@@ -96,7 +97,11 @@ class Precission(BaseMetric):
         >>> print(f"Precision Score: {score}")
     """
 
-    def __init__(self, average: str = "weighted"):
+    def __init__(
+        self,
+        average: Literal["micro", "macro", "samples", "weighted", "binary"]
+        | None = "weighted",
+    ):
         """
         Initialize the Precision metric.
 
@@ -104,7 +109,6 @@ class Precission(BaseMetric):
             average (str): The type of averaging performed on the data. Default is 'weighted'.
         """
         super().__init__(average=average)
-        self.average = average
 
     def evaluate(
         self, x_data: XYData, y_true: XYData | None, y_pred: XYData, **kwargs
@@ -159,7 +163,11 @@ class Recall(BaseMetric):
     ```
     """
 
-    def __init__(self, average: str = "weighted"):
+    def __init__(
+        self,
+        average: Literal["micro", "macro", "samples", "weighted", "binary"]
+        | None = "weighted",
+    ):
         """
         Initialize the Recall metric.
 
@@ -167,7 +175,6 @@ class Recall(BaseMetric):
             average (str): The type of averaging performed on the data. Default is 'weighted'.
         """
         super().__init__(average=average)
-        self.average = average
 
     def evaluate(
         self, x_data: XYData, y_true: XYData | None, y_pred: XYData, **kwargs

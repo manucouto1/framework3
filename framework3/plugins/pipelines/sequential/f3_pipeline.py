@@ -125,20 +125,22 @@ class F3Pipeline(SequentialPipeline):
         """Finish pipeline execution (e.g., close logger)."""
         # TODO: Finalize logger, possibly wandb
 
-    def fit(self, x: XYData, y: Optional[XYData]) -> None:
+    def fit(self, x: XYData, y: Optional[XYData]) -> None | float:
         rprint("_" * 100)
         rprint("Fitting pipeline...")
         rprint("*" * 100)
-
+        loss = None
         for filter in self.filters:
             rprint(f"\n* {filter}:")
             try:
-                filter.fit(x, y)
+                loss = filter.fit(x, y)
             except NotTrainableFilterError:
                 filter.init()  # Initialize filter
                 # Si el filtro no es entrenable, simplemente continuamos
 
             x = filter.predict(x)
+
+        return loss
 
     def predict(self, x: XYData) -> XYData:
         """
@@ -187,3 +189,6 @@ class F3Pipeline(SequentialPipeline):
                 x_data, y_true, y_pred
             )
         return evaluations
+
+    def inner(self) -> List[BaseFilter]:
+        return self.filters

@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Dict, Sequence
+from typing import Any, Dict, Optional, Sequence
 from framework3.base import XYData, BaseFilter
 from framework3.base import ParallelPipeline
 from framework3.base.exceptions import NotTrainableFilterError
@@ -70,7 +70,7 @@ class HPCPipeline(ParallelPipeline):
             # Handle the exception appropriately
             raise e
 
-    def fit(self, x: XYData, y: XYData | None = None):
+    def fit(self, x: XYData, y: Optional[XYData]):
         """
         Fit the filters in the pipeline to the input data.
 
@@ -126,18 +126,28 @@ class HPCPipeline(ParallelPipeline):
         self, x_data: XYData, y_true: XYData | None, y_pred: XYData
     ) -> Dict[str, Any]:
         """
-        Evaluate the pipeline's performance.
+        Evaluate the pipeline using the provided metrics.
+
+        This method applies each metric in the pipeline to the predicted and true values,
+        returning a dictionary of results.
 
         Args:
-            x_data (XYData): The input data.
-            y_true (XYData | None): The true target values, if available.
-            y_pred (XYData): The predicted values.
+            x_data (XYData): Input data.
+            y_true (XYData|None): True target data.
+            y_pred (XYData): Predicted target data.
 
         Returns:
-            Dict[str, Any]: A dictionary containing evaluation metrics.
+            Dict[str, Any]: A dictionary containing the evaluation results for each metric.
+
+        Example:
+            >>> evaluation = pipeline.evaluate(x_test, y_test, predictions)
+            >>> print(evaluation)
+            {'F1Score': 0.85}
         """
-        # Implement evaluation if necessary
-        return {}
+        results = {}
+        for metric in self.metrics:
+            results[metric.__class__.__name__] = metric.evaluate(x_data, y_true, y_pred)
+        return results
 
     def log_metrics(self):
         """

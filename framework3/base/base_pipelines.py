@@ -1,10 +1,13 @@
+from __future__ import annotations  # noqa: D100
 from abc import abstractmethod
-from typing import Optional
+from typing import Any, Dict, List, Optional, Type
 from framework3.base.base_clases import BaseFilter
+from framework3.base.base_optimizer import BaseOptimizer
+from framework3.base.base_splitter import BaseSplitter
 from framework3.base.base_types import XYData
 
 
-__all__ = ["BasePipeline", "SequentialPipeline", "ParallelPipeline", "GridPipeline"]
+__all__ = ["BasePipeline", "SequentialPipeline", "ParallelPipeline"]
 
 
 class BasePipeline(BaseFilter):
@@ -57,29 +60,49 @@ class BasePipeline(BaseFilter):
         ...
 
     @abstractmethod
-    def log_metrics(self) -> None:
+    def evaluate(
+        self, x_data: XYData, y_true: XYData | None, y_pred: XYData
+    ) -> Dict[str, Any]:
         """
-        Log the metrics of the pipeline.
+        Evaluate the metric based on the provided data.
 
-        This method should be implemented to record and possibly display
-        the performance metrics of the pipeline.
+        This method should be implemented by subclasses to calculate the specific metric.
+
+        Parameters:
+        -----------
+        x_data : XYData
+            The input data used for the prediction.
+        y_true : XYData
+            The ground truth or actual values.
+        y_pred : XYData
+            The predicted values.
+
+        Returns:
+        --------
+        Float | np.ndarray
+            The calculated metric value. This can be a single float or a numpy array,
+            depending on the specific metric implementation.
         """
         ...
 
-    @abstractmethod
-    def finish(self) -> None:
-        """
-        Finish the pipeline processing.
-
-        This method should be implemented to perform any necessary cleanup
-        or finalization steps after the pipeline has completed its processing.
-        """
-        ...
-
-    def init(self):
-        super().init()
+    def init(self, *args, **kwargs):
+        super().init(*args, **kwargs)
         for filter in self.filters:
-            filter.init()
+            filter.init(*args, **kwargs)
+
+    def get_types(self) -> List[Type[BaseFilter]]:
+        return list(map(lambda obj: type(obj), self.filters))
+
+    def optimizer(self, optimizer: BaseOptimizer) -> BaseOptimizer:
+        optimizer.optimize(self)
+        return optimizer
+
+    def splitter(self, splitter: BaseSplitter) -> BaseSplitter:
+        splitter.split(self)
+        return splitter
+
+    def inner(self) -> BaseFilter | List[BaseFilter] | None:
+        return self.filters
 
 
 class SequentialPipeline(BasePipeline):
@@ -116,6 +139,3 @@ class SequentialPipeline(BasePipeline):
 
 
 class ParallelPipeline(BasePipeline): ...
-
-
-class GridPipeline(BasePipeline): ...

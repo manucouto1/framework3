@@ -1,3 +1,4 @@
+from framework3.base import BaseMetric
 from framework3.base.base_clases import BaseFilter
 from framework3.container.container import Container
 from framework3.base.base_types import XYData
@@ -86,7 +87,9 @@ class KMeansFilter(BaseFilter):
             algorithm=algorithm,
         )
 
-    def fit(self, x: XYData, y: Optional[XYData] = None) -> None:
+    def fit(
+        self, x: XYData, y: Optional[XYData], evaluator: BaseMetric | None = None
+    ) -> Optional[float]:
         """
         Fit the KMeans model to the given data.
 
@@ -95,6 +98,7 @@ class KMeansFilter(BaseFilter):
             y (XYData, optional): Not used, present for API consistency.
         """
         self._clf.fit(x.value)
+        return self._clf.inertia_  # type: ignore
 
     def predict(self, x: XYData) -> XYData:
         """

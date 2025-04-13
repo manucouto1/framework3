@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, List, Literal, Optional
+from framework3.base import BaseMetric
 from framework3.base.base_types import XYData
 from framework3.base.base_clases import BaseFilter, BasePlugin
 from framework3.container.container import Container
@@ -59,7 +60,9 @@ class ClassifierSVMPlugin(BaseFilter, BasePlugin):
         super().__init__(C=C, kernel=kernel, gamma=gamma)
         self._model = SVC(C=C, kernel=kernel, gamma=gamma)
 
-    def fit(self, x: XYData, y: XYData | None):
+    def fit(
+        self, x: XYData, y: Optional[XYData], evaluator: BaseMetric | None = None
+    ) -> Optional[float]:
         """
         Fit the SVM model using the provided training data.
 
@@ -69,6 +72,8 @@ class ClassifierSVMPlugin(BaseFilter, BasePlugin):
         """
         if y is not None:
             self._model.fit(x.value, y.value)  # type: ignore
+            return self._model.score(x.value, y.value)  # type: ignore
+        return None
 
     def predict(self, x: XYData):
         """

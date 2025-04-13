@@ -1,78 +1,23 @@
 from typing import Any, Callable, Dict, List, Tuple, Optional
 
 from sklearn.model_selection import GridSearchCV
-from framework3.base import XYData
-from framework3.base import BaseFilter, BaseMetric, GridPipeline
+from framework3.base import BaseMetric, BaseFilter, XYData
+from framework3.base.base_optimizer import BaseOptimizer
 from framework3.container.container import Container
 from sklearn.pipeline import Pipeline
 
 from framework3.utils.skestimator import SkWrapper
+from rich import print
 
-
-__all__ = ["GridSearchPipeline"]
+__all__ = ["SklearnOptimizer"]
 
 
 @Container.bind()
-class GridSearchPipeline(GridPipeline):
-    """
-    A pipeline that performs grid search cross-validation on a sequence of BaseFilters.
-
-    This pipeline uses scikit-learn's GridSearchCV to perform hyperparameter tuning
-    on a given sequence of BaseFilters.
-
-    Attributes:
-        _pipeline (F3Pipeline): The internal pipeline of filters.
-        _clf (GridSearchCV): The GridSearchCV object used for hyperparameter tuning.
-
-    Example:
-        ```python
-        from framework3.plugins.filters.clasification.svm import ClassifierSVMPlugin
-        from framework3.plugins.filters.transformation.pca import PCAPlugin
-        from framework3.base.base_types import XYData
-        import numpy as np
-
-        # Create sample data
-        X = np.array([[1, 2], [2, 3], [3, 4], [4, 5]])
-        y = np.array([0, 0, 1, 1])
-        X_data = XYData(_hash='X_data', _path='/tmp', _value=X)
-        y_data = XYData(_hash='y_data', _path='/tmp', _value=y)
-
-        # Define the parameter grid
-        param_grid = {
-            'pca__n_components': [1, 2],
-            'svm__C': [0.1, 1, 10],
-            'svm__kernel': ['linear', 'rbf'],
-        }
-
-        # Create the GridSearchCVPipeline
-        grid_search = GridSearchCVPipeline(
-            filters=[
-                ('pca', PCAPlugin()),
-                ('svm', ClassifierSVMPlugin()),
-            ],
-            param_grid=param_grid,
-            scoring='accuracy',
-            cv=3
-        )
-
-        # Fit the grid search
-        grid_search.fit(X_data, y_data)
-
-        # Make predictions
-        X_test = XYData(_hash='X_test', _path='/tmp', _value=np.array([[2.5, 3.5]]))
-        predictions = grid_search.predict(X_test)
-        print(predictions.value)
-
-        # Access the best parameters
-        print(grid_search._clf.best_params_)
-        ```
-    """
-
+class SklearnOptimizer(BaseOptimizer):
     def __init__(
         self,
-        filterx: List[type[BaseFilter]],
-        param_grid: Dict[str, List[Any]],
         scoring: str | Callable | Tuple | Dict,
+        pipeline: BaseFilter | None = None,
         cv: int = 2,
         metrics: List[BaseMetric] = [],
     ):
@@ -87,30 +32,58 @@ class GridSearchPipeline(GridPipeline):
             cv (int, optional): Determines the cross-validation splitting strategy. Defaults to 2.
         """
         super().__init__(
-            filters=filterx,
-            param_grid=param_grid,
             scoring=scoring,
             cv=cv,
             metrics=metrics,
+            pipeline=pipeline,
         )
 
-        self._filters = list(map(lambda x: (x.__name__, SkWrapper(x)), filterx))
+        self._grid = {}
 
-        self._param_grid = param_grid
+    def get_grid(self, aux: Dict[str, Any]) -> None:
+        match aux["params"]:
+            case {"filters": filters, **r}:
+                for filter_config in filters:
+                    self.get_grid(filter_config)
+            case {"pipeline": pipeline, **r}:  # noqa: F841
+                self.get_grid(pipeline)
+            case _:
+                if "_grid" in aux:
+                    for param, value in aux["_grid"].items():
+                        if type(value) is list:
+                            self._grid[f'{aux["clazz"]}__{param}'] = value
+                        else:
+                            self._grid[f'{aux["clazz"]}__{param}'] = [value]
+
+    def optimize(self, pipeline: BaseFilter):
+        """Initialize the pipeline (e.g., set up logging)."""
+        self.pipeline = pipeline
+        self._filters = list(
+            map(lambda x: (x.__name__, SkWrapper(x)), self.pipeline.get_types())
+        )
+
+        dumped_pipeline = self.pipeline.item_dump(include=["_grid"])
+        print(dumped_pipeline)
+        self.get_grid(dumped_pipeline)
+
+        # for filter_config in dumped_pipeline["params"]["filters"]:
+        #     if "_grid" in filter_config:
+        #         filter_config["params"].update(**filter_config["_grid"])
+        #         for k, v in filter_config["params"].items():
+        #             if type(v) is list:
+        #                 param_grid[f'{filter_config["clazz"]}__{k}'] = v
+        #             else:
+        #                 param_grid[f'{filter_config["clazz"]}__{k}'] = [v]
 
         self._pipeline = Pipeline(self._filters)
 
         self._clf: GridSearchCV = GridSearchCV(
             estimator=self._pipeline,
-            param_grid=self._param_grid,
-            scoring=scoring,
-            cv=cv,
-            verbose=0,
+            param_grid=self._grid,
+            scoring=self.scoring,
+            cv=self.cv,
+            verbose=1,
         )
-
-    def init(self):
-        """Initialize the pipeline (e.g., set up logging)."""
-        # TODO: Initialize logger, possibly wandb
 
     def start(
         self, x: XYData, y: Optional[XYData], X_: Optional[XYData]
@@ -139,7 +112,7 @@ class GridSearchPipeline(GridPipeline):
             print(f"Error during pipeline execution: {e}")
             raise e
 
-    def fit(self, x: XYData, y: Optional[XYData]) -> None:
+    def fit(self, x: XYData, y: Optional[XYData]) -> None | float:
         """
         Fit the GridSearchCV object to the given data.
 
@@ -148,6 +121,7 @@ class GridSearchPipeline(GridPipeline):
             y (Optional[XYData]): The target values.
         """
         self._clf.fit(x.value, y.value if y is not None else None)
+        return self._clf.best_score_  # type: ignore
 
     def predict(self, x: XYData) -> XYData:
         """
@@ -163,19 +137,31 @@ class GridSearchPipeline(GridPipeline):
 
     def evaluate(
         self, x_data: XYData, y_true: XYData | None, y_pred: XYData
-    ) -> Dict[str, float]:
+    ) -> Dict[str, Any]:
         """
-        Evaluate the performance of the best estimator.
+        Evaluate the pipeline using the provided metrics.
+
+        This method applies each metric in the pipeline to the predicted and true values,
+        returning a dictionary of results.
 
         Args:
-            x_data (XYData): The input features.
-            y_true (XYData): The true target values.
-            y_pred (XYData): The predicted target values.
+            x_data (XYData): Input data.
+            y_true (XYData|None): True target data.
+            y_pred (XYData): Predicted target data.
 
         Returns:
-            Dict[str, float]: A dictionary containing evaluation metrics.
+            Dict[str, Any]: A dictionary containing the evaluation results for each metric.
+
+        Example:
+            >>> evaluation = pipeline.evaluate(x_test, y_test, predictions)
+            >>> print(evaluation)
+            {'F1Score': 0.85}
         """
-        return {"best_score": self._clf.best_score_}
+        results = {}
+        for metric in self.metrics:
+            results[metric.__class__.__name__] = metric.evaluate(x_data, y_true, y_pred)
+        results["best_score"] = self._clf.best_score_  # type: ignore
+        return results
 
     def log_metrics(self):
         """Log metrics (to be implemented)."""

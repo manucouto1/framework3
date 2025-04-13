@@ -1,6 +1,7 @@
 from copy import deepcopy
-from typing import List, Dict, Any, Sequence
-from framework3.base import XYData
+from typing import List, Dict, Any, Optional, Sequence
+import numpy as np
+from framework3.base import BaseMetric, XYData
 from framework3.base import BaseFilter
 from framework3.base import ParallelPipeline
 from framework3.base.exceptions import NotTrainableFilterError
@@ -51,7 +52,9 @@ class MonoPipeline(ParallelPipeline):
         super().__init__(filters=filters)
         self.filters = filters
 
-    def fit(self, x: XYData, y: XYData | None = None):
+    def fit(
+        self, x: XYData, y: Optional[XYData], evaluator: BaseMetric | None = None
+    ) -> Optional[float]:
         """
         Fit all filters in parallel.
 
@@ -65,11 +68,13 @@ class MonoPipeline(ParallelPipeline):
         Example:
             >>> pipeline.fit(x_train, y_train)
         """
+        losses = []
         for filter in self.filters:
             try:
-                filter.fit(deepcopy(x), y)
+                losses.append(filter.fit(deepcopy(x), y))
             except NotTrainableFilterError:
                 filter.init()
+        return float(np.mean(losses)) if losses else None
 
     def predict(self, x: XYData) -> XYData:
         """
