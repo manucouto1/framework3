@@ -4,84 +4,115 @@ icon: material/bookshelf
 
 # Framework3 API Documentation
 
-Welcome to the API documentation for Framework3. This guide provides detailed information about the modules, classes, and functions that make up the Framework3 library.
+Welcome to the API documentation for Framework3. This guide details the modules, classes, and functions that form the backbone of Framework3, enabling you to build, extend, and customize ML experimentation workflows. Use the sections below to quickly navigate to the areas you need.
+
+---
+
+## Table of Contents
+
+- [Core Components](#core-components)
+  - [Pipelines](#pipelines)
+  - [Filters](#filters)
+  - [Optimizers](#optimizers)
+  - [Splitters](#splitters)
+  - [Metrics](#metrics)
+- [Container & Dependency Injection](#container--dependency-injection)
+- [Utilities & Helpers](#utilities--helpers)
+- [Using the API](#using-the-api)
+- [Advanced Topics](#advanced-topics)
+
+---
 
 ## Core Components
 
-Framework3 is built around several core components. Here's an overview of the main modules and their purposes:
+Framework3's core components provide the fundamental building blocks. They define the structure and behavior of filters, pipelines, and more.
 
-### 1. Pipelines
+### Pipelines
 
-Pipelines are the backbone of Framework3, orchestrating the flow of data through various processing steps. We have four types of pipelines divided into three categories:
+Pipelines orchestrate the data flow through various processing steps. They are divided by type:
 
-#### Sequential Pipeline
-- [F3Pipeline](plugins/pipelines/sequential/f3_pipeline.md): The basic sequential pipeline structure.
+- **Sequential Pipeline**
+  - [F3Pipeline](plugins/pipelines/sequential/f3_pipeline.md) – The basic sequential pipeline.
 
-#### Parallel Pipelines
-- [MonoPipeline](plugins/pipelines/parallel/mono_pipeline.md): A pipeline for parallel processing of independent tasks.
-- [HPCPipeline](plugins/pipelines/parallel/hpc_pipeline.md): A pipeline designed for high-performance computing environments.
+- **Parallel Pipelines**
+  - [MonoPipeline](plugins/pipelines/parallel/mono_pipeline.md) – For parallel processing of independent tasks.
+  - [HPCPipeline](plugins/pipelines/parallel/hpc_pipeline.md) – Optimized for high-performance computing environments.
 
-#### Grid Search Pipeline
-- [GridSearchPipeline](plugins/pipelines/grid/g3_pipeline.md): A pipeline for performing grid search over hyperparameters.
+### Filters
 
-### 2. Filters
-
-Filters are individual processing units that can be combined within pipelines. Framework3 provides several categories of filters:
+Filters are modular processing units that can be composed together within pipelines:
 
 #### Classification Filters
-- [SVMClassifier](plugins/filters/classification.md#svm-classifier): Support Vector Machine classifier.
-- [KNNClassifier](plugins/filters/classification.md#k-nearest-neighbors-classifier): K-Nearest Neighbors classifier.
+- [SVMClassifier](plugins/filters/classification.md#svm-classifier) – Support Vector Machine classifier.
+- [KNNClassifier](plugins/filters/classification.md#k-nearest-neighbors-classifier) – K-Nearest Neighbors classifier.
 
 #### Clustering Filters
-- [KMeansCluster](plugins/filters/clustering.md): K-Means clustering algorithm.
-- [DBSCANCluster](plugins/filters/clustering.md): Density-Based Spatial Clustering of Applications with Noise.
+- [KMeansCluster](plugins/filters/clustering.md) – K-Means clustering algorithm.
+- [DBSCANCluster](plugins/filters/clustering.md) – Density-Based Spatial Clustering of Applications with Noise.
 
 #### Transformation Filters
-- [StandardScalerFilter](plugins/filters/transformation.md#standard-scaler): Standardize features by removing the mean and scaling to unit variance.
-- [PCAFilter](plugins/filters/transformation.md#pca-principal-component-analysis): Perform Principal Component Analysis for dimensionality reduction.
+- [StandardScalerFilter](plugins/filters/transformation.md#standard-scaler) – Standardizes features by removing the mean and scaling to unit variance.
+- [PCAFilter](plugins/filters/transformation.md#pca-principal-component-analysis) – Performs Principal Component Analysis for dimensionality reduction.
 
 #### Regression Filters
-- [LinearRegression](plugins/filters/regression.md#linear-regression): Simple linear regression model.
-- [RandomForestRegressor](plugins/filters/regression.md): Random Forest regression model.
+- [LinearRegression](plugins/filters/regression.md#linear-regression) – Simple linear regression model.
+- [RandomForestRegressor](plugins/filters/regression.md) – Random Forest regression model.
 
-#### Grid Search Filters
-- [GridSearchCVFilter](plugins/filters/grid_search.md): Exhaustive search over specified parameter values for an estimator.
+#### Grid Search & Caching Filters
+- [GridSearchCVFilter](plugins/filters/grid_search.md) – Exhaustive search over specified parameter values.
+- [CachedFilter](plugins/filters/cache.md) – Caches filter results to improve performance.
 
-#### Cache Filters
-- [CachedFilter](plugins/filters/cache.md): A filter that caches the results of other filters to improve performance.
+### Optimizers
+Optimizers help fine-tune hyperparameters for optimal performance:
 
-Each filter category serves a specific purpose in the data processing and machine learning pipeline. You can combine these filters in various ways to create complex data processing workflows.
+- [OptunaOptimizer](plugins/optimizers/optuna_optimizer.md) – Integrates Optuna for hyperparameter tuning.
+- [WandbOptimizer](plugins/optimizers/wandb_optimizer.md) – For advanced optimization using Weights & Biases.
 
-### 3. Metrics
+### Splitters
+Splitters divide the dataset into folds for cross-validation and other evaluation strategies:
 
-Metrics are used to evaluate the performance of your models. Framework3 provides metrics in several categories:
+- [KFoldSplitter](plugins/splitters/kfold_splitter.md) – Divides the data into k-folds.
+- [TimeSeriesSplitter](plugins/splitters/timeseries_splitter.md) – For time series data splitting.
+
+### Metrics
+
+Metrics evaluate model performance across various tasks:
 
 #### Classification Metrics
-- [F1Score](plugins/metrics/classification.md#f1-score): F1 score metric.
-- [AccuracyScore](plugins/metrics/classification.md#accuracy-score): Accuracy score metric.
-- [PrecisionScore](plugins/metrics/classification.md#precision-score): Precision score metric.
-- [RecallScore](plugins/metrics/classification.md#recall-score): Recall score metric.
+- [F1Score](plugins/metrics/classification.md#f1-score)
+- [AccuracyScore](plugins/metrics/classification.md#accuracy-score)
+- [PrecisionScore](plugins/metrics/classification.md#precision-score)
+- [RecallScore](plugins/metrics/classification.md#recall-score)
 
-#### Clustering Metrics
-- [SilhouetteScore](plugins/metrics/clustering.md#silhouette-score): Silhouette score for evaluating cluster quality.
-- [CalinskiHarabaszScore](plugins/metrics/clustering.md): Calinski-Harabasz Index for cluster validation.
+#### Clustering & Coherence Metrics
+- [SilhouetteScore](plugins/metrics/clustering.md#silhouette-score)
+- [CalinskiHarabaszScore](plugins/metrics/clustering.md)
+- [TopicCoherence](plugins/metrics/coherence.md#topic-coherence)
+- [WordEmbeddingCoherence](plugins/metrics/coherence.md#word-embedding-coherence)
 
-#### Coherence Metrics
-- [TopicCoherence](plugins/metrics/coherence.md): Measures the semantic coherence of topics in topic modeling.
-- [WordEmbeddingCoherence](plugins/metrics/coherence.md): Evaluates coherence using word embeddings.
+---
 
-Each metric category is designed to evaluate different aspects of model performance, allowing you to choose the most appropriate metrics for your specific machine learning tasks.
+## Container & Dependency Injection
 
-### 4. Container
+The Container is central to Framework3, managing the registration and retrieval of various components.
 
-The Container is a central component in Framework3 that manages the registration and retrieval of various components such as filters, pipelines, metrics, and storage.
+- [Container Documentation](container/container.md) – Details on the Container class and usage.
+- [bind() Decorator](container/container.md#bind) – How to register components.
 
-- [Container](container/container.md): Manages the registration and retrieval of components.
-- [bind](container/container.md): A decorator for binding components to the Container.
+---
+
+## Utilities & Helpers
+
+Additional utility functions and helpers that support the framework:
+
+- [Utilities Overview](utils/overview.md) – A guide to common utility functions.
+- [Miscellaneous Helpers](utils/misc.md) – Other useful routines.
+
+---
 
 ## Using the API
 
-To use any component of Framework3, you typically need to import it from its respective module and use the Container for registration and retrieval. For example:
+To utilize any component of Framework3, import it from the respective module and register it with the Container if necessary. For example:
 
 ```python
 from framework3.container import Container
@@ -89,46 +120,18 @@ from framework3.base import BaseFilter, BasePipeline, BaseMetric
 
 @Container.bind()
 class MyFilter(BaseFilter):
-    # Filter implementation
+    # Custom filter implementation
 
 @Container.bind()
 class MyPipeline(BasePipeline):
-    # Pipeline implementation
+    # Custom pipeline implementation
 
 @Container.bind()
 class MyMetric(BaseMetric):
-    # Metric implementation
+    # Custom metric implementation
 
-# Retrieving components
+# Retrieve components
 my_filter = Container.ff["MyFilter"]()
 my_pipeline = Container.pf["MyPipeline"]()
 my_metric = Container.mf["MyMetric"]()
 ```
-
-## Advanced Topics
-
-> ⚠️ **Alerta:** Under development.
-
-<!-- - [Custom Plugin Development](advanced/custom_plugins.md): Learn how to create your own custom plugins.
-- [Pipeline Optimization](advanced/pipeline_optimization.md): Techniques for optimizing pipeline performance.
-- [Distributed Computing](advanced/distributed_computing.md): Using Framework3 in distributed environments. -->
-
-## API Reference
-
-For a complete list of all classes and functions, refer to the [Full API Reference](index.md).
-
-## Examples
-
-To see Framework3 in action, check out our [Examples](../examples/index.md) section, which provides practical use cases and code samples.
-
-## Contributing to Framework3
-
-> ⚠️ **Alerta:** Under development.
-
-<!-- If you're interested in contributing to Framework3, please read our [Contribution Guidelines](../contributing.md) and [Code of Conduct](../code_of_conduct.md). -->
-
-## Need Help?
-
-> ⚠️ **Alerta:** Under development.
-
-<!-- If you encounter any issues or have questions about using Framework3, please check our [FAQ](../faq.md) or reach out to the community through our [GitHub Issues](https://github.com/your-username/framework3/issues) page. -->

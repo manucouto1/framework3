@@ -9,9 +9,12 @@ import numpy as np
 from fastapi.encoders import jsonable_encoder
 from typeguard import typechecked
 
-
 from framework3.base.base_factory import BaseFactory
 from framework3.base.base_types import Float, XYData
+
+from rich import print as rprint
+
+# inspect.getsource = dill.source.getsource
 
 __all__ = ["BasePlugin", "BaseFilter", "BaseMetric"]
 
@@ -274,12 +277,24 @@ class BaseFilter(BasePlugin):
 
     """
 
-    def __init__(self, *args, **kwargs):
+    def _print_acction(self, action) -> None:
+        s_str = "_" * 100
+        s_str += f"\n{action}...\n"
+        s_str += "*" * 100
+
+        if self._verbose:
+            rprint(s_str)
+
+    def verbose(self, value: bool) -> None:
+        self._verbose = value
+
+    def __init__(self, verbose=True, *args, **kwargs):
         """
         Initialize the BaseFilter instance.
 
         This method sets up attributes for storing model-related information.
         """
+        self._verbose: bool = verbose
         self._original_fit = self.fit
         self._original_predict = self.predict
 

@@ -1,4 +1,4 @@
-::: framework3.base.base_types
+::: framework3.base.base_dataset_manager
     options:
       show_root_heading: true
       show_source: true

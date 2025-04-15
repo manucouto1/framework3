@@ -126,17 +126,15 @@ class F3Pipeline(SequentialPipeline):
         # TODO: Finalize logger, possibly wandb
 
     def fit(self, x: XYData, y: Optional[XYData]) -> None | float:
-        rprint("_" * 100)
-        rprint("Fitting pipeline...")
-        rprint("*" * 100)
+        self._print_acction("Fitting pipeline")
         loss = None
         for filter in self.filters:
-            rprint(f"\n* {filter}:")
+            if self._verbose:
+                rprint(f"\t*{filter}")
             try:
                 loss = filter.fit(x, y)
             except NotTrainableFilterError:
                 filter.init()  # Initialize filter
-                # Si el filtro no es entrenable, simplemente continuamos
 
             x = filter.predict(x)
 
@@ -155,12 +153,12 @@ class F3Pipeline(SequentialPipeline):
         Raises:
             ValueError: If no filters have been trained yet.
         """
-        rprint("_" * 100)
-        rprint("Predicting pipeline...")
-        rprint("*" * 100)
+
+        self._print_acction("Predicting pipeline")
 
         for filter_ in self.filters:
-            rprint(f"\n* {filter_}")
+            if self._verbose:
+                rprint(f"\t*{filter_}")
             x = filter_.predict(x)
 
         return x
@@ -179,9 +177,8 @@ class F3Pipeline(SequentialPipeline):
         Returns:
             Dict[str, float]: A dictionary of metric names and their corresponding values.
         """
-        rprint("_" * 100)
-        rprint("Evaluating pipeline...")
-        rprint("_" * 100)
+
+        self._print_acction("Evaluating pipeline...")
 
         evaluations = {}
         for metric in self.metrics:

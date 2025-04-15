@@ -4,31 +4,47 @@ icon: octicons/mortar-board-16
 
 # Framework3 Examples
 
-Welcome to the Examples section of Framework3 documentation. This section provides a collection of practical tutorials and use cases to help you understand and effectively utilize the various features of Framework3.
+Welcome to the Examples section of the Framework3 documentation. Here you'll find a collection of hands-on tutorials and real-world use cases to help you make the most of the framework's capabilities.
 
-These examples are designed to guide you through common tasks and demonstrate best practices for working with the framework. Whether you're new to Framework3 or looking to expand your knowledge, these tutorials will help you get the most out of the platform.
+These examples are designed to walk you through common workflows and showcase best practices when working with Framework3. Whether you're just getting started or aiming to deepen your understanding, this section will guide you through using the platform effectively.
 
 ## Available Tutorials
 
-Here's an index of the currently available tutorials:
+### Simple Tutorials
+
+An index of basic tutorials to get you started:
 
 1. [Datasets Storage](data_ingestion.md)
-   Learn how to store, retrieve, update, and manage data using the Container.ds storage backend.
+   Learn how to store, retrieve, update, and manage datasets using the `Container.ds` storage backend.
 
 2. [Creating a Simple Pipeline](simple_f3pipeline.md)
-   Discover how to create a basic machine learning pipeline using Framework3's modular architecture.
-<!--
-3. [Working with Plugins](plugins_tutorial.md)
-   Explore how to use and create custom plugins to extend Framework3's functionality.
+   Build a basic machine learning pipeline using Framework3’s modular components.
 
-4. [Model Evaluation and Optimization](model_evaluation.md)
-   Learn techniques for evaluating and optimizing your machine learning models within the Framework3 ecosystem.
+### Live Tutorials
 
-5. [Distributed Processing with MapReduce](mapreduce_example.md)
-   Understand how to leverage Framework3's distributed processing capabilities for large-scale data analysis. -->
+Actively maintained notebooks showcasing more advanced use cases:
 
-Each tutorial provides step-by-step instructions, code snippets, and explanations to help you implement these features in your own projects. We recommend going through these examples in order, but feel free to jump to any specific tutorial that addresses your immediate needs.
+3. [Data Ingestion](notebooks/data_ingestion.ipynb)
+   A working notebook exploring dataset storage and retrieval.
 
-As Framework3 continues to evolve, we'll be adding more examples to this section. Check back regularly for new tutorials and updated content.
+4. [Basic Framework Usage](notebooks/simple_custom_filter.ipynb)
+   Learn how to create custom filters and integrate them into a pipeline.
 
-Happy learning!
+5. [Caching Data](notebooks/caching_heavy_data.ipynb)
+   Techniques for caching data from computationally expensive processes.
+
+6. [Optuna and K-Fold](notebooks/optuna_optimizer_with_data_splitter_kfold.ipynb)
+   Combine optimizers and data splitters to perform grid search, cross-validation, and hyperparameter tuning.
+
+7. [WandB and K-Fold](notebooks/wandb_optimizer_with_data_splitter_kfold.ipynb)
+   Leverage Weights & Biases along with K-Fold strategies for model optimization.
+
+### Real-World Applications
+
+Explore how Framework3 has been applied in real scientific research:
+
+Each tutorial includes step-by-step instructions, code examples, and explanations to help you apply these concepts in your own projects. While we recommend going through them in order, feel free to jump to whichever topic suits your current needs.
+
+This section will be regularly updated as Framework3 evolves — stay tuned for new tutorials and enhancements.
+
+Happy experimenting!

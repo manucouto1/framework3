@@ -17,6 +17,5 @@ class HuggingFaceSentenceTransformerPlugin(BaseFilter, BasePlugin):
     def fit(self, x: XYData, y: XYData | None) -> float | None: ...
 
     def predict(self, x: XYData) -> XYData:
-        inputs = x.value.tolist()
-        embeddings = self._model.encode(inputs)
+        embeddings = self._model.encode(x.value)
         return XYData.mock(torch.tensor(embeddings))

@@ -33,6 +33,7 @@ class OptunaOptimizer(BaseOptimizer):
 
     def optimize(self, pipeline: BaseFilter):
         self.pipeline = pipeline
+        self.pipeline._verbose = False
 
         if (
             self.reset_study
@@ -50,7 +51,7 @@ class OptunaOptimizer(BaseOptimizer):
 
     def exec(self, config: Dict[str, Any], x: XYData, y: XYData | None = None): ...
 
-    def get_grid(self, aux: Dict[str, Any], f: Callable, init: bool = False):
+    def get_grid(self, aux: Dict[str, Any], f: Callable):
         match aux["params"]:
             case {"filters": filters, **r}:
                 for filter_config in filters:
@@ -61,16 +62,12 @@ class OptunaOptimizer(BaseOptimizer):
                 if "_grid" in aux:
                     for param, value in aux["_grid"].items():
                         value = f(param, value)
-                        print(f"categorical param: {param}: {value}")
                         p_params.update({param: value})
-                    # if init:
-                    #     self._grid[aux["clazz"]] = aux["_grid"]
 
     def build_pipeline(
         self, dumped_pipeline: Dict[str, Any], f: Callable
     ) -> BaseFilter:
         self.get_grid(dumped_pipeline, f)
-        print(dumped_pipeline)
 
         pipeline: BaseFilter = cast(
             BaseFilter, BasePlugin.build_from_dump(dumped_pipeline, Container.pif)
@@ -78,12 +75,15 @@ class OptunaOptimizer(BaseOptimizer):
         return pipeline
 
     def fit(self, x: XYData, y: XYData | None = None):
+        self._print_acction("Fitting with OptunaOptimizer...")
+        if self._verbose:
+            print(self.pipeline)
+
         if self.pipeline is not None:
             dumped_pipeline = self.pipeline.item_dump(include=["_grid"])
+            print(dumped_pipeline)
 
             def objective(trial) -> Union[float, Sequence[float]]:
-                print(f"Trial: {trial.number}")
-
                 def matcher(k, v):
                     match v:
                         case list():
@@ -110,6 +110,7 @@ class OptunaOptimizer(BaseOptimizer):
                             raise ValueError(f"Unsupported type in grid: {k}: {v}")
 
                 pipeline: BaseFilter = self.build_pipeline(dumped_pipeline, matcher)
+                pipeline.verbose(False)
 
                 match pipeline.fit(x, y):
                     case None:
@@ -145,6 +146,10 @@ class OptunaOptimizer(BaseOptimizer):
             raise ValueError("Pipeline must be defined before fitting")
 
     def predict(self, x: XYData) -> XYData:
+        self._print_acction("Predicting with OptunaOptimizer...")
+        if self._verbose:
+            print(self.pipeline)
+
         if self.pipeline is not None:
             return self.pipeline.predict(x)
         else:

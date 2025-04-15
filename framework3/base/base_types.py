@@ -1,6 +1,6 @@
 from __future__ import annotations
 import hashlib
-from typing import Callable, Generic, Iterable, TypeVar, Any, cast
+from typing import Callable, Generic, Iterable, Tuple, TypeVar, Any, cast
 import pandas as pd
 import numpy as np
 import torch
@@ -8,7 +8,7 @@ import typing_extensions
 from multimethod import multimethod
 from scipy.sparse import spmatrix, csr_matrix, hstack, vstack
 from typing import TypeAlias
-
+from sklearn.model_selection import train_test_split
 from dataclasses import dataclass, field
 
 __all__ = ["XYData", "VData", "SkVData", "IncEx", "TypePlugable"]
@@ -42,6 +42,42 @@ class XYData(Generic[TxyData]):
     _hash: str = field(init=True)
     _path: str = field(init=True)
     _value: TxyData | Callable[..., TxyData] = field(init=True, repr=False)
+
+    def train_test_split(
+        self, x: TxyData, y: TxyData | None, test_size: float, random_state: int = 42
+    ) -> Tuple[XYData, XYData, XYData, XYData]:
+        """
+        Split the data into training and testing sets.
+
+        Args:
+            test_size (float): The proportion of the data to include in the test split.
+            random_state (int, optional): The seed for the random number generator. Defaults to 42.
+
+        Returns:
+            tuple[XYData, XYData]: The training and testing sets as XYData instances.
+
+        Example:
+            ```python
+
+            >>> data = XYData.mock(np.random.rand(10, 5))
+            >>> train_data, test_data = data.train_test_split(test_size=0.2)
+            >>> train_data.value.shape
+            (8, 5)
+            >>> test_data.value.shape
+            (2, 5)
+            ```
+
+        """
+        X_train, X_test, y_train, y_test = train_test_split(
+            x, y, test_size=test_size, random_state=random_state
+        )
+
+        return (
+            XYData.mock(X_train, hash=f"{self._hash} X train", path="/dataset"),
+            XYData.mock(X_test, hash=f"{self._hash} X test", path="/dataset"),
+            XYData.mock(y_train, hash=f"{self._hash} y train", path="/dataset"),
+            XYData.mock(y_test, hash=f"{self._hash} y test", path="/dataset"),
+        )
 
     def split(self, indices: Iterable[int]) -> XYData:
         """
@@ -79,7 +115,11 @@ class XYData(Generic[TxyData]):
         )
 
     @staticmethod
-    def mock(value: TxyData | Callable[..., TxyData]) -> XYData:
+    def mock(
+        value: TxyData | Callable[..., TxyData],
+        hash: str | None = None,
+        path: str | None = None,
+    ) -> XYData:
         """
         Create a mock XYData instance for testing or placeholder purposes.
 
@@ -98,7 +138,13 @@ class XYData(Generic[TxyData]):
             ```
 
         """
-        return XYData(_hash="Mock", _path="", _value=value)
+        if hash is None:
+            hash = "Mock"
+
+        if path is None:
+            path = "/tmp"
+
+        return XYData(_hash=hash, _path=path, _value=value)
 
     @property
     def value(self) -> TxyData:

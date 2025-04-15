@@ -44,17 +44,18 @@ theme:
 nav:
   - Home: index.md
   - Quick Start: quick_start/index.md
+  - Architecture: architecture/index.md
   - Installation: installation/index.md
   - Tutorials:
       - index: examples/index.md
       - Datasets Storage: examples/data_ingestion.md
       - F3Pipeline: examples/simple_f3pipeline.md
-  #     - First Filter:
-  #     - First Pipeline:
-  #     - Caching Data:
-  #     - Grid Search:
-  #     - Anidating Pipelines:
-  #     - Feature Extraction:
+      - Working Examples:
+        - Data Ingestion: examples/notebooks/data_ingestion.ipynb
+        - Basic Usage: examples/notebooks/simple_custom_filter.ipynb
+        - Heavy Data: examples/notebooks/caching_heavy_data.ipynb
+        - Optuna: examples/notebooks/optuna_optimizer_with_data_splitter_kfold.ipynb
+        - Wandb:  examples/notebooks/wandb_optimizer_with_data_splitter_kfold.ipynb
   - Api:
       - api/index.md
       - Base:
@@ -98,7 +99,6 @@ nav:
       - Contributing: CONTRIBUTING.md
       - Code of Conduct: CODE_OF_CONDUCT.md
 
-
 extra:
   social:
     - icon: material/github
@@ -116,31 +116,38 @@ markdown_extensions:
   - attr_list
   - pymdownx.highlight:
       anchor_linenums: true
-      use_pygments: true
-      pygments_lang_class: true
-      auto_title: true
-      linenums: true
-      linenums_style: pymdownx-inline
       line_spans: __span
+      pygments_lang_class: true
+
+
   - pymdownx.inlinehilite
   - pymdownx.snippets
+  - pymdownx.details
   - pymdownx.superfences:
       custom_fences:
         - name: tabs
           class: tabbed-set
-          # format: !!python/name:pymdownx.superfences.fence_div_format
+        - name: mermaid
+          class: mermaid
   - def_list
   - pymdownx.tasklist:
       custom_checkbox: true
   - footnotes
+  - md_in_html
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.tabbed
+  - pymdownx.caret
 
 plugins:
   - search
   - mkdocstrings
+  - mkdocs-jupyter
   - bibtex:
       bib_file: "docs/references.bib"
 
 extra_css:
   - css/styles.css
+  - css/pygments.css
 
 copyright: Manuel Couto Pintos

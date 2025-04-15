@@ -71,7 +71,7 @@ def test_grid_search_cv_pipeline_with_multiple_filters():
             PCAPlugin().grid({"n_components": [2]}),
             ClassifierSVMPlugin().grid({"C": [0.1, 1], "kernel": ["rbf"]}),
         ]
-    ).optimizer(SklearnOptimizer(scoring="accuracy", cv=2, metrics=[]))
+    ).optimizer(SklearnOptimizer(scoring="accuracy", cv=2))
 
     # Fit the pipeline
     grid_search.fit(X_data, y_data)
@@ -130,9 +130,7 @@ def test_grid_search_cv_pipeline_with_none_input():
             PCAPlugin().grid({"n_components": [1]}),
             KMeansFilter().grid({"n_clusters": [2]}),
         ]
-    ).optimizer(
-        SklearnOptimizer(scoring=AuxPlugin(metric="euclidean"), cv=2, metrics=[])
-    )
+    ).optimizer(SklearnOptimizer(scoring=AuxPlugin(metric="euclidean"), cv=2))
 
     # Test fit method with y=None
     grid_search.fit(X_data, None)

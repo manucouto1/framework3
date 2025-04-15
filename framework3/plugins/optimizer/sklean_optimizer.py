@@ -1,13 +1,14 @@
-from typing import Any, Callable, Dict, List, Tuple, Optional
+from typing import Any, Callable, Dict, Tuple, Optional
 
 from sklearn.model_selection import GridSearchCV
-from framework3.base import BaseMetric, BaseFilter, XYData
+from framework3.base import BaseFilter, XYData
 from framework3.base.base_optimizer import BaseOptimizer
 from framework3.container.container import Container
 from sklearn.pipeline import Pipeline
 
 from framework3.utils.skestimator import SkWrapper
 from rich import print
+import pandas as pd
 
 __all__ = ["SklearnOptimizer"]
 
@@ -19,7 +20,6 @@ class SklearnOptimizer(BaseOptimizer):
         scoring: str | Callable | Tuple | Dict,
         pipeline: BaseFilter | None = None,
         cv: int = 2,
-        metrics: List[BaseMetric] = [],
     ):
         """
         Initialize the GridSearchCVPipeline.
@@ -34,7 +34,6 @@ class SklearnOptimizer(BaseOptimizer):
         super().__init__(
             scoring=scoring,
             cv=cv,
-            metrics=metrics,
             pipeline=pipeline,
         )
 
@@ -56,24 +55,14 @@ class SklearnOptimizer(BaseOptimizer):
                             self._grid[f'{aux["clazz"]}__{param}'] = [value]
 
     def optimize(self, pipeline: BaseFilter):
-        """Initialize the pipeline (e.g., set up logging)."""
         self.pipeline = pipeline
+        self.pipeline.verbose(False)
         self._filters = list(
             map(lambda x: (x.__name__, SkWrapper(x)), self.pipeline.get_types())
         )
 
         dumped_pipeline = self.pipeline.item_dump(include=["_grid"])
-        print(dumped_pipeline)
         self.get_grid(dumped_pipeline)
-
-        # for filter_config in dumped_pipeline["params"]["filters"]:
-        #     if "_grid" in filter_config:
-        #         filter_config["params"].update(**filter_config["_grid"])
-        #         for k, v in filter_config["params"].items():
-        #             if type(v) is list:
-        #                 param_grid[f'{filter_config["clazz"]}__{k}'] = v
-        #             else:
-        #                 param_grid[f'{filter_config["clazz"]}__{k}'] = [v]
 
         self._pipeline = Pipeline(self._filters)
 
@@ -121,6 +110,13 @@ class SklearnOptimizer(BaseOptimizer):
             y (Optional[XYData]): The target values.
         """
         self._clf.fit(x.value, y.value if y is not None else None)
+        results = self._clf.cv_results_
+        results_df = (
+            pd.DataFrame(results)
+            .iloc[:, 4:]
+            .sort_values("mean_test_score", ascending=False)
+        )
+        print(results_df)
         return self._clf.best_score_  # type: ignore
 
     def predict(self, x: XYData) -> XYData:
@@ -157,16 +153,6 @@ class SklearnOptimizer(BaseOptimizer):
             >>> print(evaluation)
             {'F1Score': 0.85}
         """
-        results = {}
-        for metric in self.metrics:
-            results[metric.__class__.__name__] = metric.evaluate(x_data, y_true, y_pred)
+        results = self.pipeline.evaluate(x_data, y_true, y_pred)
         results["best_score"] = self._clf.best_score_  # type: ignore
         return results
-
-    def log_metrics(self):
-        """Log metrics (to be implemented)."""
-        # TODO: Implement metric logging
-
-    def finish(self):
-        """Finish pipeline execution (e.g., close logger)."""
-        # TODO: Finalize logger, possibly wandb

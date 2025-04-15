@@ -28,6 +28,7 @@ class WandbOptimizer(BaseOptimizer):
 
     def optimize(self, pipeline: BaseFilter) -> None:
         self.pipeline = pipeline
+        self.pipeline.verbose(False)
 
     def get_grid(self, aux: Dict[str, Any], config: Dict[str, Any]) -> None:
         match aux["params"]:
@@ -39,14 +40,9 @@ class WandbOptimizer(BaseOptimizer):
             case p_params:
                 if "_grid" in aux:
                     for param, value in aux["_grid"].items():
-                        print(f"categorical param: {param}: {value}")
                         p_params.update({param: config[aux["clazz"]][param]})
 
     def exec(self, config: Dict[str, Any], x: XYData, y: XYData | None = None):
-        print("-" * 200)
-        print(config)
-        print("-" * 200)
-
         if self.pipeline is None and self.sweep_id is None or self.project == "":
             raise ValueError("Either pipeline or sweep_id must be provided")
 
@@ -56,16 +52,17 @@ class WandbOptimizer(BaseOptimizer):
             BaseFilter, BasePlugin.build_from_dump(config["pipeline"], Container.pif)
         )
 
+        pipeline.verbose(False)
+
         match pipeline.fit(x, y):
             case None:
                 losses = pipeline.evaluate(x, y, pipeline.predict(x))
-                loss = next(iter(losses.values()))
-                if loss is None:
-                    loss = 0.0
-                print(f"Loss: {loss}")
-                return {"loss": float(loss)}
+
+                loss = losses.get(self.scorer.__class__.__name__, 0.0)
+
+                return {self.scorer.__class__.__name__: float(loss)}
             case float() as loss:
-                return {"loss": loss}
+                return {self.scorer.__class__.__name__: loss}
             case _:
                 raise ValueError("Unexpected return type from pipeline.fit()")
 

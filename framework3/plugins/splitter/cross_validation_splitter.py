@@ -4,7 +4,7 @@ from sklearn.model_selection import KFold
 from tqdm import tqdm
 
 from framework3 import Container
-from framework3.base.base_clases import BaseFilter
+from framework3.base.base_clases import BaseFilter, rprint
 from framework3.base.base_splitter import BaseSplitter
 from framework3.base.base_types import XYData
 
@@ -31,8 +31,13 @@ class KFoldSplitter(BaseSplitter):
 
     def split(self, pipeline: BaseFilter):
         self.pipeline = pipeline
+        self.pipeline.verbose(False)
 
     def fit(self, x: XYData, y: XYData | None) -> Optional[float]:
+        self._print_acction("Fitting with KFold Splitter...")
+        if self._verbose:
+            rprint(self.pipeline)
+
         X = x.value
         if y is None:  # type: ignore
             raise ValueError("y must be provided for KFold split")
@@ -44,7 +49,9 @@ class KFoldSplitter(BaseSplitter):
 
         losses = []
         splits = self._kfold.split(X)
-        for train_idx, val_idx in tqdm(splits, total=self._kfold.get_n_splits(X)):
+        for train_idx, val_idx in tqdm(
+            splits, total=self._kfold.get_n_splits(X), disable=not self._verbose
+        ):
             X_train = XYData(
                 _hash=f"{x._hash}_{train_idx}",
                 _path=f"{x._path}_{train_idx}",
@@ -102,6 +109,10 @@ class KFoldSplitter(BaseSplitter):
             raise e
 
     def predict(self, x: XYData) -> XYData:
+        self._print_acction("Predicting with KFold Splitter...")
+        if self._verbose:
+            rprint(self.pipeline)
+
         # X = x.value
         if self.pipeline is None:
             raise ValueError("Pipeline must be fitted before prediction")

@@ -85,6 +85,11 @@ class BasePipeline(BaseFilter):
         """
         ...
 
+    def verbose(self, value: bool) -> None:
+        self._verbose = value
+        for filter in self.filters:
+            filter.verbose(value)
+
     def init(self, *args, **kwargs):
         super().init(*args, **kwargs)
         for filter in self.filters:

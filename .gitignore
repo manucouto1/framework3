@@ -177,9 +177,8 @@ main*.py
 /tmp
 /tmp/*
 
-/examples/cache
-/examples/cache/*
-/examples/cache/**
-
 *.html
 *.db
+
+!docs/examples/notebooks
+docs/examples/notebooks/cache

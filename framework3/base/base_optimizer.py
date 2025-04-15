@@ -32,16 +32,6 @@ class BaseOptimizer(BaseFilter):
         ...
 
     @abstractmethod
-    def log_metrics(self) -> None:
-        """
-        Log the metrics of the pipeline.
-
-        This method should be implemented to record and possibly display
-        the performance metrics of the pipeline.
-        """
-        ...
-
-    @abstractmethod
     def optimize(self, pipeline: BaseFilter) -> None:
         """Escribe el docstring para este método.
         Optimize the pipeline based on the provided data.
@@ -54,3 +44,7 @@ class BaseOptimizer(BaseFilter):
         None
         """
         ...
+
+    def verbose(self, value: bool) -> None:
+        self._verbose = value
+        self.pipeline.verbose(value)

@@ -56,6 +56,10 @@ class BaseSplitter(BaseFilter):
         """
         ...
 
+    def verbose(self, value: bool) -> None:
+        self._verbose = value
+        self.pipeline.verbose(value)
+
     @abstractmethod
     def evaluate(
         self, x_data: XYData, y_true: XYData | None, y_pred: XYData
