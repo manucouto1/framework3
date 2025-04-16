@@ -84,7 +84,7 @@ class SklearnOptimizer(BaseOptimizer):
             cv=cv,
             pipeline=pipeline,
         )
-
+        self.pipeline = pipeline
         self._grid = {}
 
     def get_grid(self, aux: Dict[str, Any]) -> None:
@@ -231,6 +231,9 @@ class SklearnOptimizer(BaseOptimizer):
             {'F1Score': 0.85, 'best_score': 0.87}
             ```
         """
+        if self.pipeline is None:
+            raise Exception("No pipeline set for evaluation.")
+
         results = self.pipeline.evaluate(x_data, y_true, y_pred)
         results["best_score"] = self._clf.best_score_  # type: ignore
         return results
