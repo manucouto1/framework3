@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Dict, Sequence
+from typing import Any, Dict, Optional, Sequence
 from framework3.base import XYData, BaseFilter
 from framework3.base import ParallelPipeline
 from framework3.base.exceptions import NotTrainableFilterError
@@ -15,15 +15,42 @@ __all__ = ["HPCPipeline"]
 @Container.bind()
 class HPCPipeline(ParallelPipeline):
     """
-    A pipeline that uses MapReduce to extract features in parallel using multiple filters.
+    High Performance Computing Pipeline using MapReduce for parallel feature extraction.
 
     This pipeline applies a sequence of filters to the input data using a MapReduce approach,
-    which allows for parallel processing and potentially improved performance on large datasets.
+    enabling parallel processing and potentially improved performance on large datasets.
+
+    Key Features:
+        - Parallel processing of filters using MapReduce
+        - Scalable to large datasets
+        - Configurable number of partitions for optimization
+
+    Usage:
+        ```python
+        from framework3.plugins.pipelines.parallel import HPCPipeline
+        from framework3.base import XYData
+
+        filters = [Filter1(), Filter2(), Filter3()]
+        pipeline = HPCPipeline(filters, app_name="MyApp", master="local[*]", numSlices=8)
+
+        x_data = XYData(...)
+        y_data = XYData(...)
+
+        pipeline.fit(x_data, y_data)
+        predictions = pipeline.predict(x_data)
+        ```
 
     Attributes:
         filters (Sequence[BaseFilter]): A sequence of filters to be applied to the input data.
         numSlices (int): The number of partitions to use in the MapReduce process.
-        _map_reduce (PySparkMapReduce): The MapReduce implementation used for parallel processing.
+        app_name (str): The name of the Spark application.
+        master (str): The Spark master URL.
+
+    Methods:
+        fit(x: XYData, y: Optional[XYData]): Fit the filters in parallel using MapReduce.
+        predict(x: XYData) -> XYData: Make predictions using the fitted filters in parallel.
+        evaluate(x_data: XYData, y_true: XYData | None, y_pred: XYData) -> Dict[str, Any]:
+            Evaluate the pipeline using provided metrics.
     """
 
     def __init__(
@@ -34,7 +61,7 @@ class HPCPipeline(ParallelPipeline):
         numSlices: int = 4,
     ):
         """
-        Initialize the MapReduceFeatureExtractorPipeline.
+        Initialize the HPCPipeline.
 
         Args:
             filters (Sequence[BaseFilter]): A sequence of filters to be applied to the input data.
@@ -50,18 +77,21 @@ class HPCPipeline(ParallelPipeline):
 
     def start(self, x: XYData, y: XYData | None, X_: XYData | None) -> XYData | None:
         """
-        Start the pipeline by fitting the model and making predictions.
+        Start the pipeline execution by fitting the model and making predictions.
+
+        This method initiates the pipeline process by fitting the model to the input data
+        and then making predictions.
 
         Args:
-            x (XYData): The input data.
-            y (XYData | None): The target data, if available.
-            X_ (XYData | None): Additional input data, if available.
+            x (XYData): The input data for fitting and prediction.
+            y (XYData | None): The target data for fitting, if available.
+            X_ (XYData | None): Additional input data for prediction, if different from x.
 
         Returns:
-            XYData | None: The predictions made by the pipeline.
+            XYData | None: The predictions made by the pipeline, or None if an error occurs.
 
         Raises:
-            Exception: If an error occurs during the process.
+            Exception: If an error occurs during the fitting or prediction process.
         """
         try:
             self.fit(x, y)
@@ -70,15 +100,19 @@ class HPCPipeline(ParallelPipeline):
             # Handle the exception appropriately
             raise e
 
-    def fit(self, x: XYData, y: XYData | None = None):
+    def fit(self, x: XYData, y: Optional[XYData]):
         """
-        Fit the filters in the pipeline to the input data.
+        Fit the filters in the pipeline to the input data using MapReduce.
 
-        This method applies the fit operation to all filters in parallel using MapReduce.
+        This method applies the fit operation to all filters in parallel using MapReduce,
+        allowing for efficient processing of large datasets.
 
         Args:
             x (XYData): The input data to fit the filters on.
-            y (XYData | None, optional): The target data, if available. Defaults to None.
+            y (XYData | None, optional): The target data, if available.
+
+        Note:
+            This method updates the filters in place with their trained versions.
         """
 
         def fit_function(filter):
@@ -97,16 +131,19 @@ class HPCPipeline(ParallelPipeline):
 
     def predict(self, x: XYData) -> XYData:
         """
-        Make predictions using the fitted filters.
+        Make predictions using the fitted filters in parallel.
 
         This method applies the predict operation to all filters in parallel using MapReduce,
-        then combines the results.
+        then combines the results into a single prediction.
 
         Args:
             x (XYData): The input data to make predictions on.
 
         Returns:
             XYData: The combined predictions from all filters.
+
+        Note:
+            The predictions from each filter are stacked horizontally to form the final output.
         """
 
         def predict_function(filter: BaseFilter) -> VData:
@@ -126,18 +163,30 @@ class HPCPipeline(ParallelPipeline):
         self, x_data: XYData, y_true: XYData | None, y_pred: XYData
     ) -> Dict[str, Any]:
         """
-        Evaluate the pipeline's performance.
+        Evaluate the pipeline using the provided metrics.
+
+        This method applies each metric in the pipeline to the predicted and true values,
+        returning a dictionary of evaluation results.
 
         Args:
-            x_data (XYData): The input data.
-            y_true (XYData | None): The true target values, if available.
-            y_pred (XYData): The predicted values.
+            x_data (XYData): Input data used for evaluation.
+            y_true (XYData | None): True target data, if available.
+            y_pred (XYData): Predicted target data.
 
         Returns:
-            Dict[str, Any]: A dictionary containing evaluation metrics.
+            Dict[str, Any]: A dictionary containing the evaluation results for each metric.
+
+        Example:
+            ```python
+            >>> evaluation = pipeline.evaluate(x_test, y_test, predictions)
+            >>> print(evaluation)
+            {'F1Score': 0.85, 'Accuracy': 0.90}
+            ```
         """
-        # Implement evaluation if necessary
-        return {}
+        results = {}
+        for metric in self.metrics:
+            results[metric.__class__.__name__] = metric.evaluate(x_data, y_true, y_pred)
+        return results
 
     def log_metrics(self):
         """

@@ -1,5 +1,4 @@
-# Framework3
-
+# Framework3 [![test_on_push](https://github.com/manucouto1/framework3/actions/workflows/test_on_push_pull.yml/badge.svg)](https://github.com/manucouto1/framework3/actions/workflows/test_on_push_pull.yml)
 Framework3 is an innovative platform designed to simplify and accelerate the development of machine learning models. It provides data scientists and machine learning engineers with a flexible and powerful tool to create, experiment with, and deploy models efficiently and in a structured manner. [https://manucouto1.github.io/framework3](https://manucouto1.github.io/framework3)
 
 ## Key Features
@@ -9,6 +8,135 @@ Framework3 is an innovative platform designed to simplify and accelerate the dev
 - Extensible plugin system for filters, metrics, and storage
 - Support for distributed processing with MapReduce
 - Integrated model evaluation and optimization tools
+
+## Diagram
+```mermaid
+      classDiagram
+      class BasePlugin {
+            <<abstract>>
+            +item_dump() : Dict
+            +build_from_dump(dump_dict: Dict, factory: BaseFactory) : BasePlugin
+      }
+
+      class BaseFilter {
+            <<abstract>>
+            +fit(x: XYData, y: XYData|None) : float|None
+            +predict(x: XYData) : XYData
+            +evaluate(x_data: XYData, y_true: XYData|None, y_pred: XYData) : Dict[str, Any]
+      }
+
+      class BasePipeline {
+            <<abstract>>
+            -filters: List[BaseFilter]
+            +evaluate(x_data: XYData, y_true: XYData|None, y_pred: XYData) : Dict[str, Any]
+            +start(x: XYData, y: XYData|None, X_: XYData|None) : XYData|None
+            +init()
+            +get_types() : List[Type[BaseFilter]]
+            +optimizer(optimizer: BaseOptimizer) : BaseOptimizer|None
+            +splitter(splitter: BaseSplitter) : BaseSplitter|None
+      }
+
+      class BaseSplitter {
+            <<abstract>>
+            -pipeline: BasePipeline
+            +split(pipeline: BasePipeline)
+            +evaluate(x_data: XYData, y_true: XYData|None, y_pred: XYData) : Dict[str, Any]
+            +start(x: XYData, y: XYData|None, X_: XYData|None) : XYData|None
+            +unwrap() : BasePipeline
+      }
+
+      class BaseOptimizer {
+            <<abstract>>
+            -pipeline: BasePipeline
+            +start(x: XYData, y: XYData|None, X_: XYData|None) : XYData|None
+            +optimize(pipeline: BasePipeline)
+      }
+
+      class BaseMetric {
+            <<abstract>>
+            +evaluate(x_data: XYData, y_true: XYData|None, y_pred: XYData) : float
+      }
+
+      class BaseStorer {
+            <<abstract>>
+            +get_root_path() : str
+            +upload_file(file_path: str, destination_path: str)
+            +list_stored_files() : List[str]
+            +get_file_by_hashcode(hashcode: str) : str
+            +check_if_exists(file_path: str) : bool
+            +download_file(file_path: str, destination_path: str)
+            +delete_file(file_path: str)
+      }
+
+      class ParallelPipeline {
+            <<abstract>>
+      }
+
+      class SequentialPipeline {
+            <<abstract>>
+      }
+
+      class MonoPipeline {
+      }
+
+      class LocalThreadPipeline {
+      }
+
+      class HPCPipeline {
+      }
+
+      class F3Pipeline {
+      }
+
+      class KFoldSplitter {
+      }
+
+      class OptunaOptimizer {
+      }
+
+      class SklearnOptimizer {
+      }
+
+      class WandbOptimizer {
+      }
+
+      class LocalStorer {
+      }
+
+      class S3Storer {
+      }
+
+      class Container {
+            +bind()
+            +get()
+      }
+
+      BasePlugin <|-- BaseFilter
+      BasePlugin <|-- BaseMetric
+      BaseFilter <|-- BasePipeline
+      BaseFilter <|-- BaseSplitter
+      BaseFilter <|-- BaseOptimizer
+      BasePlugin <|-- BaseStorer
+      BasePipeline <|-- ParallelPipeline
+      BasePipeline <|-- SequentialPipeline
+      ParallelPipeline <|-- MonoPipeline
+      ParallelPipeline <|-- LocalThreadPipeline
+      ParallelPipeline <|-- HPCPipeline
+      SequentialPipeline <|-- F3Pipeline
+      BaseSplitter <|-- KFoldSplitter
+      BaseOptimizer <|-- OptunaOptimizer
+      BaseOptimizer <|-- SklearnOptimizer
+      BaseOptimizer <|-- WandbOptimizer
+      BaseStorer <|-- LocalStorer
+      BaseStorer <|-- S3Storer
+
+      BasePipeline "1" *-- "1..*" BaseFilter : contains
+      BaseSplitter "1" *-- "1" BaseFilter : contains
+      BaseOptimizer "1" *-- "1" BaseFilter : contains
+      BasePipeline "1" *-- "0..*" BaseMetric : uses
+
+      Container --> BasePlugin : contains
+```
 
 ## Prerequisites
 

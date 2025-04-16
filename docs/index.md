@@ -3,113 +3,94 @@ icon: material/home
 ---
 
 # Welcome to Framework3
-## Accelerating Machine Learning Development
 
-Framework3 is a cutting-edge platform designed to streamline and enhance the process of developing machine learning models. Our mission is to empower data scientists and machine learning engineers with a versatile and robust toolkit for efficient model creation, experimentation, and deployment.
+## A Modular and Extensible Framework for ML Experimentation
+
+**Framework3** is a lightweight, flexible foundation for building machine learning experimentation systems that are **structured**, **extensible**, and **reusable**. Unlike rigid monolithic platforms, Framework3 lets you craft your own workflows by composing modular components or reusing existing ones.
+
+Its architecture is grounded in principles of **modularity**, **composability**, and **transparency**, enabling you to tailor each part of your workflow to fit your project's needs.
 
 !!! warning
-    Framework3 is currently in active development. While we strive for stability, please use caution when implementing in production environments.
+    Framework3 is under active development. While we strive for stability, caution is advised when using it in production environments.
+
+## What *is* Framework3?
+
+Framework3 is **not a closed pipeline**, nor a library of pre-trained models. It’s a collection of **base interfaces** and **pluggable components** that empower you to:
+
+- Design and combine filters, metrics, optimizers, and storers.
+- Build reusable pipelines — sequential or parallel.
+- Execute optimization or evaluation processes, even in distributed settings.
+- Structure your experiments with clarity and complete control.
+
+> Think of Framework3 as a toolbox of interoperable building blocks — not a black-box solution.
 
 ## Key Features
 
-- **Modular Architecture**: Easily combine and customize components to suit your specific needs.
-- **Flexible Pipelines**: Create complex, reusable workflows for your ML projects.
-- **Extensible Plugin System**: Enhance functionality with filters, metrics, and storage options.
-- **Distributed Processing**: Leverage MapReduce for handling large-scale data operations.
-- **Comprehensive Evaluation Tools**: Assess and optimize your models with integrated metrics.
+- 🧩 **Modular architecture**: easily combine and reuse components.
+- 🔌 **Extensible plugin system**: add new filters, metrics, or storers without modifying the core.
+- 🧪 **Composable pipelines**: design sequential, parallel, or hybrid flows.
+- 🧠 **Built-in optimization and evaluation**: test different configurations and track performance.
+- 🧵 **Distributed processing**: supports parallel execution and MapReduce-style pipelines.
 
-## Core Philosophy
+## Design Philosophy
 
-1. **Flexibility**: Adapt to the unique requirements of each ML project.
-2. **Modularity**: Mix and match components for efficient experimentation and code reuse.
-3. **Transparency**: Gain clear insights at every stage of the ML process.
+1. **Composition over configuration**: each piece is designed to work seamlessly with others.
+2. **Frictionless extensibility**: implement your own components by subclassing base interfaces.
+3. **Full transparency**: inspect every step, metric, and decision in the workflow.
 
-## Getting Started
+## Conceptual Diagram
 
-```python
-from framework3.plugins.pipelines import F3Pipeline
-from framework3.plugins.filters.classification import KnnFilter
-from framework3.plugins.metrics import F1, Precision, Recall
+```mermaid
+graph TD
+    subgraph Core
+        A[BaseFilter]
+        B[BasePipeline]
+        C[BaseOptimizer]
+        D[BaseSplitter]
+        E[BaseMetric]
+        F[BaseStorer]
+        A --> B
+        B --> C
+        B --> D
+        B --> E
+        B --> F
+    end
 
-# Create a pipeline
-pipeline = F3Pipeline(
-    plugins=[KnnFilter()],
-    metrics=[F1(), Precision(), Recall()]
-)
-
-# Fit the model and make predictions
-pipeline.fit(X_train, y_train)
-predictions = pipeline.predict(X_test)
-
-# Evaluate the model
-evaluation = pipeline.evaluate(X_test, y_test, y_pred=predictions)
-print(evaluation)
+    subgraph Plugins
+        G[F3Pipeline] --> B
+        H[KFoldSplitter] --> D
+        I[OptunaOptimizer] --> C
+        J[LocalStorer] --> F
+        K[KnnFilter] --> A
+        L[F1Metric] --> E
+        M[ParallelPipeline] --> B
+        N[RemoteStorer] --> F
+    end
 ```
 
-For more detailed information, check out our [Quick Start Guide](quick_start/index.md) or dive into the [API Documentation](api/index.md).
+## Repository Structure
 
-## Project Structure
+Framework3 is structured to be easy to navigate, extend, and maintain:
 
-Framework3 is organized into a comprehensive and modular structure, designed to provide maximum flexibility and extensibility. Here's a detailed overview of the project's key components:
-
-### Core Components
-
-- `framework3/base/`:
-      - Contains fundamental abstract classes and interfaces
-      - Defines the core architecture for filters, pipelines, metrics, and plugins
-      - Includes base classes for data handling and storage operations
-
-- `framework3/container/`:
-      - Implements the Dependency Injection (DI) container
-      - Manages the lifecycle and dependencies of various components
-      - Provides a centralized registry for filters, pipelines, and plugins
-
-- `framework3/plugins/`:
-      - Houses a rich ecosystem of extensible components:
-         - `filters/`: Data preprocessing, feature engineering, and model algorithms
-         - `pipelines/`: Predefined and customizable ML workflows
-         - `metrics/`: Various evaluation metrics for model performance
-         - `storage/`: Different storage backends for data and model persistence
-
-- `framework3/utils/`:
-      - Contains utility functions and helper classes
-      - Includes common operations for data manipulation, logging, and configuration
-
-### Additional Directories
-
-- `docs/`:
-      - Comprehensive documentation, including tutorials and API references
-      - Contains this index file and other markdown documentation
-
-- `tests/`:
-      - Extensive test suite ensuring reliability and correctness
-      - Includes unit tests, integration tests, and end-to-end tests
-
-- `examples/`:
-      - Practical examples and use cases demonstrating Framework3's capabilities
-      - Jupyter notebooks and Python scripts for hands-on learning
-
-### Configuration and Build
-
-      - `setup.py`: Defines package metadata and dependencies for distribution
-      - `requirements.txt`: Lists all Python dependencies for easy installation
-      - `.github/`: Contains GitHub Actions workflows for CI/CD
-
-### Development Tools
-
-      - `pre_commit/`: Hooks and configurations for maintaining code quality
-      - `.gitignore`: Specifies intentionally untracked files to ignore
-
-This structure is designed to support the core philosophy of Framework3: flexibility, modularity, and transparency. It allows for easy extension and customization while maintaining a clear and organized codebase.
-
-## Contributing
-
-We welcome contributions! Please read our [contribution guidelines](https://github.com/manucouto1/framework3/blob/main/docs/CONTRIBUTING.md) before submitting pull requests.
-
-## License
-
-Framework3 is licensed under the AGPL-3.0 license. See the [LICENSE](https://github.com/manucouto1/framework3/blob/main/LICENSE) file for more details.
+- `base/`: Fundamental interfaces and abstractions.
+- `plugins/`: Filters, pipelines, metrics, optimizers, storers, and more.
+- `container/`: Dependency injection system.
+- `examples/`: Real-world use cases and tutorials.
+- `tests/`: Unit and integration tests.
+- `docs/`: Full documentation, including this page.
 
 ---
 
-Ready to revolutionize your ML workflow? [Get started with Framework3 today!](quick_start/index.md)
+## 🚀 Ready to Get Started?
+
+- 📚 **Quickstart Guide**: [quick_start/index.md](quick_start/index.md)
+- 🧬 **Full API Reference**: [api/index.md](api/index.md)
+- 🔍 **Examples and Recipes**: [examples/](examples/index.md)
+
+## 🤝 Contribute
+
+Interested in contributing? Check out the [Contribution Guidelines](https://github.com/manucouto1/framework3/blob/main/docs/CONTRIBUTING.md).
+
+## 📄 License
+
+Framework3 is licensed under **AGPL-3.0** — [View License](https://github.com/manucouto1/framework3/blob/main/LICENSE)

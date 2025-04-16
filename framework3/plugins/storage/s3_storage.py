@@ -13,23 +13,57 @@ __all__ = ["S3Storage"]
 @Container.bind()
 class S3Storage(BaseStorage):
     """
-    A storage implementation for Amazon S3.
+    A storage implementation for Amazon S3 to store and retrieve files.
 
-    This class provides methods to interact with Amazon S3 for storing and retrieving files.
+    This class provides methods to interact with Amazon S3, allowing storage operations
+    such as uploading, downloading, and deleting files in an S3 bucket.
+
+    Key Features:
+        - Simple interface for S3 file operations
+        - Support for file existence checking
+        - Listing stored files in the bucket
+        - Direct streaming support for large files
+
+    Usage:
+        ```python
+        from framework3.plugins.storage import S3Storage
+
+        # Initialize S3 storage
+        storage = S3Storage(bucket='my-bucket', region_name='us-west-2',
+                            access_key_id='YOUR_ACCESS_KEY', access_key='YOUR_SECRET_KEY')
+
+        # Upload a file
+        storage.upload_file("Hello, World!", "greeting.txt", "my-folder")
+
+        # Download and read a file
+        content = storage.download_file("greeting.txt", "my-folder")
+        print(content)  # Output: Hello, World!
+
+        # Check if a file exists
+        exists = storage.check_if_exists("greeting.txt", "my-folder")
+        print(exists)  # Output: True
+
+        # List files in the bucket
+        files = storage.list_stored_files("")
+        print(files)  # Output: ['my-folder/greeting.txt']
+
+        # Delete a file
+        storage.delete_file("greeting.txt", "my-folder")
+        ```
 
     Attributes:
         _client (boto3.client): The boto3 S3 client.
         bucket (str): The name of the S3 bucket.
 
-    Example:
-    ```python
-        >>> storage = S3Storage(bucket='my-bucket', region_name='us-west-2',
-        ...                     access_key_id='YOUR_ACCESS_KEY', access_key='YOUR_SECRET_KEY')
-        >>> storage.upload_file("Hello, World!", "greeting.txt", "my-folder")
-        >>> content = storage.download_file("greeting.txt", "my-folder")
-        >>> print(content)
-        'Hello, World!'
-    ```
+    Methods:
+        get_root_path() -> str: Get the root path (bucket name) of the storage.
+        upload_file(file: object, file_name: str, context: str, direct_stream: bool = False) -> str:
+            Upload a file to the specified context in S3.
+        list_stored_files(context: str) -> List[str]: List all files in the S3 bucket.
+        get_file_by_hashcode(hashcode: str, context: str) -> bytes: Get a file by its hashcode (key in S3).
+        check_if_exists(hashcode: str, context: str) -> bool: Check if a file exists in S3.
+        download_file(hashcode: str, context: str) -> Any: Download a file from S3.
+        delete_file(hashcode: str, context: str) -> None: Delete a file from S3.
     """
 
     def __init__(
@@ -48,11 +82,7 @@ class S3Storage(BaseStorage):
             region_name (str): The AWS region name.
             access_key_id (str): The AWS access key ID.
             access_key (str): The AWS secret access key.
-            endpoint_url (str|None, optional): The endpoint URL for the S3 service. Defaults to None.
-
-        Example:
-            >>> storage = S3Storage(bucket='my-bucket', region_name='us-west-2',
-            ...                     access_key_id='YOUR_ACCESS_KEY', access_key='YOUR_SECRET_KEY')
+            endpoint_url (str | None, optional): The endpoint URL for the S3 service. Defaults to None.
         """
         super().__init__()
         self._client = boto3.client(
@@ -71,11 +101,6 @@ class S3Storage(BaseStorage):
 
         Returns:
             str: The name of the S3 bucket.
-
-        Example:
-            >>> storage = S3Storage(bucket='my-bucket', ...)
-            >>> print(storage.get_root_path())
-            'my-bucket'
         """
         return self.bucket
 
@@ -93,11 +118,6 @@ class S3Storage(BaseStorage):
 
         Returns:
             str: The file name if successful.
-
-        Example:
-            >>> storage = S3Storage(bucket='my-bucket', ...)
-            >>> storage.upload_file("Hello, World!", "greeting.txt", "my-folder")
-            'greeting.txt'
         """
         if type(file) is not io.BytesIO:
             binary = pickle.dumps(file)
@@ -116,21 +136,13 @@ class S3Storage(BaseStorage):
 
     def list_stored_files(self, context) -> List[Any]:
         """
-        List all files in the specified context.
+        List all files in the S3 bucket.
 
         Args:
             context (str): Not used in this implementation.
 
         Returns:
-            (List[Any]): A list of dictionaries containing information about the objects in the bucket.
-
-        Example:
-        ```python
-            >>> storage = S3Storage(bucket='my-bucket', ...)
-            >>> files = storage.list_stored_files("")
-            >>> for file in files:
-            ...     print(file['Key'])
-        ```
+            List[str]: A list of object keys in the bucket.
         """
         return list(
             map(
@@ -139,7 +151,7 @@ class S3Storage(BaseStorage):
             )
         )
 
-    def get_file_by_hashcode(self, hashcode: str, context: str):
+    def get_file_by_hashcode(self, hashcode: str, context: str) -> bytes:
         """
         Get a file by its hashcode (key in S3).
 
@@ -148,15 +160,7 @@ class S3Storage(BaseStorage):
             context (str): Not used in this implementation.
 
         Returns:
-            (bytes): The content of the file.
-
-        Example:
-        ```python
-            >>> storage = S3Storage(bucket='my-bucket', ...)
-            >>> content = storage.get_file_by_hashcode("my-folder/greeting.txt", "")
-            >>> print(content.decode())
-            'Hello, World!'
-        ```
+            bytes: The content of the file.
         """
         obj = self._client.get_object(Bucket=self.bucket, Key=hashcode)
         return obj["Body"].read()
@@ -171,14 +175,6 @@ class S3Storage(BaseStorage):
 
         Returns:
             bool: True if the file exists, False otherwise.
-
-        Example:
-        ```python
-            >>> storage = S3Storage(bucket='my-bucket', ...)
-            >>> exists = storage.check_if_exists("greeting.txt", "my-folder")
-            >>> print(exists)
-            True
-        ```
         """
         try:
             self._client.head_object(Bucket=self.bucket, Key=f"{context}/{hashcode}")
@@ -200,14 +196,6 @@ class S3Storage(BaseStorage):
 
         Returns:
             Any: The deserialized content of the file.
-
-        Example:
-        ```python
-            >>> storage = S3Storage(bucket='my-bucket', ...)
-            >>> content = storage.download_file("greeting.txt", "my-folder")
-            >>> print(content)
-            'Hello, World!'
-        ```
         """
         obj = self._client.get_object(Bucket=self.bucket, Key=f"{context}/{hashcode}")
         return pickle.loads(obj["Body"].read())
@@ -223,13 +211,6 @@ class S3Storage(BaseStorage):
         Raises:
             Exception: If the file couldn't be deleted.
             FileExistsError: If the file doesn't exist in the bucket.
-
-        Example:
-        ```python
-            >>> storage = S3Storage(bucket='my-bucket', ...)
-            >>> storage.delete_file("greeting.txt", "my-folder")
-            Deleted!
-        ```
         """
         if self.check_if_exists(hashcode, context):
             self._client.delete_object(Bucket=self.bucket, Key=f"{context}/{hashcode}")

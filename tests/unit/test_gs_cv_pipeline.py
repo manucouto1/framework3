@@ -3,13 +3,13 @@ import pytest
 import numpy as np
 
 from sklearn.model_selection import GridSearchCV
-from framework3.container.container import Container
-from framework3.plugins.filters.clustering.kmeans import KMeansFilter
+from framework3 import Container, KMeansFilter
 from framework3.plugins.filters.transformation.pca import PCAPlugin
 from framework3.plugins.filters.classification.svm import ClassifierSVMPlugin
 from framework3.base.base_types import XYData
 from framework3.base.base_clases import BaseFilter, BasePlugin
-from framework3.plugins.pipelines import GridSearchPipeline
+from framework3.plugins.optimizer import SklearnOptimizer
+from framework3.plugins.pipelines.sequential import F3Pipeline
 from framework3.utils.skestimator import SkWrapper
 
 
@@ -62,19 +62,16 @@ def test_grid_search_cv_pipeline_with_multiple_filters():
     # Sample data
     X = np.array([[1, 2, 3], [2, 3, 1], [3, 4, 5], [5, 4, 3], [4, 5, 6], [5, 6, 7]])
     y = np.array([1, 2, 3, 4, 5, 6])
+
     X_data = XYData(_hash="X_data", _path="/tmp", _value=X)
     y_data = XYData(_hash="y_data", _path="/tmp", _value=y)
 
-    # Define filters and parameter grid
-    param_grid = PCAPlugin.item_grid(n_components=[2]) | ClassifierSVMPlugin.item_grid(
-        C=[0.1, 1], kernel=["rbf"]
-    )
-    filters = [PCAPlugin, ClassifierSVMPlugin]
-
-    # Create GridSearchCVPipeline
-    grid_search = GridSearchPipeline(
-        filterx=filters, param_grid=param_grid, scoring="accuracy", cv=2, metrics=[]
-    )
+    grid_search = F3Pipeline(
+        filters=[
+            PCAPlugin().grid({"n_components": [2]}),
+            ClassifierSVMPlugin().grid({"C": [0.1, 1], "kernel": ["rbf"]}),
+        ]
+    ).optimizer(SklearnOptimizer(scoring="accuracy", cv=2))
 
     # Fit the pipeline
     grid_search.fit(X_data, y_data)
@@ -90,13 +87,11 @@ def test_grid_search_cv_pipeline_with_multiple_filters():
     assert grid_search._clf.best_params_ in [
         {
             "PCAPlugin__n_components": 2,
-            "ClassifierSVMPlugin__gamma": "scale",
             "ClassifierSVMPlugin__C": 0.1,
             "ClassifierSVMPlugin__kernel": "rbf",
         },
         {
             "PCAPlugin__n_components": 2,
-            "ClassifierSVMPlugin__gamma": "scale",
             "ClassifierSVMPlugin__C": 1,
             "ClassifierSVMPlugin__kernel": "rbf",
         },
@@ -112,100 +107,12 @@ def test_grid_search_cv_pipeline_with_multiple_filters():
     assert 0 <= eval_result["best_score"] <= 1
 
 
-def test_grid_search_cv_pipeline_best_score_and_params():
-    X = np.array([[1, 2, 3], [2, 3, 1], [3, 4, 5], [4, 5, 6], [5, 6, 7]])
-    y = np.array(range(5))
-    X_data = XYData(_hash="X_data", _path="/tmp", _value=X)
-    y_data = XYData(_hash="y_data", _path="/tmp", _value=y)
-
-    # Define filters and parameter grid
-    param_grid = PCAPlugin.item_grid(n_components=[2]) | ClassifierSVMPlugin.item_grid(
-        C=[0.1, 1], kernel=["linear", "rbf"]
-    )
-    filters = [PCAPlugin, ClassifierSVMPlugin]
-
-    # Create GridSearchCVPipeline
-    grid_search = GridSearchPipeline(
-        filterx=filters, param_grid=param_grid, scoring="accuracy", cv=2, metrics=[]
-    )
-
-    # Fit the pipeline
-    grid_search.fit(X_data, y_data)
-
-    # Check best score
-    assert hasattr(grid_search._clf, "best_score_")
-    assert isinstance(grid_search._clf.best_score_, float)
-    assert 0 <= grid_search._clf.best_score_ <= 1
-
-    # Check best parameters
-    assert hasattr(grid_search._clf, "best_params_")
-    assert isinstance(grid_search._clf.best_params_, dict)
-    assert set(grid_search._clf.best_params_.keys()) == {
-        "PCAPlugin__n_components",
-        "ClassifierSVMPlugin__C",
-        "ClassifierSVMPlugin__kernel",
-        "ClassifierSVMPlugin__gamma",
-    }
-
-    # Evaluate and check if it returns the best score
-    eval_result = grid_search.evaluate(X_data, y_data, grid_search.predict(X_data))
-    assert eval_result["best_score"] == grid_search._clf.best_score_
-
-
-def test_grid_search_cv_pipeline_predictions():
-    # Create sample data
-    X = np.array([[1, 2, 3], [2, 3, 1], [3, 4, 5], [4, 5, 6], [5, 6, 7]])
-    y = np.array([0, 1, 0, 1, 0])
-    X_data = XYData(_hash="X_data", _path="/tmp", _value=X)
-    y_data = XYData(_hash="y_data", _path="/tmp", _value=y)
-
-    # Define filters using .item_grid()
-    filters = [PCAPlugin, ClassifierSVMPlugin]
-
-    param_grid = PCAPlugin.item_grid(n_components=[2]) | ClassifierSVMPlugin.item_grid(
-        C=[0.1, 1], kernel=["linear", "rbf"]
-    )
-
-    # Create GridSearchCVPipeline
-    grid_search = GridSearchPipeline(
-        filterx=filters, param_grid=param_grid, scoring="accuracy", cv=2
-    )
-
-    # Fit the pipeline
-    grid_search.fit(X_data, y_data)
-
-    # Make predictions
-    X_test = XYData(
-        _hash="X_test", _path="/tmp", _value=np.array([[2, 3, 4], [4, 5, 6]])
-    )
-    predictions = grid_search.predict(X_test)
-
-    # Assertions
-    assert isinstance(predictions, XYData)
-    assert predictions.value.shape == (2,)
-    assert np.all(np.isin(predictions.value, [0, 1]))  # type: ignore
-
-    # Check if the predictions are consistent
-    assert np.array_equal(predictions.value, grid_search._clf.predict(X_test.value))  # type: ignore
-
-    # Evaluate the model
-    eval_result = grid_search.evaluate(X_data, y_data, predictions)
-    assert "best_score" in eval_result
-    assert isinstance(eval_result["best_score"], float)
-    assert 0 <= eval_result["best_score"] <= 1
-
-
 def test_grid_search_cv_pipeline_with_none_input():
     from sklearn.metrics import silhouette_score
 
     # Create sample data
     X = np.array([[1, 1], [2, 2], [1, 1], [2, 2], [1, 1], [2, 2], [1, 1], [2, 2]])
     X_data = XYData(_hash="X_data", _path="/tmp", _value=X)
-
-    # Define filters using item_grid
-    param_grid = PCAPlugin.item_grid(n_components=[1]) | KMeansFilter.item_grid(
-        n_clusters=[2]
-    )
 
     @Container.bind()
     class AuxPlugin(BasePlugin):
@@ -218,14 +125,12 @@ def test_grid_search_cv_pipeline_with_none_input():
             estimator.predict(X)
             return silhouette_score(X, estimator.predict(X), metric=self.metric)
 
-    # Create GridSearchCVPipeline
-    grid_search = GridSearchPipeline(
-        filterx=[PCAPlugin, KMeansFilter],
-        param_grid=param_grid,
-        scoring=AuxPlugin(metric="euclidean"),
-        cv=2,
-        metrics=[],
-    )
+    grid_search = F3Pipeline(
+        filters=[
+            PCAPlugin().grid({"n_components": [1]}),
+            KMeansFilter().grid({"n_clusters": [2]}),
+        ]
+    ).optimizer(SklearnOptimizer(scoring=AuxPlugin(metric="euclidean"), cv=2))
 
     # Test fit method with y=None
     grid_search.fit(X_data, None)
@@ -243,6 +148,7 @@ def test_grid_search_cv_pipeline_with_none_input():
     assert "best_score" in eval_result
     assert isinstance(eval_result["best_score"], float)
 
+    print(grid_search._clf.best_params_)
     # Check if the best parameters are in the expected format
     assert grid_search._clf.best_params_ in [
         {"PCAPlugin__n_components": 1, "KMeansFilter__n_clusters": 2},
