@@ -83,7 +83,7 @@ class KFoldSplitter(BaseSplitter):
             random_state (int, optional): Controls the shuffling applied to the data before applying the split. Defaults to 42.
             pipeline (BaseFilter | None, optional): The pipeline to be used for training and evaluation. Defaults to None.
         """
-        super().__init__()
+        super().__init__(pipeline=pipeline)
         self.n_splits = n_splits
         self.shuffle = shuffle
         self.random_state = random_state

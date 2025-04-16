@@ -537,7 +537,7 @@ class BaseFilter(BasePlugin):
             *args (Any): Variable length argument list.
             **kwargs (Any): Arbitrary keyword arguments.
         """
-        self.verbose(verbose)
+        self._verbose = verbose
         self._original_fit = self.fit
         self._original_predict = self.predict
 
