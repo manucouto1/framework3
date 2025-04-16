@@ -214,9 +214,6 @@ def test_basepipeline_abstract_methods():
         def predict(self, x: XYData) -> XYData:
             return x
 
-        def init(self) -> None:
-            pass
-
         def start(
             self, x: XYData, y: Optional[XYData], X_: Optional[XYData]
         ) -> Optional[XYData]:

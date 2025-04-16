@@ -2,8 +2,7 @@ from __future__ import annotations  # noqa: D100
 import hashlib
 import inspect
 from abc import ABC, abstractmethod
-
-from git import Object
+from types import NotImplementedType
 from framework3.base.exceptions import NotTrainableFilterError
 from typing import (
     Any,
@@ -11,10 +10,10 @@ from typing import (
     Generator,
     List,
     Optional,
+    Self,
     Tuple,
     Type,
     TypeVar,
-    Unpack,
     get_type_hints,
 )
 
@@ -23,7 +22,7 @@ from fastapi.encoders import jsonable_encoder
 from typeguard import typechecked
 
 from framework3.base.base_factory import BaseFactory
-from framework3.base.base_types import Float, JsonEncoderkwargs, XYData
+from framework3.base.base_types import Float, XYData
 
 from rich import print as rprint
 
@@ -32,6 +31,7 @@ from rich import print as rprint
 __all__ = ["BasePlugin", "BaseFilter", "BaseMetric"]
 
 T = TypeVar("T")
+B = TypeVar("B", bound="BasePlugin")
 
 
 class BasePlugin(ABC):
@@ -98,7 +98,7 @@ class BasePlugin(ABC):
         and the typeguard library for runtime type checking.
     """
 
-    def __new__(cls, *args: Any, **kwargs: Any) -> BasePlugin:
+    def __new__(cls: type[Self], *args: Any, **kwargs: Any) -> Self:
         """
         Create a new instance of the BasePlugin class.
 
@@ -144,7 +144,7 @@ class BasePlugin(ABC):
         return instance
 
     @classmethod
-    def __inherit_annotations(cls: type):
+    def __inherit_annotations(cls):
         """
         Inherit type annotations from abstract methods in parent classes.
 
@@ -192,7 +192,7 @@ class BasePlugin(ABC):
             k: v for k, v in kwargs.items() if k.startswith("_")
         }
 
-    def __getattr__(self, name) -> Any:
+    def __getattr__(self, name: str) -> Any:
         """
         Custom attribute getter that checks both public and private attribute dictionaries.
 
@@ -213,7 +213,7 @@ class BasePlugin(ABC):
             f"'{self.__class__.__name__}' object has no attribute '{name}'"
         )
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Any):
         """
         Custom attribute setter that separates public and private attributes.
 
@@ -240,51 +240,49 @@ class BasePlugin(ABC):
         """
         return f"{self.__class__.__name__}({self._public_attributes})"
 
-    def model_dump(self, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    def model_dump(self, **kwargs: Any) -> Dict[str, Any]:
         """
         Return a copy of the public attributes.
 
         Args:
-            **kwargs (Dict[str, Any]): Additional keyword arguments (not used in this method).
+            **kwargs (Any): Additional keyword arguments (not used in this method).
 
         Returns:
             Dict[str, Any]: A copy of the public attributes.
         """
         return self._public_attributes.copy()
 
-    def dict(self, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    def dict(self, **kwargs: Any) -> Dict[str, Any]:
         """
         Alias for model_dump.
 
         Args:
-            **kwargs (Dict[str, Any]): Additional keyword arguments passed to model_dump.
+            **kwargs (Any): Additional keyword arguments passed to model_dump.
 
         Returns:
             Dict[str, Any]: A copy of the public attributes.
         """
         return self.model_dump(**kwargs)
 
-    def json(self, **kwargs: Unpack[JsonEncoderkwargs]) -> Dict[str, Any]:
+    def json(self, **kwargs: Any) -> Dict[str, Any]:
         """
         Return a JSON-encodable representation of the public attributes.
 
         Args:
-            **kwargs (Unpack[JsonEncoderkwargs]): Additional keyword arguments passed to jsonable_encoder.
+            **kwargs (Any): Additional keyword arguments passed to jsonable_encoder.
 
         Returns:
             Dict[str, Any]: A JSON-encodable representation of the public attributes.
         """
         return jsonable_encoder(self._public_attributes, **kwargs)
 
-    def item_dump(
-        self, include=[], **kwargs: Unpack[JsonEncoderkwargs]
-    ) -> Dict[str, Any]:
+    def item_dump(self, include=[], **kwargs: Any) -> Dict[str, Any]:
         """
         Return a dictionary representation of the plugin, including its class name and parameters.
 
         Args:
             include (list): A list of private attributes to include in the dump.
-            **kwargs (Unpack[JsonEncoderkwargs]): Additional keyword arguments passed to jsonable_encoder.
+            **kwargs (Any): Additional keyword arguments passed to jsonable_encoder.
 
         Returns:
             Dict[str, Any]: A dictionary representation of the plugin.
@@ -333,7 +331,7 @@ class BasePlugin(ABC):
         Prepare the object for pickling.
 
         Returns:
-            dict (Dict[str, Any]): A copy of the object's __dict__.
+            Dict[str, Any]: A copy of the object's __dict__.
         """
         state = self.__dict__.copy()
         return state
@@ -348,7 +346,7 @@ class BasePlugin(ABC):
         self.__dict__.update(state)
 
     @classmethod
-    def model_validate(cls, obj: Object) -> BasePlugin:
+    def model_validate(cls, obj: object) -> BasePlugin:
         """
         Validate and create an instance from a dictionary.
 
@@ -370,7 +368,7 @@ class BasePlugin(ABC):
         Rich representation of the plugin, used by the rich library.
 
         Yields:
-            Generator[Any, Any]: Key-value pairs of public attributes.
+            Generator[Any, Any, Any]: Key-value pairs of public attributes.
         """
         for key, value in self._public_attributes.items():
             yield key, value
@@ -496,7 +494,7 @@ class BaseFilter(BasePlugin):
         the fit and predict methods to provide specific functionality.
     """
 
-    def _print_acction(self, action) -> None:
+    def _print_acction(self, action: str) -> None:
         """
         Print an action message with formatting.
 
@@ -568,7 +566,7 @@ class BaseFilter(BasePlugin):
         self._m_str: str = m_str
         self._m_path: str = f"{self._get_model_name()}/{m_hash}"
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other: object) -> bool | NotImplementedType:
         """
         Check equality between this filter and another object.
 
@@ -598,7 +596,7 @@ class BaseFilter(BasePlugin):
         """
         return hash((type(self), frozenset(self._public_attributes.items())))
 
-    def _pre_fit(self, x: XYData, y: Optional[XYData]):
+    def _pre_fit(self, x: XYData, y: Optional[XYData]) -> Tuple[str, str, str]:
         """
         Perform pre-processing steps before fitting the model.
 
@@ -621,7 +619,7 @@ class BaseFilter(BasePlugin):
         self._m_str = m_str
         return m_hash, m_path, m_str
 
-    def _pre_predict(self, x: XYData):
+    def _pre_predict(self, x: XYData) -> XYData:
         """
         Perform pre-processing steps before making predictions.
 
@@ -685,14 +683,14 @@ class BaseFilter(BasePlugin):
             _value=self._original_predict(x)._value,
         )
 
-    def __getstate__(self) -> Dict:
+    def __getstate__(self) -> Dict[str, Any]:
         """
         Prepare the object for pickling.
 
         This method ensures that the original fit and predict methods are stored for serialization.
 
         Returns:
-            dict: The object's state dictionary.
+            Dict[str, Any]: The object's state dictionary.
         """
         state = super().__getstate__()
         # Ensure we're storing the original methods for serialization
@@ -700,14 +698,14 @@ class BaseFilter(BasePlugin):
         state["predict"] = self._original_predict
         return state
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: Dict[str, Any]):
         """
         Restore the object from its pickled state.
 
         This method restores the wrapper methods after deserialization.
 
         Args:
-            state (dict): The pickled state of the object.
+            state (Dict[str, Any]): The pickled state of the object.
         """
         super().__setstate__(state)
         # Restore the wrapper methods after deserialization
