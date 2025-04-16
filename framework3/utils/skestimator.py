@@ -58,7 +58,7 @@ class SkWrapper(BaseEstimator):
         set_params(**parameters) -> 'SkWrapper': Set the parameters of the estimator.
     """
 
-    def __init__(self, z_clazz: type[BaseFilter], **kwargs: Dict[str, Any]):
+    def __init__(self, z_clazz: type[BaseFilter], **kwargs: Any):
         """
         Initialize the SkWrapper.
 
