@@ -6,7 +6,7 @@ from framework3.base import BasePlugin, XYData
 
 from rich import print
 
-from framework3.base.base_clases import BaseFilter
+from framework3.base import BaseFilter
 from framework3.base.base_optimizer import BaseOptimizer
 
 
@@ -108,7 +108,10 @@ class OptunaOptimizer(BaseOptimizer):
             and self.study_name is not None
             and self.storage is not None
         ):
-            optuna.delete_study(study_name=self.study_name, storage=self.storage)
+            studies = optuna.get_all_study_summaries(storage=self.storage)
+
+            if self.study_name in studies:
+                optuna.delete_study(study_name=self.study_name, storage=self.storage)
 
         self._study = optuna.create_study(
             study_name=self.study_name,
