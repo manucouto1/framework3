@@ -21,24 +21,24 @@ class Cached(BaseFilter):
     and the processed data. It allows for efficient reuse of previously computed results
     and trained models.
 
-    Args:
-        filter (BaseFilter): The underlying filter to be cached.
-        cache_data (bool): Whether to cache the processed data.
-        cache_filter (bool): Whether to cache the trained filter.
-        overwrite (bool): Whether to overwrite existing cached data/models.
-        storage (BaseStorage|None): The storage backend for caching.
+    Key Features:
+        - Caches both filter models and processed data
+        - Supports various storage backends through BaseStorage
+        - Allows for overwriting existing cached data
+        - Provides methods for managing the cache
 
-    Example:
-        Ejemplo de uso de la clase:
+    Usage:
+        The Cached filter can be used to wrap any BaseFilter, providing caching capabilities:
+
         ```python
-
         from framework3.storage import LocalStorage
         from framework3.container import Container
         from your_custom_filter import CustomFilter
-             # Configurar el almacenamiento
+
+        # Configure storage
         Container.storage = LocalStorage(storage_path='cache')
 
-        # Crear un filtro personalizado y envolverlo con Cached
+        # Create a custom filter and wrap it with Cached
         custom_filter = CustomFilter()
         cached_filter = Cached(
             filter=custom_filter,
@@ -46,14 +46,42 @@ class Cached(BaseFilter):
             cache_filter=True,
             overwrite=False
         )
-             # Usar el filtro cacheado
+
+        # Use the cached filter
         X = XYData(_hash='input_data', _path='/datasets', _value=input_data)
         y = XYData(_hash='target_data', _path='/datasets', _value=target_data)
-             cached_filter.fit(X, y)
+
+        cached_filter.fit(X, y)
         predictions = cached_filter.predict(X)
-             # Limpiar el caché si es necesario
+
+        # Clear the cache if needed
         cached_filter.clear_cache()
         ```
+
+    Args:
+        filter (BaseFilter): The underlying filter to be cached.
+        cache_data (bool): Whether to cache the processed data.
+        cache_filter (bool): Whether to cache the trained filter.
+        overwrite (bool): Whether to overwrite existing cached data/models.
+        storage (BaseStorage|None): The storage backend for caching.
+
+    Attributes:
+        filter (BaseFilter): The underlying filter being cached.
+        cache_data (bool): Flag indicating whether to cache processed data.
+        cache_filter (bool): Flag indicating whether to cache the trained filter.
+        overwrite (bool): Flag indicating whether to overwrite existing cached data/models.
+        _storage (BaseStorage): The storage backend used for caching.
+        _lambda_filter (Callable[..., BaseFilter] | None): Lambda function for lazy loading of cached filter.
+
+    Methods:
+        init(): Initialize the cached filter.
+        fit(x: XYData, y: Optional[XYData]): Fit the filter to the input data, caching the model if necessary.
+        predict(x: XYData) -> XYData: Make predictions using the filter, caching the results if necessary.
+        clear_cache(): Clear the cache in the storage.
+
+    Note:
+        The caching behavior can be customized by adjusting the cache_data, cache_filter, and overwrite parameters.
+        The storage backend can be changed by providing a different BaseStorage implementation.
     """
 
     def __init__(
@@ -64,6 +92,23 @@ class Cached(BaseFilter):
         overwrite: bool = False,
         storage: BaseStorage | None = None,
     ):
+        """
+        Initialize a new Cached filter instance.
+
+        This constructor sets up the Cached filter with the specified parameters and
+        initializes the underlying filter and storage backend.
+
+        Args:
+            filter (BaseFilter): The underlying filter to be cached.
+            cache_data (bool, optional): Whether to cache the processed data. Defaults to True.
+            cache_filter (bool, optional): Whether to cache the trained filter. Defaults to True.
+            overwrite (bool, optional): Whether to overwrite existing cached data/models. Defaults to False.
+            storage (BaseStorage | None, optional): The storage backend for caching. If None, uses the Container's storage. Defaults to None.
+
+        Note:
+            If no storage is provided, the method will use the storage defined in the Container.
+            The _lambda_filter attribute is initialized as None and will be set later if needed.
+        """
         super().__init__(
             filter=filter,
             cache_data=cache_data,
@@ -79,56 +124,83 @@ class Cached(BaseFilter):
         self._lambda_filter: Callable[..., BaseFilter] | None = None
 
     def init(self) -> None:
+        """
+        Initialize the cached filter.
+
+        This method initializes both the underlying filter and the Cached filter itself.
+        """
         self.filter.init()
         super().init()
 
-    def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData]) -> None:
+    def _pre_fit_wrapp(self, x: XYData, y: Optional[XYData]) -> float | None:
+        """
+        Wrapper method for the pre-fit stage.
+
+        Args:
+            x (XYData): The input data.
+            y (Optional[XYData]): The target data, if any.
+
+        Returns:
+            float | None: The result of the original fit method.
+        """
         return self._original_fit(x, y)
 
     def _pre_predict_wrapp(self, x: XYData) -> XYData:
+        """
+        Wrapper method for the pre-predict stage.
+
+        Args:
+            x (XYData): The input data for prediction.
+
+        Returns:
+            XYData: The result of the original predict method.
+        """
         return self._original_predict(x)
 
     def _get_model_name(self) -> str:
         """
-        Obtiene el nombre del modelo del filtro subyacente.
+        Get the name of the underlying filter's model.
 
         Returns:
-            str: El nombre del modelo.
+            str: The model name.
         """
         return self.filter._get_model_name()
 
     def _get_model_key(self, data_hash: str) -> Tuple[str, str]:
         """
-        Genera la clave del modelo basada en el hash de los datos.
+        Generate the model key based on the input data hash.
 
         Args:
-            data_hash (str): El hash de los datos de entrada.
+            data_hash (str): The hash of the input data.
 
         Returns:
-            Tuple[str, str]: Una tupla con el hash del modelo y su representación en string.
+            Tuple[str, str]: A tuple containing the model hash and its string representation.
         """
         return BaseFilter._get_model_key(self.filter, data_hash)
 
     def _get_data_key(self, model_str: str, data_hash: str) -> Tuple[str, str]:
         """
-        Genera la clave de los datos basada en el modelo y el hash de los datos.
+        Generate the data key based on the model and input data hash.
 
         Args:
-            model_str (str): La representación en string del modelo.
-            data_hash (str): El hash de los datos de entrada.
+            model_str (str): The string representation of the model.
+            data_hash (str): The hash of the input data.
 
         Returns:
-            Tuple[str, str]: Una tupla con el hash de los datos y su representación en string.
+            Tuple[str, str]: A tuple containing the data hash and its string representation.
         """
         return BaseFilter._get_data_key(self.filter, model_str, data_hash)
 
     def fit(self, x: XYData, y: Optional[XYData]) -> None:
         """
-        Ajusta el filtro a los datos de entrada, cacheando el modelo si es necesario.
+        Fit the filter to the input data, caching the model if necessary.
+
+        This method checks if a cached model exists and uses it if available.
+        If not, it trains the model and caches it if caching is enabled.
 
         Args:
-            x (XYData): Los datos de entrada.
-            y (Optional[XYData]): Los datos objetivo, si existen.
+            x (XYData): The input data.
+            y (Optional[XYData]): The target data, if any.
         """
 
         self.filter._pre_fit(x, y)
@@ -163,13 +235,16 @@ class Cached(BaseFilter):
 
     def predict(self, x: XYData) -> XYData:
         """
-        Realiza predicciones usando el filtro, cacheando los resultados si es necesario.
+        Make predictions using the filter, caching the results if necessary.
+
+        This method checks if cached predictions exist and uses them if available.
+        If not, it makes new predictions and caches them if caching is enabled.
 
         Args:
-            x (XYData): Los datos de entrada para la predicción.
+            x (XYData): The input data for prediction.
 
         Returns:
-            XYData: Los resultados de la predicción.
+            XYData: The prediction results.
         """
         x = self.filter._pre_predict(x)
 
@@ -214,9 +289,14 @@ class Cached(BaseFilter):
 
     def clear_cache(self):
         """
-        Limpia el caché en el almacenamiento.
+        Clear the cache in the storage.
 
-        Nota: Esta función aún no está implementada.
+        This method should implement the logic to clear all cached data and models
+        associated with this filter from the storage backend.
+
+        Note:
+            This method is not yet implemented.
         """
         # Implementa la lógica para limpiar el caché en el almacenamiento
+        raise NotImplementedError("El método clear_cache no está implementado.")
         pass

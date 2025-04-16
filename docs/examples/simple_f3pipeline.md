@@ -2,7 +2,7 @@
 
 This tutorial will guide you through a simple example of using F3Pipeline, including the Cache functionality.
 
-## 1. Necessary Imports
+## 1. Imports
 
 First, we import the required classes and functions:
 

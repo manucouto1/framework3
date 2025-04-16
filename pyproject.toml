@@ -42,9 +42,12 @@ scikit-learn = "1.5.2"
 cloudpickle = "3.1.0"
 tqdm = "4.67.1"
 nltk = "3.9.1"
-transformers = "4.46.3"
+transformers = "4.51.1"
 gensim = "4.3.3"
-wandb = "0.18.7"
+wandb = "0.19.9"
+optuna = "4.2.1"
+sentence-transformers = "4.0.2"
+dill = "0.3.9"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
@@ -142,3 +145,6 @@ docstring-code-format = false
 # This only has an effect when the `docstring-code-format` setting is
 # enabled.
 docstring-code-line-length = "dynamic"
+
+[tool.mypy]
+enable_incomplete_feature = ["Unpack"]

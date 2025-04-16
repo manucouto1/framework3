@@ -12,22 +12,62 @@ class BaseFactory(Generic[TypePlugable]):
     This class provides a flexible way to register, retrieve, and manage
     different types of components (plugins) in the framework.
 
-    Example:
-    ```python
+    Key Features:
+        - Dynamic registration and retrieval of components
+        - Support for attribute-style and dictionary-style access
+        - Iteration over registered components
+        - Rich printing of available components
 
-    from framework3.base.base_factory import BaseFactory
-    from framework3.base.base_plugin import BasePlugin
+    Usage:
+        To create a new factory for a specific type of component, inherit from this class
+        and specify the type of components it will manage. For example:
 
-    class MyComponentFactory(BaseFactory[BasePlugin]):
-        pass
+        ```python
+        from framework3.base.base_factory import BaseFactory
+        from framework3.base.base_plugin import BasePlugin
 
-    factory = MyComponentFactory()
-    factory['ComponentA'] = ComponentA
-    factory['ComponentB'] = ComponentB
+        class MyComponentFactory(BaseFactory[BasePlugin]):
+            pass
 
-    component_a = factory['ComponentA']()
-    component_b = factory['ComponentB']()
-    ```
+        factory = MyComponentFactory()
+        factory['ComponentA'] = ComponentA
+        factory['ComponentB'] = ComponentB
+
+        component_a = factory['ComponentA']()
+        component_b = factory['ComponentB']()
+        ```
+
+    Attributes:
+        _foundry (Dict[str, Type[TypePlugable]]): Internal dictionary to store registered components.
+
+    Methods:
+        __getattr__(name: str) -> Type[TypePlugable]:
+            Retrieve a component by attribute access.
+
+        __setattr__(name: str, value: Type[TypePlugable]) -> None:
+            Set a component by attribute assignment.
+
+        __setitem__(name: str, value: Type[TypePlugable]) -> None:
+            Set a component using dictionary-like syntax.
+
+        __getitem__(name: str, default: Type[TypePlugable] | None = None) -> Type[TypePlugable]:
+            Retrieve a component using dictionary-like syntax.
+
+        __iter__() -> Iterator[Tuple[str, Type[TypePlugable]]]:
+            Provide an iterator over the registered components.
+
+        __contains__(item: str) -> bool:
+            Check if a component is registered in the factory.
+
+        get(name: str, default: Type[TypePlugable] | None = None) -> Type[TypePlugable]:
+            Retrieve a component by name.
+
+        print_available_components() -> None:
+            Print a list of all available components in the factory.
+
+    Note:
+        This class uses Generic[TypePlugable] to allow type hinting for the specific
+        type of components managed by the factory.
     """
 
     def __init__(self):
@@ -40,6 +80,9 @@ class BaseFactory(Generic[TypePlugable]):
         """
         Retrieve a component by attribute access.
 
+        This method allows components to be accessed as if they were attributes
+        of the factory instance.
+
         Args:
             name (str): The name of the component to retrieve.
 
@@ -47,7 +90,13 @@ class BaseFactory(Generic[TypePlugable]):
             Type[TypePlugable]: The requested component class.
 
         Raises:
-            AttributeError: If the component is not found.
+            AttributeError: If the component is not found in the factory.
+
+        Example:
+            ```python
+            factory = MyComponentFactory()
+            component_class = factory.ComponentA
+            ```
         """
         if name in self._foundry:
             return self._foundry[name]
@@ -59,9 +108,18 @@ class BaseFactory(Generic[TypePlugable]):
         """
         Set a component by attribute assignment.
 
+        This method allows components to be registered as if they were attributes
+        of the factory instance.
+
         Args:
             name (str): The name to assign to the component.
             value (Type[TypePlugable]): The component class to register.
+
+        Example:
+            ```python
+            factory = MyComponentFactory()
+            factory.ComponentA = ComponentA
+            ```
         """
         if name == "_foundry":
             super().__setattr__(name, value)
@@ -72,9 +130,18 @@ class BaseFactory(Generic[TypePlugable]):
         """
         Set a component using dictionary-like syntax.
 
+        This method allows components to be registered using dictionary-style
+        item assignment.
+
         Args:
             name (str): The name to assign to the component.
             value (Type[TypePlugable]): The component class to register.
+
+        Example:
+            ```python
+            factory = MyComponentFactory()
+            factory['ComponentA'] = ComponentA
+            ```
         """
         if name == "_foundry":
             super().__setattr__(name, value)
@@ -87,6 +154,9 @@ class BaseFactory(Generic[TypePlugable]):
         """
         Retrieve a component using dictionary-like syntax.
 
+        This method allows components to be accessed using dictionary-style
+        item retrieval.
+
         Args:
             name (str): The name of the component to retrieve.
             default (Type[TypePlugable] | None, optional): Default value if component is not found.
@@ -96,6 +166,12 @@ class BaseFactory(Generic[TypePlugable]):
 
         Raises:
             AttributeError: If the component is not found and no default is provided.
+
+        Example:
+            ```python
+            factory = MyComponentFactory()
+            component_class = factory['ComponentA']
+            ```
         """
         if name in self._foundry:
             return self._foundry[name]
@@ -110,8 +186,17 @@ class BaseFactory(Generic[TypePlugable]):
         """
         Provide an iterator over the registered components.
 
+        This method allows iteration over the (name, component) pairs in the factory.
+
         Returns:
             Iterator[Tuple[str, Type[TypePlugable]]]: An iterator of (name, component) pairs.
+
+        Example:
+            ```python
+            factory = MyComponentFactory()
+            for name, component_class in factory:
+                print(f"{name}: {component_class}")
+            ```
         """
         return iter(self._foundry.items())
 
@@ -119,11 +204,20 @@ class BaseFactory(Generic[TypePlugable]):
         """
         Check if a component is registered in the factory.
 
+        This method allows the use of the 'in' operator to check for component existence.
+
         Args:
             item (str): The name of the component to check.
 
         Returns:
             bool: True if the component is registered, False otherwise.
+
+        Example:
+            ```python
+            factory = MyComponentFactory()
+            if 'ComponentA' in factory:
+                print("ComponentA is available")
+            ```
         """
         return item in self._foundry
 
@@ -132,6 +226,8 @@ class BaseFactory(Generic[TypePlugable]):
     ) -> Type[TypePlugable]:
         """
         Retrieve a component by name.
+
+        This method provides a way to safely retrieve components with an optional default value.
 
         Args:
             name (str): The name of the component to retrieve.
@@ -142,6 +238,12 @@ class BaseFactory(Generic[TypePlugable]):
 
         Raises:
             AttributeError: If the component is not found and no default is provided.
+
+        Example:
+            ```python
+            factory = MyComponentFactory()
+            component_class = factory.get('ComponentA', DefaultComponent)
+            ```
         """
         if name in self._foundry:
             return self._foundry[name]
@@ -157,6 +259,12 @@ class BaseFactory(Generic[TypePlugable]):
         Print a list of all available components in the factory.
 
         This method uses rich formatting to display the components in a visually appealing way.
+
+        Example:
+            ```python
+            factory = MyComponentFactory()
+            factory.print_available_components()
+            ```
         """
         rprint(f"[bold]Available {self.__class__.__name__[:-7]}s:[/bold]")
         for name, binding in self._foundry.items():
