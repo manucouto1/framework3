@@ -4,109 +4,111 @@ icon: material/bookshelf
 
 # Framework3 API Documentation
 
-Welcome to the API documentation for Framework3. This guide details the modules, classes, and functions that form the backbone of Framework3, enabling you to build, extend, and customize ML experimentation workflows. Use the sections below to quickly navigate to the areas you need.
+Welcome to the API documentation for Framework3. This comprehensive guide details the modules, classes, and functions that form the backbone of Framework3, enabling you to build, extend, and customize ML experimentation workflows efficiently.
 
 ---
 
 ## Table of Contents
 
-- [Core Components](#core-components)
+- [Base Classes](#base-classes)
+- [Container & Dependency Injection](#container-dependency-injection)
+- [Plugins](#plugins)
   - [Pipelines](#pipelines)
   - [Filters](#filters)
+  - [Metrics](#metrics)
   - [Optimizers](#optimizers)
   - [Splitters](#splitters)
-  - [Metrics](#metrics)
-- [Container & Dependency Injection](#container--dependency-injection)
-- [Utilities & Helpers](#utilities--helpers)
+  - [Storage](#storage)
+- [Utilities](#utilities)
 - [Using the API](#using-the-api)
-- [Advanced Topics](#advanced-topics)
 
 ---
 
-## Core Components
+## Base Classes
 
-Framework3's core components provide the fundamental building blocks. They define the structure and behavior of filters, pipelines, and more.
+The foundation of Framework3 is built on these abstract base classes:
+
+- [Types](base/base_types.md) - Core data structures and type definitions.
+- [Classes](base/base_plugin.md) - Abstract base class for all components.
+- [Pipeline](base/base_pipelines.md) - Base class for creating pipelines.
+- [Filter](base/base_filter.md) - Abstract class for all filter implementations.
+- [Metric](base/base_metric.md) - Base class for metric implementations.
+- [Optimizer](base/base_optimizer.md) - Abstract base for optimization algorithms.
+- [Splitter](base/base_splitter.md) - Base class for data splitting strategies.
+- [Factory](base/base_factory.md) - Factory classes for component creation.
+- [Storage](base/base_storage.md) - Abstract base for storage implementations.
+
+## Container & Dependency Injection
+
+The core of Framework3's component management:
+
+- [Container](container/container.md) - Main class for dependency injection and component management.
+- [Overload](container/overload.md) - Utilities for method overloading in the container.
+
+## Plugins
 
 ### Pipelines
 
-Pipelines orchestrate the data flow through various processing steps. They are divided by type:
-
-- **Sequential Pipeline**
-  - [F3Pipeline](plugins/pipelines/sequential/f3_pipeline.md) – The basic sequential pipeline.
+Pipelines orchestrate the data flow through various processing steps:
 
 - **Parallel Pipelines**
-  - [MonoPipeline](plugins/pipelines/parallel/mono_pipeline.md) – For parallel processing of independent tasks.
-  - [HPCPipeline](plugins/pipelines/parallel/hpc_pipeline.md) – Optimized for high-performance computing environments.
+  - [MonoPipeline](plugins/pipelines/parallel/mono_pipeline.md) - For parallel processing of independent tasks.
+  - [HPCPipeline](plugins/pipelines/parallel/hpc_pipeline.md) - Optimized for high-performance computing environments.
+- **Sequential Pipeline**
+  - [F3Pipeline](plugins/pipelines/sequential/f3_pipeline.md) - The basic sequential pipeline.
 
 ### Filters
 
-Filters are modular processing units that can be composed together within pipelines:
+Modular processing units that can be composed together within pipelines:
 
-#### Classification Filters
-- [SVMClassifier](plugins/filters/classification.md#svm-classifier) – Support Vector Machine classifier.
-- [KNNClassifier](plugins/filters/classification.md#k-nearest-neighbors-classifier) – K-Nearest Neighbors classifier.
-
-#### Clustering Filters
-- [KMeansCluster](plugins/filters/clustering.md) – K-Means clustering algorithm.
-- [DBSCANCluster](plugins/filters/clustering.md) – Density-Based Spatial Clustering of Applications with Noise.
-
-#### Transformation Filters
-- [StandardScalerFilter](plugins/filters/transformation.md#standard-scaler) – Standardizes features by removing the mean and scaling to unit variance.
-- [PCAFilter](plugins/filters/transformation.md#pca-principal-component-analysis) – Performs Principal Component Analysis for dimensionality reduction.
-
-#### Regression Filters
-- [LinearRegression](plugins/filters/regression.md#linear-regression) – Simple linear regression model.
-- [RandomForestRegressor](plugins/filters/regression.md) – Random Forest regression model.
-
-#### Grid Search & Caching Filters
-- [GridSearchCVFilter](plugins/filters/grid_search.md) – Exhaustive search over specified parameter values.
-- [CachedFilter](plugins/filters/cache.md) – Caches filter results to improve performance.
-
-### Optimizers
-Optimizers help fine-tune hyperparameters for optimal performance:
-
-- [OptunaOptimizer](plugins/optimizers/optuna_optimizer.md) – Integrates Optuna for hyperparameter tuning.
-- [WandbOptimizer](plugins/optimizers/wandb_optimizer.md) – For advanced optimization using Weights & Biases.
-
-### Splitters
-Splitters divide the dataset into folds for cross-validation and other evaluation strategies:
-
-- [KFoldSplitter](plugins/splitters/kfold_splitter.md) – Divides the data into k-folds.
-- [TimeSeriesSplitter](plugins/splitters/timeseries_splitter.md) – For time series data splitting.
+- [Classification Filters](plugins/filters/classification.md)
+- [Clustering Filters](plugins/filters/clustering.md)
+- [Regression Filters](plugins/filters/regression.md)
+- [Transformation Filters](plugins/filters/transformation.md)
+- [Text Processing Filters](plugins/filters/text_processing.md)
+- [Cache Filters](plugins/filters/cache.md)
+  - [CachedFilter](plugins/filters/cache.md)
+- [Grid Search Filters](plugins/filters/grid_search.md)
+  - [GridSearchCVFilter](plugins/filters/grid_search.md)
 
 ### Metrics
 
 Metrics evaluate model performance across various tasks:
 
-#### Classification Metrics
-- [F1Score](plugins/metrics/classification.md#f1-score)
-- [AccuracyScore](plugins/metrics/classification.md#accuracy-score)
-- [PrecisionScore](plugins/metrics/classification.md#precision-score)
-- [RecallScore](plugins/metrics/classification.md#recall-score)
+- [Classification Metrics](plugins/metrics/classification.md)
+- [Clustering Metrics](plugins/metrics/clustering.md)
+- [Coherence Metrics](plugins/metrics/coherence.md)
 
-#### Clustering & Coherence Metrics
-- [SilhouetteScore](plugins/metrics/clustering.md#silhouette-score)
-- [CalinskiHarabaszScore](plugins/metrics/clustering.md)
-- [TopicCoherence](plugins/metrics/coherence.md#topic-coherence)
-- [WordEmbeddingCoherence](plugins/metrics/coherence.md#word-embedding-coherence)
+### Optimizers
 
----
+Optimizers help fine-tune hyperparameters for optimal performance:
 
-## Container & Dependency Injection
+- [SklearnOptimizer](plugins/optimizers/sklearn_optimizer.md)
+- [OptunaOptimizer](plugins/optimizers/optuna_optimizer.md)
+- [WandbOptimizer](plugins/optimizers/wandb_optimizer.md)
 
-The Container is central to Framework3, managing the registration and retrieval of various components.
+### Splitters
 
-- [Container Documentation](container/container.md) – Details on the Container class and usage.
-- [bind() Decorator](container/container.md#bind) – How to register components.
+Splitters divide the dataset for cross-validation and evaluation:
 
----
+- [KFoldSplitter](plugins/splitters/kfold_splitter.md)
 
-## Utilities & Helpers
+### Storage
+
+Storage plugins for data persistence:
+
+- [Local Storage](plugins/storage/local.md)
+- [S3 Storage](plugins/storage/s3.md)
+
+## Utilities
 
 Additional utility functions and helpers that support the framework:
 
-- [Utilities Overview](utils/overview.md) – A guide to common utility functions.
-- [Miscellaneous Helpers](utils/misc.md) – Other useful routines.
+- [PySpark Utilities](utils/pyspark.md)
+- [Weights & Biases Integration](utils/wandb.md)
+- [Typeguard for Notebooks](utils/typeguard.md)
+- [Scikit-learn Estimator Utilities](utils/sklearn.md)
+- [General Utilities](utils/utils.md)
 
 ---
 
@@ -134,4 +136,5 @@ class MyMetric(BaseMetric):
 my_filter = Container.ff["MyFilter"]()
 my_pipeline = Container.pf["MyPipeline"]()
 my_metric = Container.mf["MyMetric"]()
+
 ```

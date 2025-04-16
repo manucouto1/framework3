@@ -26,7 +26,6 @@ def test_map_reduce_combiner_pipeline_initialization():
     assert isinstance(pipeline, BasePipeline)
     assert len(pipeline.filters) == 2
     assert all(isinstance(f, DummyFilter) for f in pipeline.filters)
-    pipeline.finish()
 
 
 def test_map_reduce_combiner_pipeline_invalid_filters():
@@ -118,8 +117,6 @@ def test_map_reduce_combiner_pipeline_fit():
     result = final_pieline.predict(x)
 
     rprint(final_pieline.evaluate(x, y, result))
-
-    final_pieline.finish()
 
 
 def test_caching_map_reduce_combiner_pipeline():

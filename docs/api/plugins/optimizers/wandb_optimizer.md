@@ -1,5 +1,4 @@
-
-::: framework3.plugins.storage.local_storage.LocalStorage
+::: framework3.plugins.optimizer.wandb_optimizer
     options:
       show_root_heading: true
       show_source: true

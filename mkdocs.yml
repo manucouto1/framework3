@@ -42,10 +42,12 @@ theme:
   #     icon: material/weather-sunny  # Icono para el toggle
   #     name: Toggle theme            # Texto del toggle
 nav:
-  - Home: index.md
-  - Quick Start: quick_start/index.md
+  - Home:
+    - Overview: index.md
+    - Quick Start: quick_start/index.md
+    - Installation: installation/index.md
+
   - Architecture: architecture/index.md
-  - Installation: installation/index.md
   - Tutorials:
       - index: examples/index.md
       - Datasets Storage: examples/data_ingestion.md
@@ -56,12 +58,16 @@ nav:
         - Heavy Data: examples/notebooks/caching_heavy_data.ipynb
         - Optuna: examples/notebooks/optuna_optimizer_with_data_splitter_kfold.ipynb
         - Wandb:  examples/notebooks/wandb_optimizer_with_data_splitter_kfold.ipynb
-  - Api:
-      - api/index.md
+  - API:
+      - Overview: api/index.md
       - Base:
           - Types: api/base/base_types.md
-          - Clases: api/base/base_clases.md
+          - Plugins: api/base/base_plugin.md
           - Pipeline: api/base/base_pipelines.md
+          - Filter: api/base/base_filter.md
+          - Metric: api/base/base_metric.md
+          - Optimizer: api/base/base_optimizer.md
+          - Splitter: api/base/base_splitter.md
           - Factory: api/base/base_factory.md
           - Storage: api/base/base_storage.md
       - Container:
@@ -70,30 +76,39 @@ nav:
       - Plugins:
           - Pipelines:
               - Parallel:
-                  - Sequential: api/plugins/pipelines/parallel/mono_pipeline.md
-                  - MapReduce: api/plugins/pipelines/parallel/hpc_pipeline.md
+                  - MonoPipeline: api/plugins/pipelines/parallel/mono_pipeline.md
+                  - HPCPipeline: api/plugins/pipelines/parallel/hpc_pipeline.md
               - Sequential:
-                  - F3pipeline: api/plugins/pipelines/sequential/f3_pipeline.md
-              - Grid:
-                  - GridSearchPipeline: api/plugins/pipelines/grid/g3_pipeline.md
-
+                  - F3Pipeline: api/plugins/pipelines/sequential/f3_pipeline.md
           - Filters:
               - Classification: api/plugins/filters/classification.md
               - Clustering: api/plugins/filters/clustering.md
               - Regression: api/plugins/filters/regression.md
-              - Cache:
-                  - Cached: api/plugins/filters/cache.md
               - Transformation: api/plugins/filters/transformation.md
-              - Grid Search: api/plugins/filters/grid_search.md
-
+              - Text Processing: api/plugins/filters/text_processing.md
+              - Cache:
+                  - CachedFilter: api/plugins/filters/cache.md
+              - Grid Search:
+                  - GridSearchCVFilter: api/plugins/filters/grid_search.md
           - Metrics:
               - Classification: api/plugins/metrics/classification.md
               - Clustering: api/plugins/metrics/clustering.md
               - Coherence: api/plugins/metrics/coherence.md
+          - Optimizers:
+              - SklearnOptimizer: api/plugins/optimizers/sklearn_optimizer.md
+              - OptunaOptimizer: api/plugins/optimizers/optuna_optimizer.md
+              - WandbOptimizer: api/plugins/optimizers/wandb_optimizer.md
+          - Splitters:
+              - KFoldSplitter: api/plugins/splitters/kfold_splitter.md
           - Storage:
               - Local: api/plugins/storage/local.md
               - S3: api/plugins/storage/s3.md
-      - Full API Reference: api/index.md
+      - Utilities:
+          - PySpark: api/utils/pyspark.md
+          - Weights & Biases: api/utils/wandb.md
+          - Typeguar Notebooks: api/utils/typeguard.md
+          - Sklearn Estimator: api/utils/sklearn.md
+          - Utils: api/utils/utils.md
 
   - Best Practices:
       - Contributing: CONTRIBUTING.md

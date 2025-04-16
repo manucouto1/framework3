@@ -12,6 +12,54 @@ from framework3.base.base_optimizer import BaseOptimizer
 
 @Container.bind()
 class OptunaOptimizer(BaseOptimizer):
+    """
+    Optuna-based optimizer for hyperparameter tuning.
+
+    This class implements hyperparameter optimization using the Optuna framework.
+    It allows for efficient searching of hyperparameter spaces for machine learning models.
+
+    Key Features:
+        - Supports various types of hyperparameters (categorical, integer, float)
+        - Allows for customizable optimization direction (minimize or maximize)
+        - Can resume previous studies or start new ones
+        - Integrates with the Framework3 pipeline system
+
+    Usage:
+        The OptunaOptimizer can be used to optimize hyperparameters of a machine learning pipeline:
+
+        ```python
+        from framework3.plugins.optimizer import OptunaOptimizer
+        from framework3.base import XYData
+
+        # Assuming you have a pipeline and data
+        pipeline = ...
+        x_data = XYData(...)
+        y_data = XYData(...)
+
+        optimizer = OptunaOptimizer(direction="minimize", n_trials=100)
+        optimizer.optimize(pipeline)
+        optimizer.fit(x_data, y_data)
+
+        best_pipeline = optimizer.pipeline
+        ```
+
+    Attributes:
+        direction (str): The direction of optimization ("minimize" or "maximize").
+        n_trials (int): The number of trials for the optimization process.
+        load_if_exists (bool): Whether to load an existing study if one exists.
+        reset_study (bool): Whether to reset the study before optimization.
+        pipeline (BaseFilter | None): The pipeline to be optimized.
+        study_name (str | None): The name of the Optuna study.
+        storage (str | None): The storage URL for the Optuna study.
+
+    Methods:
+        optimize(pipeline: BaseFilter): Set up the optimization process for a given pipeline.
+        fit(x: XYData, y: XYData | None): Perform the optimization and fit the best pipeline.
+        predict(x: XYData) -> XYData: Make predictions using the optimized pipeline.
+        evaluate(x_data: XYData, y_true: XYData | None, y_pred: XYData) -> Dict[str, Any]:
+            Evaluate the optimized pipeline.
+    """
+
     def __init__(
         self,
         direction: str,
@@ -22,6 +70,18 @@ class OptunaOptimizer(BaseOptimizer):
         study_name: str | None = None,
         storage: str | None = None,
     ):
+        """
+        Initialize the OptunaOptimizer.
+
+        Args:
+            direction (str): The direction of optimization ("minimize" or "maximize").
+            n_trials (int): The number of trials for the optimization process.
+            load_if_exists (bool): Whether to load an existing study if one exists.
+            reset_study (bool): Whether to reset the study before optimization.
+            pipeline (BaseFilter | None): The pipeline to be optimized.
+            study_name (str | None): The name of the Optuna study.
+            storage (str | None): The storage URL for the Optuna study.
+        """
         super().__init__(direction=direction, study_name=study_name, storage=storage)
         self.direction = direction
         self.study_name = study_name
@@ -32,6 +92,14 @@ class OptunaOptimizer(BaseOptimizer):
         self.reset_study = reset_study
 
     def optimize(self, pipeline: BaseFilter):
+        """
+        Set up the optimization process for a given pipeline.
+
+        This method prepares the Optuna study for optimization.
+
+        Args:
+            pipeline (BaseFilter): The pipeline to be optimized.
+        """
         self.pipeline = pipeline
         self.pipeline._verbose = False
 
@@ -49,9 +117,20 @@ class OptunaOptimizer(BaseOptimizer):
             load_if_exists=self.load_if_exists,
         )
 
-    def exec(self, config: Dict[str, Any], x: XYData, y: XYData | None = None): ...
-
     def get_grid(self, aux: Dict[str, Any], f: Callable):
+        """
+        Recursively process the grid configuration of a pipeline or filter.
+
+        This method traverses the configuration dictionary and applies the provided
+        callable to each grid parameter.
+
+        Args:
+            aux (Dict[str, Any]): The configuration dictionary to process.
+            f (Callable): A function to apply to each grid parameter.
+
+        Note:
+            This method modifies the input dictionary in-place.
+        """
         match aux["params"]:
             case {"filters": filters, **r}:
                 for filter_config in filters:
@@ -67,6 +146,23 @@ class OptunaOptimizer(BaseOptimizer):
     def build_pipeline(
         self, dumped_pipeline: Dict[str, Any], f: Callable
     ) -> BaseFilter:
+        """
+        Build a pipeline from a dumped configuration.
+
+        This method processes the dumped pipeline configuration, applies the provided
+        callable to the grid parameters, and constructs a new BaseFilter object.
+
+        Args:
+            dumped_pipeline (Dict[str, Any]): The dumped pipeline configuration.
+            f (Callable): A function to apply to each grid parameter.
+
+        Returns:
+            BaseFilter: The constructed pipeline.
+
+        Note:
+            This method uses the Container.pif for dependency injection when building
+            the pipeline components.
+        """
         self.get_grid(dumped_pipeline, f)
 
         pipeline: BaseFilter = cast(
@@ -75,6 +171,18 @@ class OptunaOptimizer(BaseOptimizer):
         return pipeline
 
     def fit(self, x: XYData, y: XYData | None = None):
+        """
+        Perform the optimization and fit the best pipeline.
+
+        This method runs the Optuna optimization process and fits the best found pipeline.
+
+        Args:
+            x (XYData): The input features.
+            y (XYData | None): The target values (if applicable).
+
+        Raises:
+            ValueError: If the pipeline is not defined before fitting.
+        """
         self._print_acction("Fitting with OptunaOptimizer...")
         if self._verbose:
             print(self.pipeline)
@@ -146,6 +254,18 @@ class OptunaOptimizer(BaseOptimizer):
             raise ValueError("Pipeline must be defined before fitting")
 
     def predict(self, x: XYData) -> XYData:
+        """
+        Make predictions using the optimized pipeline.
+
+        Args:
+            x (XYData): The input features.
+
+        Returns:
+            XYData: The predictions.
+
+        Raises:
+            ValueError: If the pipeline is not fitted before predicting.
+        """
         self._print_acction("Predicting with OptunaOptimizer...")
         if self._verbose:
             print(self.pipeline)
@@ -155,10 +275,23 @@ class OptunaOptimizer(BaseOptimizer):
         else:
             raise ValueError("Pipeline must be fitted before predicting")
 
-    def log_metrics(self) -> None: ...
     def evaluate(
         self, x_data: XYData, y_true: XYData | None, y_pred: XYData
     ) -> Dict[str, Any]:
+        """
+        Evaluate the optimized pipeline.
+
+        Args:
+            x_data (XYData): The input features.
+            y_true (XYData | None): The true target values (if applicable).
+            y_pred (XYData): The predicted values.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing evaluation metrics.
+
+        Raises:
+            ValueError: If the pipeline is not fitted before evaluating.
+        """
         if self.pipeline is not None:
             return self.pipeline.evaluate(x_data, y_true, y_pred)
         else:

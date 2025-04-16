@@ -10,136 +10,128 @@ Framework3 is designed with a modular, decoupled, and extensible architecture, b
 
 | Component       | Description                                               |
 |----------------|-----------------------------------------------------------|
-| `BaseFilter`   | Functional component that transforms, trains, or predicts |
-| `BasePipeline` | Chains multiple filters into a sequential or parallel strategy |
-| `BaseMetric`   | Evaluates the performance of models or pipelines          |
-| `BaseSplitter` | Splits data into folds for validation                     |
-| `BaseOptimizer`| Optimizes hyperparameters over pipelines or filters       |
-| `BaseStorer`   | Manages storage and retrieval of objects                  |
+| [`BaseFilter`](../api/base/base_filter.md)   | Functional component that transforms, trains, or predicts |
+| [`BasePipeline`](../api/base/base_pipelines.md) | Chains multiple filters into a sequential or parallel strategy |
+| [`BaseMetric`](../api/base/base_metric.md)   | Evaluates the performance of models or pipelines          |
+| [`BaseSplitter`](../api/base/base_splitter.md) | Splits data into folds for validation                     |
+| [`BaseOptimizer`](../api/base/base_optimizer.md)| Optimizes hyperparameters over pipelines or filters       |
+| [`BaseStorer`](../api/base/base_storage.md)   | Manages storage and retrieval of objects                  |
 
 ### 🔄 Typical Flow
 
-<div style="zoom: 1.3; display: inline-block;">
+<div style="zoom: 1.8; display: inline-block;">
 
 ```mermaid
 graph TD
     A[Data Input] --> B[XYData]
+    U[BaseSplitter] --> |Split Data| B
     B --> C[F3Pipeline]
     C --> D{Filters}
     D --> |Filter 1| E[PCA]
     D --> |Filter 2| F[Custom Filter]
     D --> |Filter N| G[...]
-    E --> H[Processed Data]
-    F --> H
-    G --> H
+    E & F & G --> H[Processed Data]
     H --> I{Metrics}
     I --> |Metric 1| J[F1 Score]
     I --> |Metric 2| K[Precision]
     I --> |Metric 3| L[Recall]
-    J --> M[Evaluation Results]
-    K --> M
-    L --> M
+    J & K & L --> M[Evaluation Results]
     C --> |Fit| N[Model Training]
     C --> |Predict| O[Prediction]
     N --> P[Trained Model]
     P --> O
     O --> Q[Output Predictions]
     R[Container] --> |Dependency Injection| C
-    R --> |Data Storage| S[Container.ds]
+    R --> |Data Storage| S[BaseStorer]
     S --> |Cache| T[Data Caching]
     T --> B
+    V[BaseOptimizer] --> |Tune| C
+
+    style C stroke:#1976D2,stroke-width:2px,color:#FFFFFF
+
 ```
 </div>
 
 ### 🧬 Design Principles
 
-- **Modularity**: each class has a single responsibility and does it well.
-- **Dependency Injection**: plugins are registered and configured via a `Container`.
-- **Extensibility**: easily create new components without modifying the core.
-- **Reproducibility**: all pipelines are configurable and fully traceable.
+- **Modularity**: Each class has a single responsibility and does it well.
+- **Dependency Injection**: Plugins are registered and configured via a [`Container`](../api/container/container.md).
+- **Extensibility**: Easily create new components without modifying the core.
+- **Reproducibility**: All pipelines are configurable and fully traceable.
 
----
+### 📦 Container and Dependency Injection
 
-# 🧩 How to Extend Framework3
+The [`Container`](../api/container/container.md) is a central component in Framework3, managing the registration and retrieval of various components. It allows for easy plugin management and dependency injection throughout the framework.
 
-Framework3 is designed to be *hacked*. Here's how to build and plug in your own components.
+### 🔢 Data Handling
 
-## ➕ Creating a Custom Filter
+Framework3 uses the [`XYData`](../api/base/base_types.md) class for handling input and output data. This class provides a consistent interface for data manipulation across different components of the framework.
 
-```python
-from framework3.base import BaseFilter
+### 🔌 Plugin System
 
-class MyAwesomeFilter(BaseFilter):
-    def fit(self, x, y=None):
-        # your training logic
-        return 0.92
+Framework3's plugin system allows for easy extension of the framework's capabilities. You can create custom filters, metrics, optimizers, and more by inheriting from the base classes and registering them with the Container.
 
-    def predict(self, x):
-        # your inference logic
-        return x
-```
+### 📊 Example Workflow
 
-Register it for named usage:
+Here's a basic example of how these components might interact in a typical workflow:
 
 ```python
-from framework3.container import Container
-Container.bind("MyAwesomeFilter", MyAwesomeFilter)
-```
+from framework3 import (
+    F1,
+    F3Pipeline,
+    KnnFilter,
+    Precission,
+    Recall,
+    StandardScalerPlugin,
+    WandbOptimizer,
+    XYData,
+    KFoldSplitter
+)
 
-Or register it via decorator:
+from sklearn import datasets
 
-```python
-from framework3.base import BaseFilter
-from framework3.container import Container
+# Prepare data
+X = XYData(
+    _hash="Iris X data",
+    _path="/datasets",
+    _value=iris.data,  # type: ignore
+)
+y = XYData(
+    _hash="Iris y data",
+    _path="/datasets",
+    _value=iris.target,  # type: ignore
+)
 
-@Container.bind()
-class MyAwesomeFilter(BaseFilter):
-    ...
-```
-
----
-
-## 📏 Creating a Custom Metric
-
-```python
-from framework3.base import BaseMetric
-
-class MyMetric(BaseMetric):
-    def evaluate(self, x_data, y_true, y_pred):
-        return (y_true == y_pred).mean()
-```
-
----
-
-## 🧬 Composing Filters and Pipelines
-
-You can use built-in classes like `SequentialPipeline`, `LocalThreadPipeline`, or `MonoPipeline`, or define your own execution strategies.
-
-```python
-from framework3 import KnnFilter, F3Pipeline
-
+# Create pipeline
 pipeline = F3Pipeline(
     filters=[
-        MyAwesomeFilter(),
-        KnnFilter()
+        StandardScalerPlugin(),
+        KnnFilter().grid({
+             'n_neighbors': [3, 5]
+        })
     ],
-    metrics=[F1(), MyMetric()]
+    metrics=[F1(), Precission(), Recall()]
+).splitter(
+    KFoldSplitter(
+        n_splits=2,
+        shuffle=True,
+        random_state=42,
+    )
+).optimizer(
+    WandbOptimizer(
+        project="test_project",
+        sweep_id=None,
+        scorer=F1(),
+    )
 )
+
+# Fit and evaluate
+pipeline.fit(x_data, y_data)
+y_pred = XYData.mock(prediction.value)
+
+results = pipeline.evaluate(x_data, y_data, y_pred)
 ```
 
----
+For more detailed examples and use cases, check out the [Examples](../examples/index.md) section.
 
-## 💾 Custom Plugins
-
-You can implement and plug in your own versions of:
-
-- `Splitter`: for custom validations like *grouped CV*, *time-series split*, etc.
-- `Storer`: to save/load from Localhost, S3, Redis, MongoDB, IPFS, Hugging Face, and more.
-- `Optimizer`: including tools like Optuna, Weights & Biases (Wandb), Hyperopt, etc.
-
-
-## 🔍 Learn More
-
-For practical examples and use cases, check out the [Examples](/examples/).
-
-To explore all available components, methods, and configuration options, refer to the [API Reference](/api/).
+To explore all available components, methods, and configuration options, refer to the [API Reference](../api/index.md).

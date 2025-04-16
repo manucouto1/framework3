@@ -15,6 +15,55 @@ __all__ = ["SklearnOptimizer"]
 
 @Container.bind()
 class SklearnOptimizer(BaseOptimizer):
+    """
+    Sklearn-based optimizer for hyperparameter tuning using GridSearchCV.
+
+    This class implements hyperparameter optimization using scikit-learn's GridSearchCV.
+    It allows for efficient searching of hyperparameter spaces for machine learning models
+    within the Framework3 pipeline system.
+
+    Key Features:
+        - Supports various types of hyperparameters (categorical, numerical)
+        - Integrates with scikit-learn's GridSearchCV for exhaustive search
+        - Allows for customizable scoring metrics
+        - Integrates with the Framework3 pipeline system
+
+    Usage:
+        The SklearnOptimizer can be used to optimize hyperparameters of a machine learning pipeline:
+
+        ```python
+        from framework3.plugins.optimizer import SklearnOptimizer
+        from framework3.base import XYData
+
+        # Assuming you have a pipeline and data
+        pipeline = ...
+        x_data = XYData(...)
+        y_data = XYData(...)
+
+        optimizer = SklearnOptimizer(scoring='accuracy', cv=5)
+        optimizer.optimize(pipeline)
+        optimizer.fit(x_data, y_data)
+
+        best_pipeline = optimizer.pipeline
+        ```
+
+    Attributes:
+        scoring (str | Callable | Tuple | Dict): The scoring metric for GridSearchCV.
+        pipeline (BaseFilter | None): The pipeline to be optimized.
+        cv (int): The number of cross-validation folds.
+        _grid (Dict): The parameter grid for GridSearchCV.
+        _filters (List[Tuple[str, SkWrapper]]): The list of pipeline steps.
+        _pipeline (Pipeline): The scikit-learn Pipeline object.
+        _clf (GridSearchCV): The GridSearchCV object.
+
+    Methods:
+        optimize(pipeline: BaseFilter): Set up the optimization process for a given pipeline.
+        fit(x: XYData, y: Optional[XYData]) -> None | float: Fit the GridSearchCV object to the given data.
+        predict(x: XYData) -> XYData: Make predictions using the best estimator found by GridSearchCV.
+        evaluate(x_data: XYData, y_true: XYData | None, y_pred: XYData) -> Dict[str, Any]:
+            Evaluate the optimized pipeline.
+    """
+
     def __init__(
         self,
         scoring: str | Callable | Tuple | Dict,
@@ -22,15 +71,14 @@ class SklearnOptimizer(BaseOptimizer):
         cv: int = 2,
     ):
         """
-        Initialize the GridSearchCVPipeline.
+        Initialize the SklearnOptimizer.
 
         Args:
-            filterx (List[Tuple[str, BaseFilter]]): List of (name, filter) tuples defining the pipeline steps.
-            param_grid (Dict[str, Any]): Dictionary with parameters names (string) as keys
-                                         and lists of parameter settings to try as values.
-            scoring (str): Strategy to evaluate the performance of the cross-validated model on the test set.
-            cv (int, optional): Determines the cross-validation splitting strategy. Defaults to 2.
+            scoring (str | Callable | Tuple | Dict): Strategy to evaluate the performance of the cross-validated model.
+            pipeline (BaseFilter | None): The pipeline to be optimized. Defaults to None.
+            cv (int): Determines the cross-validation splitting strategy. Defaults to 2.
         """
+
         super().__init__(
             scoring=scoring,
             cv=cv,
@@ -40,6 +88,18 @@ class SklearnOptimizer(BaseOptimizer):
         self._grid = {}
 
     def get_grid(self, aux: Dict[str, Any]) -> None:
+        """
+        Recursively process the grid configuration of a pipeline or filter.
+
+        This method traverses the configuration dictionary and builds the parameter grid
+        for GridSearchCV.
+
+        Args:
+            aux (Dict[str, Any]): The configuration dictionary to process.
+
+        Note:
+            This method modifies the _grid attribute in-place.
+        """
         match aux["params"]:
             case {"filters": filters, **r}:
                 for filter_config in filters:
@@ -55,6 +115,14 @@ class SklearnOptimizer(BaseOptimizer):
                             self._grid[f'{aux["clazz"]}__{param}'] = [value]
 
     def optimize(self, pipeline: BaseFilter):
+        """
+        Set up the optimization process for a given pipeline.
+
+        This method prepares the GridSearchCV object for optimization.
+
+        Args:
+            pipeline (BaseFilter): The pipeline to be optimized.
+        """
         self.pipeline = pipeline
         self.pipeline.verbose(False)
         self._filters = list(
@@ -79,6 +147,8 @@ class SklearnOptimizer(BaseOptimizer):
     ) -> Optional[XYData]:
         """
         Start the pipeline execution.
+
+        This method fits the optimizer and makes predictions if X_ is provided.
 
         Args:
             x (XYData): Input data for fitting.
@@ -105,9 +175,14 @@ class SklearnOptimizer(BaseOptimizer):
         """
         Fit the GridSearchCV object to the given data.
 
+        This method performs the grid search and prints the results.
+
         Args:
             x (XYData): The input features.
             y (Optional[XYData]): The target values.
+
+        Returns:
+            None | float: The best score achieved during the grid search.
         """
         self._clf.fit(x.value, y.value if y is not None else None)
         results = self._clf.cv_results_
@@ -135,23 +210,26 @@ class SklearnOptimizer(BaseOptimizer):
         self, x_data: XYData, y_true: XYData | None, y_pred: XYData
     ) -> Dict[str, Any]:
         """
-        Evaluate the pipeline using the provided metrics.
+        Evaluate the optimized pipeline.
 
         This method applies each metric in the pipeline to the predicted and true values,
-        returning a dictionary of results.
+        and includes the best score from GridSearchCV.
 
         Args:
             x_data (XYData): Input data.
-            y_true (XYData|None): True target data.
+            y_true (XYData | None): True target data.
             y_pred (XYData): Predicted target data.
 
         Returns:
-            Dict[str, Any]: A dictionary containing the evaluation results for each metric.
+            Dict[str, Any]: A dictionary containing the evaluation results for each metric
+                            and the best score from GridSearchCV.
 
         Example:
-            >>> evaluation = pipeline.evaluate(x_test, y_test, predictions)
+            ```python
+            >>> evaluation = optimizer.evaluate(x_test, y_test, predictions)
             >>> print(evaluation)
-            {'F1Score': 0.85}
+            {'F1Score': 0.85, 'best_score': 0.87}
+            ```
         """
         results = self.pipeline.evaluate(x_data, y_true, y_pred)
         results["best_score"] = self._clf.best_score_  # type: ignore
