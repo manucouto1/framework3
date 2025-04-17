@@ -110,7 +110,7 @@ class OptunaOptimizer(BaseOptimizer):
         ):
             studies = optuna.get_all_study_summaries(storage=self.storage)
 
-            if self.study_name in studies:
+            if self.study_name in [study.study_name for study in studies]:
                 optuna.delete_study(study_name=self.study_name, storage=self.storage)
 
         self._study = optuna.create_study(
