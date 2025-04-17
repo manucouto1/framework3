@@ -1,6 +1,6 @@
 from typing import Any, Callable, Literal, TypedDict
 
-from tests.unit.test_cached_filter import ArrayLike
+from numpy.typing import ArrayLike
 
 
 class CoherenceEvaluateKwargs(TypedDict, total=False):
