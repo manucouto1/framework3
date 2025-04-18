@@ -155,7 +155,7 @@ class F3Pipeline(SequentialPipeline):
         loss = None
         for filter in self.filters:
             if self._verbose:
-                rprint(f"\t*{filter}")
+                rprint(filter)
             try:
                 loss = filter.fit(x, y)
             except NotTrainableFilterError:
@@ -183,7 +183,7 @@ class F3Pipeline(SequentialPipeline):
 
         for filter_ in self.filters:
             if self._verbose:
-                rprint(f"\t*{filter_}")
+                rprint(filter_)
             x = filter_.predict(x)
 
         return x

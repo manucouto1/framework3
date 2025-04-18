@@ -69,6 +69,7 @@ class SklearnOptimizer(BaseOptimizer):
         scoring: str | Callable | Tuple | Dict,
         pipeline: BaseFilter | None = None,
         cv: int = 2,
+        n_jobs: int = -1,
     ):
         """
         Initialize the SklearnOptimizer.
@@ -85,6 +86,7 @@ class SklearnOptimizer(BaseOptimizer):
             pipeline=pipeline,
         )
         self.pipeline = pipeline
+        self.n_jobs = n_jobs
         self._grid = {}
 
     def get_grid(self, aux: Dict[str, Any]) -> None:
@@ -139,7 +141,8 @@ class SklearnOptimizer(BaseOptimizer):
             param_grid=self._grid,
             scoring=self.scoring,
             cv=self.cv,
-            verbose=1,
+            n_jobs=self.n_jobs,
+            verbose=10,
         )
 
     def start(
