@@ -71,7 +71,7 @@ def test_grid_search_cv_pipeline_with_multiple_filters():
             PCAPlugin().grid({"n_components": [2]}),
             ClassifierSVMPlugin().grid({"C": [0.1, 1], "kernel": ["rbf"]}),
         ]
-    ).optimizer(SklearnOptimizer(scoring="accuracy", cv=2))
+    ).optimizer(SklearnOptimizer(scoring="accuracy", cv=2, n_jobs=1))
 
     # Fit the pipeline
     grid_search.fit(X_data, y_data)

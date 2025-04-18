@@ -69,7 +69,7 @@ class SklearnOptimizer(BaseOptimizer):
         scoring: str | Callable | Tuple | Dict,
         pipeline: BaseFilter | None = None,
         cv: int = 2,
-        n_jobs: int = -1,
+        n_jobs: int | None = None,
     ):
         """
         Initialize the SklearnOptimizer.
