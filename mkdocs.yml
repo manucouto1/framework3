@@ -58,6 +58,8 @@ nav:
         - Heavy Data: examples/notebooks/caching_heavy_data.ipynb
         - Optuna: examples/notebooks/optuna_optimizer_with_data_splitter_kfold.ipynb
         - Wandb:  examples/notebooks/wandb_optimizer_with_data_splitter_kfold.ipynb
+      - Real World:
+        - Temporal Word Embeddings for Early Detection of Psychological Disorders on Social Media: examples/notebooks/research_deltas.ipynb
   - API:
       - Overview: api/index.md
       - Base:
