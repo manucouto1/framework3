@@ -48,6 +48,7 @@ class BaseSingleton:
     """
 
     _instances: Dict[Type[BaseSingleton], Any] = {}
+    _verbose: bool = True
 
     def __new__(cls: Type[BaseSingleton], *args: Any, **kwargs: Any) -> BaseStorage:
         """

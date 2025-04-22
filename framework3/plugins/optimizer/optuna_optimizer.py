@@ -1,7 +1,7 @@
 import optuna
 
 from typing import Any, Callable, Dict, Sequence, Union, cast
-from framework3 import Container
+from framework3.container import Container
 from framework3.base import BasePlugin, XYData
 
 from rich import print
@@ -140,6 +140,8 @@ class OptunaOptimizer(BaseOptimizer):
                     self.get_grid(filter_config, f)
             case {"pipeline": pipeline, **r}:  # noqa: F841
                 self.get_grid(pipeline, f)
+            case {"filter": cached_filter, **r}:  # noqa: F841
+                self.get_grid(cached_filter, f)
             case p_params:
                 if "_grid" in aux:
                     for param, value in aux["_grid"].items():

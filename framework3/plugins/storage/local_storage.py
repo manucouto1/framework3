@@ -100,9 +100,11 @@ class LocalStorage(BaseStorage):
         """
         try:
             Path(context).mkdir(parents=True, exist_ok=True)
-            print(f"\t * Saving in local path: {context}/{file_name}")
+            if self._verbose:
+                print(f"\t * Saving in local path: {context}/{file_name}")
             pickle.dump(file, open(f"{context}/{file_name}", "wb"))
-            print("\t * Saved !")
+            if self._verbose:
+                print("\t * Saved !")
             return file_name
         except Exception as ex:
             print(ex)
@@ -170,7 +172,8 @@ class LocalStorage(BaseStorage):
             Any: The content of the file, unpickled if it was pickled.
         """
         stream = self.get_file_by_hashcode(hashcode, context)
-        print(f"\t * Downloading: {stream}")
+        if self._verbose:
+            print(f"\t * Downloading: {stream}")
         loaded = pickle.load(stream)
         return pickle.loads(loaded) if isinstance(loaded, bytes) else loaded
 
