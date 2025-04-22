@@ -45,7 +45,7 @@ def test_cached_with_grid_search():
                 random_state=42,
             )
         )
-        .optimizer(GridOptimizer(scoring=F1()))
+        .optimizer(GridOptimizer(scorer=F1()))
     )
 
     wandb_pipeline.fit(X, y)
