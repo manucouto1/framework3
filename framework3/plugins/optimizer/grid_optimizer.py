@@ -56,11 +56,11 @@ class GridOptimizer(BaseOptimizer):
 
     def __init__(
         self,
-        scoring: BaseMetric,
+        scorer: BaseMetric,
         pipeline: BaseFilter | None = None,
     ):
-        super().__init__(pipeline=pipeline, scoring=scoring)
-        self.scoring: BaseMetric = scoring
+        super().__init__(pipeline=pipeline, scorer=scorer)
+        self.scorer: BaseMetric = scorer
         self.pipeline: Optional[BaseFilter] = None
 
         self.best_params: Dict[str, Any] = {}
@@ -196,7 +196,7 @@ class GridOptimizer(BaseOptimizer):
         # Create DataFrame with all combinations and scores
         self._results = pd.DataFrame(results)
         self._results = self._results.sort_values(
-            "score", ascending=not self.scoring.higher_better
+            "score", ascending=not self.scorer.higher_better
         )
 
         self.best_params = self._results.iloc[0].drop("score").to_dict()
