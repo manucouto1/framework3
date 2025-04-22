@@ -86,6 +86,7 @@ Optimizers help fine-tune hyperparameters for optimal performance:
 - [SklearnOptimizer](plugins/optimizers/sklearn_optimizer.md)
 - [OptunaOptimizer](plugins/optimizers/optuna_optimizer.md)
 - [WandbOptimizer](plugins/optimizers/wandb_optimizer.md)
+- [GridOptimizer](plugins/optimizers/grid_optimizer.md)
 
 ### Splitters
 

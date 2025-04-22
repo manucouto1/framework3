@@ -112,6 +112,8 @@ class WandbOptimizer(BaseOptimizer):
                     self.get_grid(filter_config, config)
             case {"pipeline": pipeline, **r}:  # noqa: F841
                 self.get_grid(pipeline, config)
+            case {"filter": cached_filter, **r}:  # noqa: F841
+                self.get_grid(cached_filter, config)
             case p_params:
                 if "_grid" in aux:
                     for param, value in aux["_grid"].items():

@@ -6,6 +6,7 @@ import typeguard
 
 from framework3 import (
     F1,
+    Cached,
     F3Pipeline,
     KnnFilter,
     Precission,
@@ -88,7 +89,10 @@ def test_wandb_pipeline_init_and_fit():
 
     wandb_pipeline = (
         F3Pipeline(
-            filters=[StandardScalerPlugin(), KnnFilter().grid({"n_neighbors": [3, 5]})],
+            filters=[
+                Cached(StandardScalerPlugin()),
+                KnnFilter().grid({"n_neighbors": [3, 5]}),
+            ],
             metrics=[F1(), Precission(), Recall()],
         )
         .splitter(

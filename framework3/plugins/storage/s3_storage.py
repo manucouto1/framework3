@@ -124,14 +124,18 @@ class S3Storage(BaseStorage):
             stream = io.BytesIO(binary)
         else:
             stream = file
-        print("- Binary prepared!")
+        if self._verbose:
+            print("- Binary prepared!")
+            print("- Stream ready!")
+            print(f" \t * Object size {sys.getsizeof(stream) * 1e-9} GBs ")
 
-        print("- Stream ready!")
-        print(f" \t * Object size {sys.getsizeof(stream) * 1e-9} GBs ")
         self._client.put_object(
             Body=stream, Bucket=self.bucket, Key=f"{context}/{file_name}"
         )
-        print("Upload Complete!")
+
+        if self._verbose:
+            print("Upload Complete!")
+
         return file_name
 
     def list_stored_files(self, context) -> List[Any]:
