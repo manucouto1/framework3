@@ -3,6 +3,7 @@ from framework3 import (
     F1,
     Cached,
     F3Pipeline,
+    KFoldSplitter,
     KnnFilter,
     Precission,
     Recall,
@@ -12,11 +13,10 @@ from framework3 import (
 from rich import print
 
 from framework3.base.base_clases import XYData
-from framework3.plugins.optimizer.optuna_optimizer import OptunaOptimizer
-from framework3.plugins.splitter.cross_validation_splitter import KFoldSplitter
+from framework3.plugins.optimizer.grid_optimizer import GridOptimizer
 
 
-def test_optuna_pipeline_init_and_fit():
+def test_cached_with_grid_search():
     iris = datasets.load_iris()
 
     X = XYData(
@@ -45,18 +45,12 @@ def test_optuna_pipeline_init_and_fit():
                 random_state=42,
             )
         )
-        .optimizer(
-            OptunaOptimizer(
-                direction="maximize",
-                study_name="Iris-KNN",
-                reset_study=True,
-                n_trials=100,
-                storage="sqlite:///optuna_estudios.db",
-            )
-        )
+        .optimizer(GridOptimizer(scoring=F1()))
     )
 
     wandb_pipeline.fit(X, y)
+
+    assert len(list(wandb_pipeline._results.items())) == 2
 
     prediction = wandb_pipeline.predict(x=X)
 

@@ -58,6 +58,7 @@ nav:
         - Heavy Data: examples/notebooks/caching_heavy_data.ipynb
         - Optuna: examples/notebooks/optuna_optimizer_with_data_splitter_kfold.ipynb
         - Wandb:  examples/notebooks/wandb_optimizer_with_data_splitter_kfold.ipynb
+        - Grid: examples/notebooks/grid_search_optimizer_with_data_splitter_kfold.ipynb
       - Real World:
         - Temporal Word Embeddings for Early Detection of Psychological Disorders on Social Media: examples/notebooks/research_deltas.ipynb
   - API:
@@ -100,6 +101,7 @@ nav:
               - SklearnOptimizer: api/plugins/optimizers/sklearn_optimizer.md
               - OptunaOptimizer: api/plugins/optimizers/optuna_optimizer.md
               - WandbOptimizer: api/plugins/optimizers/wandb_optimizer.md
+              - GridOptimizer: api/plugins/optimizers/grid_optimizer.md
           - Splitters:
               - KFoldSplitter: api/plugins/splitters/kfold_splitter.md
           - Storage:

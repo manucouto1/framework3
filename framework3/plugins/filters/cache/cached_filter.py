@@ -123,6 +123,11 @@ class Cached(BaseFilter):
         self._storage: BaseStorage = Container.storage if storage is None else storage
         self._lambda_filter: Callable[..., BaseFilter] | None = None
 
+    def verbose(self, value: bool):
+        super().verbose(value)
+        self._storage._verbose = value
+        self.filter.verbose(value)
+
     def init(self) -> None:
         """
         Initialize the cached filter.
@@ -212,20 +217,24 @@ class Cached(BaseFilter):
             )
             or self.overwrite
         ):
-            rprint(
-                f"\t - El filtro {self.filter} con hash {self.filter._m_hash} No existe, se va a entrenar."
-            )
+            if self._verbose:
+                rprint(
+                    f"\t - El filtro {self.filter} con hash {self.filter._m_hash} No existe, se va a entrenar."
+                )
             self.filter._original_fit(x, y)
 
             if self.cache_filter and method_is_overridden(self.filter.__class__, "fit"):
-                rprint(f"\t - El filtro {self.filter} Se cachea.")
+                if self._verbose:
+                    rprint(f"\t - El filtro {self.filter} Se cachea.")
                 self._storage.upload_file(
                     file=pickle.dumps(self.filter),
                     file_name="model",
                     context=f"{self._storage.get_root_path()}/{self.filter._m_path}",
                 )
         else:
-            rprint(f"\t - El filtro {self.filter} Existe, se crea lambda.")
+            if self._verbose:
+                rprint(f"\t - El filtro {self.filter} Existe, se carga del storage.")
+
             self._lambda_filter = lambda: cast(
                 BaseFilter,
                 self._storage.download_file(
@@ -254,11 +263,14 @@ class Cached(BaseFilter):
             )
             or self.overwrite
         ):
-            rprint(f"\t - El dato {x} No existe, se va a crear.")
+            if self._verbose:
+                rprint(f"\t - El dato {x} No existe, se va a crear.")
+
             if self._lambda_filter is not None:
-                rprint(
-                    "\t - Existe un Lambda por lo que se recupera el filtro del storage."
-                )
+                if self._verbose:
+                    rprint(
+                        "\t - Existe un Lambda por lo que se recupera el filtro del storage."
+                    )
                 self.filter = self._lambda_filter()
 
             value = XYData(
@@ -267,14 +279,18 @@ class Cached(BaseFilter):
                 _value=self.filter._original_predict(x)._value,
             )
             if self.cache_data:
-                rprint(f"\t - El dato {x} Se cachea.")
+                if self._verbose:
+                    rprint(f"\t - El dato {x} Se cachea.")
+
                 self._storage.upload_file(
                     file=pickle.dumps(value.value),
                     file_name=x._hash,
                     context=f"{self._storage.get_root_path()}/{x._path}",
                 )
         else:
-            rprint(f"\t - El dato {x} Existe, se crea lambda.")
+            if self._verbose:
+                rprint(f"\t - El dato {x} Existe, se carga del storage.")
+
             value = XYData(
                 _hash=x._hash,
                 _path=x._path,
