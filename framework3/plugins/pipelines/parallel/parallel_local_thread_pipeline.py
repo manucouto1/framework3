@@ -120,11 +120,15 @@ class LocalThreadPipeline(ParallelPipeline):
                     *tqdm(
                         executor.map(fit_function, self.filters),
                         total=len(self.filters),
-                        desc="Fitting",
+                        desc="Parallel Fitting",
                     )
                 )
             )
-            return float(np.mean(losses)) if losses else None
+            match list(filter(lambda x: x is not None, losses)):
+                case []:
+                    return None
+                case lss:
+                    return float(np.mean(lss))
 
     def predict(self, x: XYData) -> XYData:
         """

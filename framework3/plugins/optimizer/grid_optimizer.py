@@ -207,7 +207,7 @@ class GridOptimizer(BaseOptimizer):
             BaseFilter, BasePlugin.build_from_dump(dumped_pipeline, Container.pif)
         )
 
-        self.pipeline.unwrap().fit(x, y)
+        return self.pipeline.unwrap().fit(x, y)
 
     def predict(self, x: XYData) -> XYData:
         """
