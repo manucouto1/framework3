@@ -5,10 +5,9 @@ from framework3 import BaseMetric, Container, XYData
 from numpy import exp
 import numpy as np
 
-__all__ = ["ERDE"]
+__all__ = ["ERDE_5", "ERDE_50"]
 
 
-@Container.bind()
 class ERDE(BaseMetric):
     def __init__(self, count: Iterable, k: int = 5):
         self.k = k
@@ -34,3 +33,31 @@ class ERDE(BaseMetric):
             elif result == 0 and expected == 0:
                 all_erde.append(0.0)
         return float(np.mean(all_erde) * 100)
+
+
+@Container.bind()
+class ERDE_5(BaseMetric):
+    def __init__(self, count: Iterable):
+        self._erde = ERDE(count=count, k=5)
+
+    def evaluate(
+        self, x_data: XYData, y_true: XYData | None, y_pred: XYData
+    ) -> float | np.ndarray:
+        if y_true is None:
+            raise ValueError("y_true must be provided for evaluation")
+
+        return self._erde.evaluate(x_data, y_true, y_pred)
+
+
+@Container.bind()
+class ERDE_50(BaseMetric):
+    def __init__(self, count: Iterable):
+        self._erde = ERDE(count=count, k=50)
+
+    def evaluate(
+        self, x_data: XYData, y_true: XYData | None, y_pred: XYData
+    ) -> float | np.ndarray:
+        if y_true is None:
+            raise ValueError("y_true must be provided for evaluation")
+
+        return self._erde.evaluate(x_data, y_true, y_pred)
