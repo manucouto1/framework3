@@ -1,4 +1,3 @@
-from typing import Iterable
 from sklearn.metrics import confusion_matrix
 from framework3 import BaseMetric, Container, XYData
 
@@ -9,9 +8,8 @@ __all__ = ["ERDE_5", "ERDE_50"]
 
 
 class ERDE(BaseMetric):
-    def __init__(self, count: Iterable, k: int = 5):
+    def __init__(self, k: int = 5):
         self.k = k
-        self.count = count
 
     def evaluate(
         self, x_data: XYData, y_true: XYData | None, y_pred: XYData
@@ -22,7 +20,7 @@ class ERDE(BaseMetric):
         all_erde = []
         _, _, _, tp = confusion_matrix(y_true.value, y_pred.value).ravel()
         for expected, result, count in list(
-            zip(y_true.value, y_pred.value, self.count)
+            zip(y_true.value, y_pred.value, x_data.value.n_texts.values.tolist())
         ):
             if result == 1 and expected == 0:
                 all_erde.append(float(tp) / len(y_true.value))
@@ -37,8 +35,8 @@ class ERDE(BaseMetric):
 
 @Container.bind()
 class ERDE_5(BaseMetric):
-    def __init__(self, count: Iterable):
-        self._erde = ERDE(count=count, k=5)
+    def __init__(self):
+        self._erde = ERDE(k=5)
 
     def evaluate(
         self, x_data: XYData, y_true: XYData | None, y_pred: XYData
@@ -51,8 +49,8 @@ class ERDE_5(BaseMetric):
 
 @Container.bind()
 class ERDE_50(BaseMetric):
-    def __init__(self, count: Iterable):
-        self._erde = ERDE(count=count, k=50)
+    def __init__(self):
+        self._erde = ERDE(k=50)
 
     def evaluate(
         self, x_data: XYData, y_true: XYData | None, y_pred: XYData
