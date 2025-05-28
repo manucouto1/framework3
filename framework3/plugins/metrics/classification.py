@@ -58,9 +58,7 @@ class F1(BaseMetric):
 
     def __init__(
         self,
-        average: Literal[
-            "micro", "macro", "samples", "weighted", "binary"
-        ] = "weighted",
+        average: Literal["micro", "macro", "samples", "weighted", "binary"] = "binary",
     ):
         """
         Initialize a new F1 metric instance.
@@ -111,7 +109,8 @@ class F1(BaseMetric):
         return f1_score(
             y_true.value,
             y_pred.value,
-            **kwargs,
+            average=self.average,
+            **kwargs,  # type: ignore
         )  # type: ignore
 
 
@@ -162,7 +161,7 @@ class Precission(BaseMetric):
     def __init__(
         self,
         average: Literal["micro", "macro", "samples", "weighted", "binary"]
-        | None = "weighted",
+        | None = "binary",
     ):
         """
         Initialize a new Precission metric instance.
@@ -212,7 +211,6 @@ class Precission(BaseMetric):
         return precision_score(
             y_true.value,
             y_pred.value,
-            zero_division=0,
             average=self.average,
             **kwargs,  # type: ignore
         )  # type: ignore
@@ -265,7 +263,7 @@ class Recall(BaseMetric):
     def __init__(
         self,
         average: Literal["micro", "macro", "samples", "weighted", "binary"]
-        | None = "weighted",
+        | None = "binary",
     ):
         """
         Initialize a new Recall metric instance.
@@ -315,7 +313,6 @@ class Recall(BaseMetric):
         return recall_score(
             y_true.value,
             y_pred.value,
-            zero_division=0,
             average=self.average,
             **kwargs,  # type: ignore
         )  # type: ignore

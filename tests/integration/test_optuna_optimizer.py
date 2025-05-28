@@ -36,7 +36,11 @@ def test_optuna_pipeline_init_and_fit():
                 Cached(StandardScalerPlugin()),
                 KnnFilter().grid({"n_neighbors": (2, 6)}),
             ],
-            metrics=[F1(), Precission(), Recall()],
+            metrics=[
+                F1(average="weighted"),
+                Precission(average="weighted"),
+                Recall(average="weighted"),
+            ],
         )
         .splitter(
             KFoldSplitter(

@@ -36,7 +36,11 @@ def test_cached_with_grid_search():
                 Cached(StandardScalerPlugin()),
                 KnnFilter().grid({"n_neighbors": (2, 6)}),
             ],
-            metrics=[F1(), Precission(), Recall()],
+            metrics=[
+                F1(average="weighted"),
+                Precission(average="weighted"),
+                Recall(average="weighted"),
+            ],
         )
         .splitter(
             KFoldSplitter(
@@ -45,7 +49,7 @@ def test_cached_with_grid_search():
                 random_state=42,
             )
         )
-        .optimizer(GridOptimizer(scorer=F1()))
+        .optimizer(GridOptimizer(scorer=F1(average="weighted")))
     )
 
     wandb_pipeline.fit(X, y)

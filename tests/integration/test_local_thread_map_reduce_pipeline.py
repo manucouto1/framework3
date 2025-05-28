@@ -109,7 +109,7 @@ def test_map_reduce_combiner_pipeline_fit():
     assert result.value.shape == (150, 4)  # We used 10 samples for prediction
 
     final_pieline = F3Pipeline(
-        filters=[pipeline, ClassifierSVMPlugin()], metrics=[F1()]
+        filters=[pipeline, ClassifierSVMPlugin()], metrics=[F1(average="weighted")]
     )
 
     final_pieline.fit(x, y)
