@@ -1,4 +1,4 @@
-from typing import Literal, Unpack, cast
+from typing import Literal, Unpack
 from sklearn.metrics import f1_score, precision_score, recall_score
 from framework3.base.base_types import Float
 from framework3.base.base_types import XYData
@@ -107,14 +107,6 @@ class F1(BaseMetric):
         """
         if y_true is None:
             raise ValueError("Ground truth (y_true) must be provided.")
-
-        kwargs.setdefault(
-            "average",
-            cast(
-                Literal["micro", "macro", "samples", "weighted", "binary"], self.average
-            ),
-        )
-        kwargs.setdefault("zero_division", 0)
 
         return f1_score(
             y_true.value,
