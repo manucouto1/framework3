@@ -36,7 +36,11 @@ def test_pipeline_iris_dataset():
                 cv=2,
             ),
         ],
-        metrics=[F1(), Precission(), Recall()],
+        metrics=[
+            F1(average="weighted"),
+            Precission(average="weighted"),
+            Recall(average="weighted"),
+        ],
     )
 
     X = XYData(
@@ -95,7 +99,11 @@ def test_pipeline_different_feature_counts():
                 cv=2,
             ),
         ],
-        metrics=[F1(), Precission(), Recall()],
+        metrics=[
+            F1(average="weighted"),
+            Precission(average="weighted"),
+            Recall(average="weighted"),
+        ],
     )
 
     # Test with full dataset
@@ -147,7 +155,11 @@ def test_grid_search_with_specified_parameters():
                 cv=2,
             ),
         ],
-        metrics=[F1(), Precission(), Recall()],
+        metrics=[
+            F1(average="weighted"),
+            Precission(average="weighted"),
+            Recall(average="weighted"),
+        ],
     )
 
     pipeline.fit(X, y)

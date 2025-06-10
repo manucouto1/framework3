@@ -93,7 +93,11 @@ def test_wandb_pipeline_init_and_fit():
                 Cached(StandardScalerPlugin()),
                 KnnFilter().grid({"n_neighbors": [3, 5]}),
             ],
-            metrics=[F1(), Precission(), Recall()],
+            metrics=[
+                F1(average="weighted"),
+                Precission(average="weighted"),
+                Recall(average="weighted"),
+            ],
         )
         .splitter(
             KFoldSplitter(
@@ -106,7 +110,7 @@ def test_wandb_pipeline_init_and_fit():
             WandbOptimizer(
                 project="test_project",
                 sweep_id=None,
-                scorer=F1(),
+                scorer=F1(average="weighted"),
             )
         )
     )

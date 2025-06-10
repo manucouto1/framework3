@@ -155,14 +155,34 @@ class XYData(Generic[TxyData]):
             ```
         """
 
-        def split_data(self, indices: Iterable[int]) -> Any:
+        def split_data(self, indices: Iterable[int]) -> VData:
             value = self.value
-            if isinstance(value, spmatrix):
-                value = csr_matrix(value)
 
-            return cast(spmatrix, value[indices])
+            match value:
+                case np.ndarray():
+                    return value[list(indices)]
 
-        indices_hash = hashlib.sha1(str(indices).encode()).hexdigest()
+                case list():
+                    return [value[i] for i in indices]
+
+                case torch.Tensor():
+                    return value[list(indices)]
+
+                # mypy: disable-next-line[misc]
+                # case spmatrix():
+                #     return cast(spmatrix, csr_matrix(value)[indices])
+
+                case pd.DataFrame():
+                    return value.iloc[list(indices)]
+
+                case _:
+                    if isinstance(value, spmatrix):
+                        return cast(spmatrix, csr_matrix(value)[indices])
+                    raise TypeError(
+                        f"Unsupported data type for splitting: {type(value)}"
+                    )
+
+        indices_hash = hashlib.sha1(str(list(indices)).encode()).hexdigest()
         return XYData(
             _hash=f"{self._hash}[{indices_hash}]",
             _path=self._path,

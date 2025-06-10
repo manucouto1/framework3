@@ -1,4 +1,4 @@
-from typing import Literal, Unpack, cast
+from typing import Literal, Unpack
 from sklearn.metrics import f1_score, precision_score, recall_score
 from framework3.base.base_types import Float
 from framework3.base.base_types import XYData
@@ -58,9 +58,7 @@ class F1(BaseMetric):
 
     def __init__(
         self,
-        average: Literal[
-            "micro", "macro", "samples", "weighted", "binary"
-        ] = "weighted",
+        average: Literal["micro", "macro", "samples", "weighted", "binary"] = "binary",
     ):
         """
         Initialize a new F1 metric instance.
@@ -108,18 +106,11 @@ class F1(BaseMetric):
         if y_true is None:
             raise ValueError("Ground truth (y_true) must be provided.")
 
-        kwargs.setdefault(
-            "average",
-            cast(
-                Literal["micro", "macro", "samples", "weighted", "binary"], self.average
-            ),
-        )
-        kwargs.setdefault("zero_division", 0)
-
         return f1_score(
             y_true.value,
             y_pred.value,
-            **kwargs,
+            average=self.average,
+            **kwargs,  # type: ignore
         )  # type: ignore
 
 
@@ -170,7 +161,7 @@ class Precission(BaseMetric):
     def __init__(
         self,
         average: Literal["micro", "macro", "samples", "weighted", "binary"]
-        | None = "weighted",
+        | None = "binary",
     ):
         """
         Initialize a new Precission metric instance.
@@ -220,7 +211,6 @@ class Precission(BaseMetric):
         return precision_score(
             y_true.value,
             y_pred.value,
-            zero_division=0,
             average=self.average,
             **kwargs,  # type: ignore
         )  # type: ignore
@@ -273,7 +263,7 @@ class Recall(BaseMetric):
     def __init__(
         self,
         average: Literal["micro", "macro", "samples", "weighted", "binary"]
-        | None = "weighted",
+        | None = "binary",
     ):
         """
         Initialize a new Recall metric instance.
@@ -323,7 +313,6 @@ class Recall(BaseMetric):
         return recall_score(
             y_true.value,
             y_pred.value,
-            zero_division=0,
             average=self.average,
             **kwargs,  # type: ignore
         )  # type: ignore

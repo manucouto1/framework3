@@ -812,6 +812,18 @@ class BaseFilter(BasePlugin):
         """
         return self
 
+    @staticmethod
+    def clear_memory():
+        import gc
+
+        gc.collect()
+        try:
+            import torch
+
+            torch.cuda.empty_cache()
+        except ImportError:
+            pass
+
 
 class BaseMetric(BasePlugin):
     """
