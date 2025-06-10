@@ -128,8 +128,6 @@ class KFoldSplitter(BaseSplitter):
         if y is None:  # type: ignore
             raise ValueError("y must be provided for KFold split")
 
-        Y = y.value
-
         if self.pipeline is None:
             raise ValueError("Pipeline must be fitted before splitting")
 
@@ -138,32 +136,19 @@ class KFoldSplitter(BaseSplitter):
         for train_idx, val_idx in tqdm(
             splits, total=self._kfold.get_n_splits(X), disable=not self._verbose
         ):
-            X_train = XYData(
-                _hash=f"{x._hash}_{train_idx}",
-                _path=f"{x._path}_{train_idx}",
-                _value=X[train_idx],
-            )
-            X_val = XYData(
-                _hash=f"{x._hash}_{val_idx}",
-                _path=f"{x._path}_{val_idx}",
-                _value=X[val_idx],
-            )
-            y_train = XYData(
-                _hash=f"{y._hash}_{train_idx}",
-                _path=f"{y._path}_{train_idx}",
-                _value=Y[train_idx],
-            )
-            y_val = XYData(
-                _hash=f"{y._hash}_{val_idx}",
-                _path=f"{y._path}_{val_idx}",
-                _value=Y[val_idx],
-            )
+            X_train = x.split(train_idx)
+            X_val = x.split(val_idx)
+            y_train = y.split(train_idx)
+            y_val = y.split(val_idx)
+
             self.pipeline.fit(X_train, y_train)
 
             _y = self.pipeline.predict(X_val)
 
             loss = self.pipeline.evaluate(X_val, y_val, _y)
             losses.append(float(next(iter(loss.values()))))
+
+            self.clear_memory()
 
         return float(np.mean(losses) if losses else 0.0)
 
