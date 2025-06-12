@@ -104,6 +104,7 @@ nav:
               - GridOptimizer: api/plugins/optimizers/grid_optimizer.md
           - Splitters:
               - KFoldSplitter: api/plugins/splitters/kfold_splitter.md
+              - StratifiedKFoldSplitter: api/plugins/splitters/stratified_kfold_splitter.md
           - Storage:
               - Local: api/plugins/storage/local.md
               - S3: api/plugins/storage/s3.md

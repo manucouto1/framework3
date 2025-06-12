@@ -93,6 +93,7 @@ Optimizers help fine-tune hyperparameters for optimal performance:
 Splitters divide the dataset for cross-validation and evaluation:
 
 - [KFoldSplitter](plugins/splitters/kfold_splitter.md)
+- [KFoldSplitter](plugins/splitters/stratified_kfold_splitter.md)
 
 ### Storage
 
