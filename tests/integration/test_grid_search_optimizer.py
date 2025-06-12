@@ -1,24 +1,25 @@
+import pytest
 from sklearn import datasets
+from rich import print
+
 from framework3 import (
     F1,
     Cached,
     F3Pipeline,
     KFoldSplitter,
+    StratifiedKFoldSplitter,
     KnnFilter,
     Precission,
     Recall,
     StandardScalerPlugin,
 )
-
-from rich import print
-
 from framework3.base.base_clases import XYData
 from framework3.plugins.optimizer.grid_optimizer import GridOptimizer
 
 
-def test_cached_with_grid_search():
+def load_iris_data():
+    """Helper function to load and wrap the Iris dataset in XYData."""
     iris = datasets.load_iris()
-
     X = XYData(
         _hash="Iris X data",
         _path="/datasets",
@@ -29,8 +30,12 @@ def test_cached_with_grid_search():
         _path="/datasets",
         _value=iris.target,  # type: ignore
     )
+    return X, y
 
-    wandb_pipeline = (
+
+def build_pipeline(splitter):
+    """Helper function to create a pipeline with GridSearch and the provided splitter."""
+    return (
         F3Pipeline(
             filters=[
                 Cached(StandardScalerPlugin()),
@@ -42,26 +47,38 @@ def test_cached_with_grid_search():
                 Recall(average="weighted"),
             ],
         )
-        .splitter(
-            KFoldSplitter(
-                n_splits=2,
-                shuffle=True,
-                random_state=42,
-            )
-        )
+        .splitter(splitter)
         .optimizer(GridOptimizer(scorer=F1(average="weighted")))
     )
 
-    wandb_pipeline.fit(X, y)
 
-    assert len(list(wandb_pipeline._results.items())) == 2
+@pytest.mark.parametrize("splitter_class", [KFoldSplitter, StratifiedKFoldSplitter])
+def test_pipeline_with_grid_search_and_splitter(splitter_class):
+    """
+    Test that the pipeline works correctly with both KFold and StratifiedKFold splitter classes.
+    """
+    X, y = load_iris_data()
 
-    prediction = wandb_pipeline.predict(x=X)
+    splitter = splitter_class(n_splits=2, shuffle=True, random_state=42)
+    pipeline = build_pipeline(splitter)
 
+    # Fit the pipeline
+    pipeline.fit(X, y)
+
+    # Check that 2 folds were evaluated
+    assert len(list(pipeline._results.items())) == 2
+
+    # Predict on training data (sanity check)
+    prediction = pipeline.predict(x=X)
+    assert prediction.value.shape[0] == X.value.shape[0]
+
+    # Fake prediction to evaluate the metrics
     y_pred = XYData.mock(prediction.value)
+    evaluation = pipeline.pipeline.evaluate(X, y, y_pred=y_pred)
 
-    evaluate = wandb_pipeline.pipeline.evaluate(X, y, y_pred=y_pred)
+    # Sanity check for evaluation output
+    assert isinstance(evaluation, dict)
+    assert all(metric in evaluation for metric in ["F1", "Precission", "Recall"])
 
-    print(wandb_pipeline)
-
-    print(evaluate)
+    print(f"\n[bold green]{splitter_class.__name__} results:[/bold green]")
+    print(evaluation)
