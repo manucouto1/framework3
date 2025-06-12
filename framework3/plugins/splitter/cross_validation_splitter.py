@@ -1,9 +1,9 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 import numpy as np
 from sklearn.model_selection import KFold
 from tqdm import tqdm
 
-from framework3 import Container
+from framework3 import BasePipeline, BasePlugin, Container
 from framework3.base.base_clases import BaseFilter, rprint
 from framework3.base.base_splitter import BaseSplitter
 from framework3.base.base_types import XYData
@@ -141,11 +141,16 @@ class KFoldSplitter(BaseSplitter):
             y_train = y.split(train_idx)
             y_val = y.split(val_idx)
 
-            self.pipeline.fit(X_train, y_train)
+            pipeline = cast(
+                BasePipeline,
+                BasePlugin.build_from_dump(self.pipeline.item_dump(), Container.pif),
+            )
 
-            _y = self.pipeline.predict(X_val)
+            pipeline.fit(X_train, y_train)
 
-            loss = self.pipeline.evaluate(X_val, y_val, _y)
+            _y = pipeline.predict(X_val)
+
+            loss = pipeline.evaluate(X_val, y_val, _y)
             losses.append(float(next(iter(loss.values()))))
 
             self.clear_memory()
