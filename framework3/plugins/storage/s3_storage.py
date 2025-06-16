@@ -138,22 +138,32 @@ class S3Storage(BaseStorage):
 
         return file_name
 
-    def list_stored_files(self, context) -> List[Any]:
+    def list_stored_files(self, context: str) -> List[str]:
         """
-        List all files in the S3 bucket.
+        List all files in a specific folder (context) in the S3 bucket.
 
         Args:
-            context (str): Not used in this implementation.
+            context (str): The folder path within the bucket to list files from.
 
         Returns:
-            List[str]: A list of object keys in the bucket.
+            List[str]: A list of object keys in the specified folder.
         """
-        return list(
-            map(
-                lambda x: x["Key"],
-                self._client.list_objects_v2(Bucket=self.bucket)["Contents"],
-            )
-        )
+        # Ensure the context ends with a trailing slash if it's not empty
+        prefix = f"{context}/" if context and not context.endswith("/") else context
+
+        paginator = self._client.get_paginator("list_objects_v2")
+        pages = paginator.paginate(Bucket=self.bucket, Prefix=prefix)
+
+        file_list = []
+        for page in pages:
+            if "Contents" in page:
+                for obj in page["Contents"]:
+                    # Remove the prefix from the key to get the relative path
+                    relative_path = obj["Key"][len(prefix) :]
+                    if relative_path:  # Ignore the folder itself
+                        file_list.append(relative_path)
+
+        return file_list
 
     def get_file_by_hashcode(self, hashcode: str, context: str) -> bytes:
         """
