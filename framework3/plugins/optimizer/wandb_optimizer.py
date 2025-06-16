@@ -181,9 +181,12 @@ class WandbOptimizer(BaseOptimizer):
             )
 
         if self.sweep_id is not None:
-            WandbAgent()(
-                self.sweep_id, self.project, lambda config: self.exec(config, x, y)
-            )
+            sweep = WandbSweepManager().get_sweep(self.project, self.sweep_id)
+            sweep_state = sweep.state.lower()
+            if sweep_state not in ("finished", "cancelled", "crashed"):
+                WandbAgent()(
+                    self.sweep_id, self.project, lambda config: self.exec(config, x, y)
+                )
         else:
             raise ValueError("Either pipeline or sweep_id must be provided")
 
