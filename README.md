@@ -1,5 +1,5 @@
 # LabChain [![test_on_push](https://github.com/manucouto1/LabChain/actions/workflows/test_on_push_pull.yml/badge.svg)](https://github.com/manucouto1/LabChain/actions/workflows/test_on_push_pull.yml)
-Framework3 is an innovative platform designed to simplify and accelerate the development of machine learning models. It provides data scientists and machine learning engineers with a flexible and powerful tool to create, experiment with, and deploy models efficiently and in a structured manner. [https://manucouto1.github.io/LabChain](https://manucouto1.github.io/LabChain)
+LabChain is an innovative platform designed to simplify and accelerate the development of machine learning models. It provides data scientists and machine learning engineers with a flexible and powerful tool to create, experiment with, and deploy models efficiently and in a structured manner. [https://manucouto1.github.io/LabChain](https://manucouto1.github.io/LabChain)
 
 ## Key Features
 
@@ -154,7 +154,7 @@ You have two options to install LabChain:
 The easiest way to install LabChain is directly from PyPI using pip:
 
 ```bash
-pip install LabChain
+pip install framework3
 ```
 
 This will install the latest stable version of LabChain and its dependencies.
