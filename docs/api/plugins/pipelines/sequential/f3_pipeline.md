@@ -4,7 +4,7 @@
 
 ## Overview
 
-The F3Pipeline is a flexible and powerful pipeline implementation in the framework3 ecosystem. It allows you to chain multiple data processing steps, machine learning models, and evaluation metrics into a single, cohesive workflow.
+The F3Pipeline is a flexible and powerful pipeline implementation in the LabChain ecosystem. It allows you to chain multiple data processing steps, machine learning models, and evaluation metrics into a single, cohesive workflow.
 
 ## Key Features
 
@@ -152,4 +152,4 @@ class F3Pipeline(BasePipeline):
 
 ## Conclusion
 
-F3Pipeline provides a powerful and flexible way to build complex data processing and machine learning workflows in framework3. By combining multiple plugins, nested pipelines, and caching capabilities, you can create efficient and maintainable pipelines for a wide range of tasks.
+F3Pipeline provides a powerful and flexible way to build complex data processing and machine learning workflows in LabChain. By combining multiple plugins, nested pipelines, and caching capabilities, you can create efficient and maintainable pipelines for a wide range of tasks.

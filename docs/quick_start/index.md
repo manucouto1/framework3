@@ -2,20 +2,20 @@
 icon: material/glasses
 ---
 
-# Quick Start Guide for Framework3
+# Quick Start Guide for LabChain
 
-This guide will help you get started with Framework3, demonstrating its basic usage and core concepts.
+This guide will help you get started with LabChain, demonstrating its basic usage and core concepts.
 
 ## 1. Installation
 
-Install Framework3 using pip:
+Install LabChain using pip:
 
 ```bash
 pip install framework3
 ```
 
 ## 2. Basic Concepts
-* Framework3 is built around:
+* LabChain is built around:
     - **Pipelines**: Orchestrate the flow of data through processing steps.
     - **Filters**: Perform specific operations on data.
     - **Metrics**: Evaluate model performance.
@@ -61,4 +61,4 @@ evaluation = pipeline.evaluate(X_test, y_test, predictions)
     - [Examples](../examples/index.md)
     - [Best Practices](../best_practices.md)
 
-Happy coding with Framework3!
+Happy coding with LabChain!

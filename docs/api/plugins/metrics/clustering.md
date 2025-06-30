@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Clustering Metrics module in framework3 provides a set of evaluation metrics specifically designed for assessing the performance of clustering algorithms. These metrics help in understanding various aspects of a clustering model's performance, such as cluster homogeneity, completeness, and overall quality.
+The Clustering Metrics module in LabChain provides a set of evaluation metrics specifically designed for assessing the performance of clustering algorithms. These metrics help in understanding various aspects of a clustering model's performance, such as cluster homogeneity, completeness, and overall quality.
 
 ## Available Clustering Metrics
 
@@ -144,7 +144,7 @@ print(f"Completeness Score: {completeness_score}")
 This example demonstrates how to:
 
 1. Generate sample clustering data
-2. Create XYData objects for use with framework3
+2. Create XYData objects for use with LabChain
 3. Train a KMeans clustering model
 4. Make predictions on the dataset
 5. Initialize and compute various clustering metrics
@@ -170,4 +170,4 @@ This example demonstrates how to:
 
 ## Conclusion
 
-The Clustering Metrics module in framework3 provides essential tools for evaluating the performance of clustering models. By using these metrics in combination with other framework3 components, you can gain valuable insights into your model's strengths and weaknesses. The example demonstrates how easy it is to compute and interpret these metrics within the framework3 ecosystem, enabling you to make informed decisions about your clustering models.
+The Clustering Metrics module in LabChain provides essential tools for evaluating the performance of clustering models. By using these metrics in combination with other LabChain components, you can gain valuable insights into your model's strengths and weaknesses. The example demonstrates how easy it is to compute and interpret these metrics within the LabChain ecosystem, enabling you to make informed decisions about your clustering models.

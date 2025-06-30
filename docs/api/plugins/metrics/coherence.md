@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Coherence Metrics module in framework3 provides evaluation metrics specifically designed for assessing the quality and interpretability of topic models. These metrics help in understanding how well the generated topics represent the underlying themes in a corpus of documents.
+The Coherence Metrics module in LabChain provides evaluation metrics specifically designed for assessing the quality and interpretability of topic models. These metrics help in understanding how well the generated topics represent the underlying themes in a corpus of documents.
 
 ## Available Coherence Metrics
 
@@ -76,7 +76,7 @@ print(f"NPMI Coherence Score: {coherence_score}")
 This example demonstrates how to:
 
 1. Prepare your text data
-2. Create XYData objects for use with framework3
+2. Create XYData objects for use with LabChain
 3. Train an LDA topic model
 4. Extract topic-word distributions
 5. Initialize and compute the NPMI coherence metric
@@ -102,4 +102,4 @@ This example demonstrates how to:
 
 ## Conclusion
 
-The Coherence Metrics module in framework3 provides essential tools for evaluating the quality of topic models. By using these metrics in combination with other framework3 components, you can gain valuable insights into your model's performance and interpretability. The example demonstrates how easy it is to compute and interpret these metrics within the framework3 ecosystem, enabling you to make informed decisions about your topic modeling approach.
+The Coherence Metrics module in LabChain provides essential tools for evaluating the quality of topic models. By using these metrics in combination with other LabChain components, you can gain valuable insights into your model's performance and interpretability. The example demonstrates how easy it is to compute and interpret these metrics within the LabChain ecosystem, enabling you to make informed decisions about your topic modeling approach.

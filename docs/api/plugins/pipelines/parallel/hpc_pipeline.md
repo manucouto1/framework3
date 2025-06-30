@@ -45,4 +45,4 @@ hpc_pipeline.log_metrics()
 3. Monitor resource utilization and adjust configurations as needed to optimize performance.
 
 ## Conclusion
-`HPCPipeline` provides a robust solution for executing high-performance computing tasks within the `framework3` ecosystem. By following the best practices and examples provided, you can effectively leverage HPC resources to enhance your machine learning workflows.
+`HPCPipeline` provides a robust solution for executing high-performance computing tasks within the `LabChain` ecosystem. By following the best practices and examples provided, you can effectively leverage HPC resources to enhance your machine learning workflows.

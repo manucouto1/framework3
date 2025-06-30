@@ -2,27 +2,27 @@
 icon: material/home
 ---
 
-# Welcome to Framework3
+# Welcome to LabChain
 
-## A Modular and Extensible Framework for ML Experimentation
+## A Modular and Extensible LabChain for ML Experimentation
 
-**Framework3** is a lightweight, flexible foundation for building machine learning experimentation systems that are **structured**, **extensible**, and **reusable**. Unlike rigid monolithic platforms, Framework3 lets you craft your own workflows by composing modular components or reusing existing ones.
+**LabChain** is a lightweight, flexible foundation for building machine learning experimentation systems that are **structured**, **extensible**, and **reusable**. Unlike rigid monolithic platforms, LabChain lets you craft your own workflows by composing modular components or reusing existing ones.
 
 Its architecture is grounded in principles of **modularity**, **composability**, and **transparency**, enabling you to tailor each part of your workflow to fit your project's needs.
 
 !!! warning
     Framework3 is under active development. While we strive for stability, caution is advised when using it in production environments.
 
-## What *is* Framework3?
+## What *is* LabChain?
 
-Framework3 is **not a closed pipeline**, nor a library of pre-trained models. It’s a collection of **base interfaces** and **pluggable components** that empower you to:
+LabChain is **not a closed pipeline**, nor a library of pre-trained models. It’s a collection of **base interfaces** and **pluggable components** that empower you to:
 
 - Design and combine filters, metrics, optimizers, and storers.
 - Build reusable pipelines — sequential or parallel.
 - Execute optimization or evaluation processes, even in distributed settings.
 - Structure your experiments with clarity and complete control.
 
-> Think of Framework3 as a toolbox of interoperable building blocks — not a black-box solution.
+> Think of LabChain as a toolbox of interoperable building blocks — not a black-box solution.
 
 ## Key Features
 
@@ -70,7 +70,7 @@ graph TD
 
 ## Repository Structure
 
-Framework3 is structured to be easy to navigate, extend, and maintain:
+LabChain is structured to be easy to navigate, extend, and maintain:
 
 - `base/`: Fundamental interfaces and abstractions.
 - `plugins/`: Filters, pipelines, metrics, optimizers, storers, and more.
@@ -89,8 +89,8 @@ Framework3 is structured to be easy to navigate, extend, and maintain:
 
 ## 🤝 Contribute
 
-Interested in contributing? Check out the [Contribution Guidelines](https://github.com/manucouto1/framework3/blob/main/docs/CONTRIBUTING.md).
+Interested in contributing? Check out the [Contribution Guidelines](https://github.com/manucouto1/LabChain/blob/main/docs/CONTRIBUTING.md).
 
 ## 📄 License
 
-Framework3 is licensed under **AGPL-3.0** — [View License](https://github.com/manucouto1/framework3/blob/main/LICENSE)
+LabChain is licensed under **AGPL-3.0** — [View License](https://github.com/manucouto1/LabChain/blob/main/LICENSE)

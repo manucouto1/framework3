@@ -2,9 +2,9 @@
 icon: material/crane
 ---
 
-# 🏗️ Framework3 Architecture
+# 🏗️ LabChain Architecture
 
-Framework3 is designed with a modular, decoupled, and extensible architecture, built to support experimentation, evaluation, and comparison of models or processes in AI environments in a fully reproducible way.
+LabChain is designed with a modular, decoupled, and extensible architecture, built to support experimentation, evaluation, and comparison of models or processes in AI environments in a fully reproducible way.
 
 ### 🔌 Core Components
 
@@ -61,15 +61,15 @@ graph TD
 
 ### 📦 Container and Dependency Injection
 
-The [`Container`](../api/container/container.md) is a central component in Framework3, managing the registration and retrieval of various components. It allows for easy plugin management and dependency injection throughout the framework.
+The [`Container`](../api/container/container.md) is a central component in LabChain, managing the registration and retrieval of various components. It allows for easy plugin management and dependency injection throughout the framework.
 
 ### 🔢 Data Handling
 
-Framework3 uses the [`XYData`](../api/base/base_types.md) class for handling input and output data. This class provides a consistent interface for data manipulation across different components of the framework.
+LabChain uses the [`XYData`](../api/base/base_types.md) class for handling input and output data. This class provides a consistent interface for data manipulation across different components of the framework.
 
 ### 🔌 Plugin System
 
-Framework3's plugin system allows for easy extension of the framework's capabilities. You can create custom filters, metrics, optimizers, and more by inheriting from the base classes and registering them with the Container.
+LabChain's plugin system allows for easy extension of the framework's capabilities. You can create custom filters, metrics, optimizers, and more by inheriting from the base classes and registering them with the Container.
 
 ### 📊 Example Workflow
 

@@ -1,5 +1,5 @@
-# Framework3 [![test_on_push](https://github.com/manucouto1/framework3/actions/workflows/test_on_push_pull.yml/badge.svg)](https://github.com/manucouto1/framework3/actions/workflows/test_on_push_pull.yml)
-Framework3 is an innovative platform designed to simplify and accelerate the development of machine learning models. It provides data scientists and machine learning engineers with a flexible and powerful tool to create, experiment with, and deploy models efficiently and in a structured manner. [https://manucouto1.github.io/framework3](https://manucouto1.github.io/framework3)
+# LabChain [![test_on_push](https://github.com/manucouto1/LabChain/actions/workflows/test_on_push_pull.yml/badge.svg)](https://github.com/manucouto1/LabChain/actions/workflows/test_on_push_pull.yml)
+Framework3 is an innovative platform designed to simplify and accelerate the development of machine learning models. It provides data scientists and machine learning engineers with a flexible and powerful tool to create, experiment with, and deploy models efficiently and in a structured manner. [https://manucouto1.github.io/LabChain](https://manucouto1.github.io/LabChain)
 
 ## Key Features
 
@@ -140,35 +140,35 @@ Framework3 is an innovative platform designed to simplify and accelerate the dev
 
 ## Prerequisites
 
-Before installing Framework3, ensure you have the following prerequisites:
+Before installing LabChain, ensure you have the following prerequisites:
 
 1. Python 3.11 or higher
 2. pip (Python package installer)
 
 ## Installation Options
 
-You have two options to install Framework3:
+You have two options to install LabChain:
 
 ### Option 1: Install from PyPI
 
-The easiest way to install Framework3 is directly from PyPI using pip:
+The easiest way to install LabChain is directly from PyPI using pip:
 
 ```bash
-pip install framework3
+pip install LabChain
 ```
 
-This will install the latest stable version of Framework3 and its dependencies.
+This will install the latest stable version of LabChain and its dependencies.
 
 ### Option 2: Install from Source
 
 2. Clone the repository:
    ```
-   git clone https://github.com/manucouto1/framework3.git
+   git clone https://github.com/manucouto1/LabChain.git
    ```
 
 3. Navigate to the project directory:
    ```
-   cd framework3
+   cd LabChain
    ```
 
 4. Install the dependencies using pip:
@@ -178,7 +178,7 @@ This will install the latest stable version of Framework3 and its dependencies.
 
 ## Basic Usage
 
-Here's a basic example of how to use Framework3:
+Here's a basic example of how to use LabChain:
 
 ```python
 from framework3.plugins.pipelines import F3Pipeline
@@ -206,7 +206,7 @@ print(evaluation)
 
 For more detailed information on how to use Framework3, check out our complete documentation at:
 
-[https://manucouto1.github.io/framework3](https://manucouto1.github.io/framework3)
+[https://manucouto1.github.io/LabChain](https://manucouto1.github.io/LabChain)
 
 ## Contributing
 
@@ -222,4 +222,4 @@ If you have any questions or suggestions, don't hesitate to open an issue in thi
 
 ---
 
-Thank you for your interest in Framework3! We hope this tool will be useful in your machine learning projects.
+Thank you for your interest in LabChain! We hope this tool will be useful in your machine learning projects.

@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Classification Metrics module in framework3 provides a set of evaluation metrics specifically designed for assessing the performance of classification models. These metrics help in understanding various aspects of a classifier's performance, such as accuracy, precision, recall, and F1-score.
+The Classification Metrics module in LabChain provides a set of evaluation metrics specifically designed for assessing the performance of classification models. These metrics help in understanding various aspects of a classifier's performance, such as accuracy, precision, recall, and F1-score.
 
 ## Available Classification Metrics
 
@@ -128,7 +128,7 @@ print(f"F1 Score: {f1}")
 This example demonstrates how to:
 
 1. Load and prepare the Iris dataset
-2. Create XYData objects for use with framework3
+2. Create XYData objects for use with LabChain
 3. Train an SVM classifier
 4. Make predictions on the test set
 5. Initialize and compute various classification metrics
@@ -154,4 +154,4 @@ This example demonstrates how to:
 
 ## Conclusion
 
-The Classification Metrics module in framework3 provides essential tools for evaluating the performance of classification models. By using these metrics in combination with other framework3 components, you can gain valuable insights into your model's strengths and weaknesses. The example demonstrates how easy it is to compute and interpret these metrics within the framework3 ecosystem, enabling you to make informed decisions about your classification models.
+The Classification Metrics module in LabChain provides essential tools for evaluating the performance of classification models. By using these metrics in combination with other LabChain components, you can gain valuable insights into your model's strengths and weaknesses. The example demonstrates how easy it is to compute and interpret these metrics within the LabChain ecosystem, enabling you to make informed decisions about your classification models.

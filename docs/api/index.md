@@ -2,9 +2,9 @@
 icon: material/bookshelf
 ---
 
-# Framework3 API Documentation
+# LabChain API Documentation
 
-Welcome to the API documentation for Framework3. This comprehensive guide details the modules, classes, and functions that form the backbone of Framework3, enabling you to build, extend, and customize ML experimentation workflows efficiently.
+Welcome to the API documentation for LabChain. This comprehensive guide details the modules, classes, and functions that form the backbone of LabChain, enabling you to build, extend, and customize ML experimentation workflows efficiently.
 
 ---
 
@@ -26,7 +26,7 @@ Welcome to the API documentation for Framework3. This comprehensive guide detail
 
 ## Base Classes
 
-The foundation of Framework3 is built on these abstract base classes:
+The foundation of LabChain is built on these abstract base classes:
 
 - [Types](base/base_types.md) - Core data structures and type definitions.
 - [Classes](base/base_plugin.md) - Abstract base class for all components.
@@ -40,7 +40,7 @@ The foundation of Framework3 is built on these abstract base classes:
 
 ## Container & Dependency Injection
 
-The core of Framework3's component management:
+The core of LabChain's component management:
 
 - [Container](container/container.md) - Main class for dependency injection and component management.
 - [Overload](container/overload.md) - Utilities for method overloading in the container.
@@ -116,7 +116,7 @@ Additional utility functions and helpers that support the framework:
 
 ## Using the API
 
-To utilize any component of Framework3, import it from the respective module and register it with the Container if necessary. For example:
+To utilize any component of LabChain, import it from the respective module and register it with the Container if necessary. For example:
 
 ```python
 from framework3.container import Container
